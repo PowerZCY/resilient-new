@@ -22,7 +22,9 @@ export default function Home() {
       </div>
       
       <div className="w-1/2 mx-auto space-y-8">
-        <NicknameFilter />
+        <Suspense fallback={<div>Loading...</div>}>
+          <NicknameFilter />
+        </Suspense>
         <Suspense fallback={<div>Loading...</div>}>
           <CalendarHeatmap />
         </Suspense>
