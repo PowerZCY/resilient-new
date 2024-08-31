@@ -33,8 +33,9 @@ export default function ContributionHeatmap() {
 
   const processDataForHeatmap = (entries: EntryData[]): DataPoint[] => {
     const countByDate = entries.reduce((acc, entry) => {
-      const date = new Date(entry.date).toISOString().split('T')[0];
-      acc[date] = (acc[date] || 0) + 1;
+      const date = new Date(entry.date);
+      const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      acc[formattedDate] = (acc[formattedDate] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
