@@ -9,6 +9,7 @@ export async function POST(request: Request) {
   const { date, nickname, content } = body;
 
   // 使用 Prisma 创建新的数据记录
+  // test
   const entry = await prisma.detail.create({
     data: {
       date: new Date(date),    // 将日期字符串转换为 Date 对象
