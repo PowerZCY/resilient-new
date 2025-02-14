@@ -14,7 +14,7 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
-model Detail {
+model detail {
   id        String   @id @default(cuid())
   date      DateTime
   nickname  String
