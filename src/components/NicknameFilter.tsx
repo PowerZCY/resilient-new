@@ -29,7 +29,7 @@ export default function NicknameFilter() {
         scroll: false
       });
     }
-  }, [searchParams]);
+  }, [searchParams, router]);
 
   // 使用 useCallback 缓存 handleFilter 函数
   const handleFilter = useCallback((value: string) => {

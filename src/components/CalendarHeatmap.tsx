@@ -63,7 +63,7 @@ export default function ContributionHeatmap() {
 
   return (
     <>
-      <h2 className="text-2xl font-semibold mb-2">{nickname}'s Contributions</h2>
+      <h2 className="text-2xl font-semibold mb-2">{nickname}&apos;s Contributions</h2>
       <Card className="border border-[#509863] p-4 rounded-lg">
         <CalendarHeatmap
           startDate={oneYearAgo}
