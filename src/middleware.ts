@@ -13,6 +13,7 @@ async function traceHttp(request: NextRequest) {
   if (!request.url.includes('/api/')) {
     return NextResponse.next()
   }
+
   const requestTime = new Date()
   const requestId = crypto.randomUUID()
 
@@ -51,32 +52,14 @@ async function traceHttp(request: NextRequest) {
 
   // 使用 fetch 直接调用 API 路由，并在请求头添加日志追踪标志 X-Request-ID
   request.headers.set('X-Request-ID', requestId)
-  const response = await fetch(request.url, {
-    method: request.method,
-    headers: {
-      ...Object.fromEntries(request.headers)
-    },
-    body: request.body
-  })
 
+  const response = NextResponse.next()
   // 设置响应头
   response.headers.set('X-Request-ID', requestId)
   // 记录响应信息
   const responseTime = new Date()
   const duration = responseTime.getTime() - requestTime.getTime()
 
-  // 克隆响应以获取响应体
-  let responseBody = null
-  try {
-    const clone = response.clone()
-    const responseBody = await clone.json()
-  } catch (e) {
-    if(e instanceof Error) {
-      Logger.error(`|${request.nextUrl.pathname}|Failed to parse response body`, e, null, requestId)
-    } else {
-      Logger.error(`|${request.nextUrl.pathname}|Failed to parse response body`, new Error(String(e)), null, requestId)
-    }
-  }
 
   const responseLog = {
     timestamp: dayjs(responseTime).format('YYYY-MM-DD HH:mm:ss.SSS'),
@@ -87,9 +70,7 @@ async function traceHttp(request: NextRequest) {
     status: response.status,
     statusText: response.statusText,
     headers: Object.fromEntries(response.headers),
-    body: responseBody
   }
-
   Logger.info('API Response', responseLog, requestId)
   
   return response
