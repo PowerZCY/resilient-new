@@ -22,10 +22,9 @@ export default function ContributionHeatmap() {
   const nickname = searchParams.get('nickname');
 
   useEffect(() => {
-    fetch(`/api/entries${nickname ? `?nickname=${encodeURIComponent(nickname)}` : ''}`)
+    fetch(`/api/entries/heatmap${nickname ? `?nickname=${encodeURIComponent(nickname)}` : ''}`)
       .then(res => res.json())
       .then(entries => {
-        console.log('API Response:', entries); // 日志 API 响应
         const processedData = processDataForHeatmap(entries);
         setData(processedData);
       });
