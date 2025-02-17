@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Select,
@@ -11,23 +11,33 @@ import {
 } from "@/components/ui/select"
 
 export default function NicknameFilter() {
-  const [nickname, setNickname] = useState('Zia慢成');
   const router = useRouter();
   const searchParams = useSearchParams();
+  const defaultNickname = 'Zia慢成';
+  const isFirstRender = useRef(true);
+  
+  // 使用 useState 的函数形式来确保初始值只计算一次
+  const [nickname, setNickname] = useState(() => {
+    return searchParams.get('nickname') || defaultNickname;
+  });
 
+  // 只在首次渲染时执行一次 URL 更新
   useEffect(() => {
-    const currentNickname = searchParams.get('nickname');
-    if (currentNickname) {
-      setNickname(currentNickname);
-    } else {
-      router.push('/?nickname=Zia慢成');
+    if (isFirstRender.current && !searchParams.get('nickname')) {
+      isFirstRender.current = false;
+      router.replace(`/?nickname=${defaultNickname}`, {
+        scroll: false
+      });
     }
-  }, [searchParams, router]);
+  }, [searchParams]);
 
-  const handleFilter = (value: string) => {
+  // 使用 useCallback 缓存 handleFilter 函数
+  const handleFilter = useCallback((value: string) => {
     setNickname(value);
-    router.push(`/?nickname=${encodeURIComponent(value)}`);
-  };
+    router.push(`/?nickname=${encodeURIComponent(value)}`, {
+      scroll: false
+    });
+  }, [router]);
 
   return (
     <Select value={nickname} onValueChange={handleFilter}>

@@ -15,15 +15,27 @@ export default function Timeline() {
   const nickname = searchParams.get('nickname');
 
   useEffect(() => {
-    fetch(`/api/entries${nickname ? `?nickname=${encodeURIComponent(nickname)}` : ''}`)
-      .then(res => res.json())
-      .then(setEntries);
+    // 只在有 nickname 时才加载数据
+    if (nickname) {
+      fetch(`/api/entries${nickname ? `?nickname=${encodeURIComponent(nickname)}` : ''}`)
+        .then(res => res.json())
+        .then(setEntries)
+    }
   }, [nickname]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
   };
+
+  // 如果没有 nickname，显示加载状态
+  if (!nickname) {
+    return (
+      <div className="text-center text-gray-500">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div>

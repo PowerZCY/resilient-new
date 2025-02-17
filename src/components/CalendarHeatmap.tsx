@@ -22,12 +22,15 @@ export default function ContributionHeatmap() {
   const nickname = searchParams.get('nickname');
 
   useEffect(() => {
-    fetch(`/api/entries/heatmap${nickname ? `?nickname=${encodeURIComponent(nickname)}` : ''}`)
-      .then(res => res.json())
-      .then(entries => {
-        const processedData = processDataForHeatmap(entries);
-        setData(processedData);
-      });
+    // 只在有 nickname 时才加载数据
+    if (nickname) {
+      fetch(`/api/entries/heatmap?nickname=${encodeURIComponent(nickname)}`)
+        .then(res => res.json())
+        .then(entries => {
+          const processedData = processDataForHeatmap(entries);
+          setData(processedData);
+        });
+    }
   }, [nickname]);
 
   const processDataForHeatmap = (entries: EntryData[]): DataPoint[] => {
@@ -47,11 +50,22 @@ export default function ContributionHeatmap() {
   const today = new Date();
   const oneYearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
 
+  // 如果没有 nickname，显示加载状态或空状态
+  if (!nickname) {
+    return (
+      <Card className="border border-[#509863] p-4 rounded-lg">
+        <div className="text-center text-gray-500">
+          Loading...
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <>
-    <h2 className="text-2xl font-semibold mb-2">{nickname ? `${nickname}'s` : 'User'} Contributions</h2>
-    <Card className="border border-[#509863] p-4 rounded-lg">
-      <CalendarHeatmap
+      <h2 className="text-2xl font-semibold mb-2">{nickname}'s Contributions</h2>
+      <Card className="border border-[#509863] p-4 rounded-lg">
+        <CalendarHeatmap
           startDate={oneYearAgo}
           endDate={today}
           values={data}
@@ -69,7 +83,7 @@ export default function ContributionHeatmap() {
           .react-calendar-heatmap .color-scale-3 { fill: #30A14E; }
           .react-calendar-heatmap .color-scale-4 { fill: #216E39; }
         `}</style>
-    </Card>
-  </>
+      </Card>
+    </>
   );
 }
