@@ -6,6 +6,7 @@
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
+    "target": "es2015", // 或 "es2017", "es2020" 等
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
