@@ -8,36 +8,43 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from '@/components/ui/select';
 
 export default function NicknameFilter() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const defaultNickname = 'Zia慢成';
   const isFirstRender = useRef(true);
-  
-  // 使用 useState 的函数形式来确保初始值只计算一次
+
+  // 确保初始化时处理 null 或 undefined
   const [nickname, setNickname] = useState(() => {
-    return searchParams.get('nickname') || defaultNickname;
+    const param = searchParams.get('nickname');
+    return param ? param : defaultNickname;
   });
 
-  // 只在首次渲染时执行一次 URL 更新
+  // 仅在首次渲染且无 nickname 参数时更新 URL
   useEffect(() => {
-    if (isFirstRender.current && !searchParams.get('nickname')) {
+    const currentNickname = searchParams.get('nickname');
+    if (isFirstRender.current && !currentNickname) {
       isFirstRender.current = false;
-      router.replace(`/?nickname=${defaultNickname}`, {
-        scroll: false
+      // console.log('Initializing URL with default nickname:', defaultNickname);
+      router.replace(`/?nickname=${encodeURIComponent(defaultNickname)}`, {
+        scroll: false,
       });
     }
-  }, [searchParams, router]);
+  }, [router]); // 确保只依赖 router，避免 searchParams 的变化触发
 
-  // 使用 useCallback 缓存 handleFilter 函数
-  const handleFilter = useCallback((value: string) => {
-    setNickname(value);
-    router.push(`/?nickname=${encodeURIComponent(value)}`, {
-      scroll: false
-    });
-  }, [router]);
+  // 处理用户选择
+  const handleFilter = useCallback(
+    (value: string) => {
+      setNickname(value);
+      // console.log('User selected nickname:', value);
+      router.push(`/?nickname=${encodeURIComponent(value)}`, {
+        scroll: false,
+      });
+    },
+    [router]
+  );
 
   return (
     <Select value={nickname} onValueChange={handleFilter}>

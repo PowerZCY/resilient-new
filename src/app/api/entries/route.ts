@@ -27,25 +27,48 @@ export async function POST(request: Request) {
   return NextResponse.json(entry);
 }
 
-// GET 请求处理函数 - 获取日记条目列表
 export async function GET(request: Request) {
   const requestId = request.headers.get('X-Request-ID');
   // 从请求 URL 中获取查询参数
   const { searchParams } = new URL(request.url);
-  // 获取 nickname 查询参数
+  // 获取 nickname、page 和 limit 查询参数
   const nickname = searchParams.get('nickname');
-  Logger.info('Timeline data fetching', { nickname }, requestId);
+  const page = parseInt(searchParams.get('page') || '1', 10); // 默认第 1 页
+  const limit = parseInt(searchParams.get('limit') || '20', 10); // 默认每页 20 条
+
+  Logger.info('Timeline data fetching', { nickname, page, limit }, requestId);
+
+  // 计算分页的偏移量
+  const skip = (page - 1) * limit;
 
   // 使用 Prisma 查询数据库
-  const entries = await prisma.detail.findMany({
-    where: nickname ? { nickname } : undefined,  // 如果提供了昵称，则按昵称筛选
-    orderBy: { date: 'desc' },                  // 按日期降序排序
-  });
+  const [entries, total] = await Promise.all([
+    prisma.detail.findMany({
+      where: nickname ? { nickname } : undefined, // 如果提供了昵称，则按昵称筛选
+      orderBy: [{ date: 'desc' }, { id: 'desc' }],// 按日期降序排序
+      skip, // 跳过前面的记录
+      take: limit, // 限制返回数量
+    }),
+    prisma.detail.count({
+      where: nickname ? { nickname } : undefined, // 计算符合条件的总记录数
+    }),
+  ]);
 
-  Logger.info('Timeline data fetched successfully', { 
-    nickname: nickname,
-    count: entries.length 
-  }, requestId);
-  // 返回查询结果作为 JSON 响应
-  return NextResponse.json(entries);
+  Logger.info(
+    'Timeline data fetched successfully',
+    {
+      nickname,
+      page,
+      limit,
+      count: entries.length,
+      total,
+    },
+    requestId
+  );
+
+  // 返回分页数据和总数
+  return NextResponse.json({
+    entries,
+    total,
+  });
 }
