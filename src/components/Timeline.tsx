@@ -20,7 +20,6 @@ export default function Timeline(): JSX.Element {
   const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
-  const [fetchedPages, setFetchedPages] = useState<Set<number>>(new Set());
   const observerRef = useRef<HTMLDivElement | null>(null);
   const searchParams = useSearchParams();
   const nickname: string | null = searchParams.get('nickname');
@@ -30,8 +29,8 @@ export default function Timeline(): JSX.Element {
 
   const fetchEntries = useCallback(
     async (pageNum: number): Promise<void> => {
-      if (!nickname || loading || fetchedPages.has(pageNum)) {
-        console.log(`Skipping fetch for page=${pageNum}: already fetched or loading`);
+      if (!nickname || loading) {
+        console.log(`Skipping fetch for page=${pageNum}: no nickname or loading`);
         return;
       }
 
@@ -61,7 +60,6 @@ export default function Timeline(): JSX.Element {
           console.log('Merged entries IDs:', uniqueEntries.map((e: Entry) => e.id));
           return uniqueEntries;
         });
-        setFetchedPages((prev: Set<number>): Set<number> => new Set(prev).add(pageNum));
         setHasMore(pageNum * limit < total);
       } catch (error: unknown) {
         Logger.error('Error fetching entries:', error as Error);
@@ -80,7 +78,6 @@ export default function Timeline(): JSX.Element {
       setPage(1); // 重置页面
       setLoading(false); // 重置加载状态
       setHasMore(true); // 重置是否有更多数据
-      setFetchedPages(new Set()); // 重置已请求页面
       fetchEntries(1); // 加载新昵称的第一页数据
     }
   }, [nickname, fetchEntries]);
