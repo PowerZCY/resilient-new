@@ -15,7 +15,7 @@ interface ApiResponse {
   total: number;
 }
 
-export default function Timeline() {
+export default function Timeline(): JSX.Element {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
@@ -23,14 +23,13 @@ export default function Timeline() {
   const [fetchedPages, setFetchedPages] = useState<Set<number>>(new Set());
   const observerRef = useRef<HTMLDivElement | null>(null);
   const searchParams = useSearchParams();
-  const nickname = searchParams.get('nickname');
-  const limit = 20;
-  const observerInitialized = useRef<boolean>(false);
-  const isFirstLoad = useRef<boolean>(true);
-  const debouncedFetch = useRef<ReturnType<typeof setTimeout> | null>(null); // 用于防抖
+  const nickname: string | null = searchParams.get('nickname');
+  const limit: number = 20;
+  const observerInitialized: React.MutableRefObject<boolean> = useRef<boolean>(false);
+  const debouncedFetch: React.MutableRefObject<ReturnType<typeof setTimeout> | null> = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchEntries = useCallback(
-    async (pageNum: number) => {
+    async (pageNum: number): Promise<void> => {
       if (!nickname || loading || fetchedPages.has(pageNum)) {
         console.log(`Skipping fetch for page=${pageNum}: already fetched or loading`);
         return;
@@ -39,32 +38,32 @@ export default function Timeline() {
       console.log(`Fetching entries: page=${pageNum}, nickname=${nickname}`);
       setLoading(true);
       try {
-        const res = await fetch(
+        const res: Response = await fetch(
           `/api/entries?nickname=${encodeURIComponent(nickname || '')}&page=${pageNum}&limit=${limit}`
         );
         const data: ApiResponse = await res.json();
 
-        // console.log('API response:', {
-        //   page: pageNum,
-        //   entries: data.entries.map((e: Entry) => e.id),
-        //   total: data.total,
-        // });
+        console.log('API response:', {
+          page: pageNum,
+          entries: data.entries.map((e: Entry) => e.id),
+          total: data.total,
+        });
 
         const newEntries: Entry[] = data.entries || [];
         const total: number = data.total || 0;
 
         // 去重：基于 id 合并新旧数据
-        setEntries((prev: Entry[]) => {
-          const combined = [...prev, ...newEntries];
-          const uniqueEntries = [
-            ...new Map(combined.map((entry: Entry) => [entry.id, entry])).values(),
+        setEntries((prev: Entry[]): Entry[] => {
+          const combined: Entry[] = [...prev, ...newEntries];
+          const uniqueEntries: Entry[] = [
+            ...new Map(combined.map((entry: Entry) => [entry.id, entry] as const)).values(),
           ];
-          // console.log('Merged entries IDs:', uniqueEntries.map((e: Entry) => e.id));
+          console.log('Merged entries IDs:', uniqueEntries.map((e: Entry) => e.id));
           return uniqueEntries;
         });
-        setFetchedPages((prev: Set<number>) => new Set(prev).add(pageNum));
+        setFetchedPages((prev: Set<number>): Set<number> => new Set(prev).add(pageNum));
         setHasMore(pageNum * limit < total);
-      } catch (error) {
+      } catch (error: unknown) {
         Logger.error('Error fetching entries:', error as Error);
       } finally {
         setLoading(false);
@@ -73,16 +72,16 @@ export default function Timeline() {
     [nickname, limit]
   );
 
-  // 初次加载第一页
+  // 每次 nickname 变化时重新加载第一页数据，并重置所有状态
   useEffect(() => {
-    if (nickname && isFirstLoad.current) {
-      console.log('Initial load for nickname:', nickname);
-      setEntries([]);
-      setPage(1);
-      setHasMore(true);
-      setFetchedPages(new Set());
-      fetchEntries(1);
-      isFirstLoad.current = false;
+    if (nickname) {
+      console.log('Nickname changed, reloading for nickname:', nickname);
+      setEntries([]); // 重置数据
+      setPage(1); // 重置页面
+      setLoading(false); // 重置加载状态
+      setHasMore(true); // 重置是否有更多数据
+      setFetchedPages(new Set()); // 重置已请求页面
+      fetchEntries(1); // 加载新昵称的第一页数据
     }
   }, [nickname, fetchEntries]);
 
@@ -101,27 +100,26 @@ export default function Timeline() {
     console.log('Setting up observer for page:', page);
     observerInitialized.current = true;
 
-    const observer = new IntersectionObserver(
-      (entries: IntersectionObserverEntry[]) => {
+    const observer: IntersectionObserver = new IntersectionObserver(
+      (entries: IntersectionObserverEntry[]): void => {
         if (entries[0].isIntersecting && !loading) {
           console.log('Observer triggered, loading page:', page + 1);
-          // 使用防抖确保只触发一次
           if (debouncedFetch.current) {
             clearTimeout(debouncedFetch.current);
           }
           debouncedFetch.current = setTimeout(() => {
-            setPage((prevPage: number) => {
+            setPage((prevPage: number): number => {
               const nextPage: number = prevPage + 1;
               fetchEntries(nextPage);
               return nextPage;
             });
-          }, 500); // 300ms 防抖时间
+          }, 500);
         }
       },
-      { threshold: 0.2, rootMargin: '500px' } // 保持现有配置
+      { threshold: 0.2, rootMargin: '500px' }
     );
 
-    const currentRef = observerRef.current;
+    const currentRef: HTMLDivElement | null = observerRef.current;
     if (currentRef) {
       observer.observe(currentRef);
     }
@@ -138,7 +136,7 @@ export default function Timeline() {
   }, [hasMore, nickname, fetchEntries]);
 
   const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
+    const date: Date = new Date(dateString);
     return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
   };
 
