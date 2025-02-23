@@ -33,6 +33,12 @@ export default function NewEntry() {
     setEntries(newEntries);
   };
 
+  const removeEntry = (index: number) => {
+    if (entries.length > 1 && window.confirm('确定删除此条目？')) { // 添加确认提示
+      setEntries(entries.filter((_, i) => i !== index));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nickname || entries.some(entry => !entry.date || !entry.content)) return;
@@ -72,6 +78,9 @@ export default function NewEntry() {
         {entries.map((entry, index) => (
           <div key={index} className="p-4 border rounded-lg shadow-md bg-white flex flex-col space-y-4">
             <div className="flex items-center gap-4">
+              <div className="w-1/12">
+                <label className="block mb-2 text-sm font-medium text-red-500">Row.{index + 1}</label>
+              </div>
               <div className="w-1/4">
                 <label className="block mb-2 text-sm font-medium">日期</label>
                 <Popover>
@@ -108,6 +117,14 @@ export default function NewEntry() {
                   placeholder="输入好体验、好事儿或成就"
                 />
               </div>
+              <Button
+                type="button"
+                onClick={() => removeEntry(index)}
+                className="mt-2 bg-red-500 hover:bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center ml-2"
+                aria-label="删除条目"
+              >
+                -
+              </Button>
             </div>
             {index === entries.length - 1 && (
               <Button
