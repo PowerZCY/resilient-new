@@ -1,4 +1,4 @@
-'use client'; // 标记为客户端组件
+'use client'; // 保持客户端组件标记
 
 import { Suspense } from 'react';
 import Link from 'next/link';
@@ -8,7 +8,8 @@ import CalendarHeatmap from '@/components/CalendarHeatmap';
 import Timeline from '@/components/Timeline';
 import { useSearchParams } from 'next/navigation';
 
-export default function Home() {
+// 定义一个客户端组件来处理 useSearchParams
+function HomeContent() {
   const searchParams = useSearchParams();
   const nickname = searchParams.get('nickname') || 'Zia慢成'; // 获取当前选定的昵称，默认值
 
@@ -39,5 +40,13 @@ export default function Home() {
         </Suspense>
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HomeContent />
+    </Suspense>
   );
 }

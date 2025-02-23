@@ -1,6 +1,6 @@
-'use client';
+'use client'; // 保持客户端组件标记
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -16,20 +16,20 @@ interface EntryForm {
   content: string;
 }
 
-export default function NewEntry() {
+// 定义一个客户端组件来处理 useSearchParams
+function NewEntryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const defaultNickname = 'Zia慢成';
   const [nickname, setNickname] = useState<string>(searchParams.get('nickname') || defaultNickname); // 从 URL 获取昵称
   const [entries, setEntries] = useState<EntryForm[]>([{ date: new Date(), content: '' }]); // 批量记录
 
-  // 简化 useEffect，只在初次加载时同步 URL 的 nickname
   useEffect(() => {
     const urlNickname = searchParams.get('nickname');
     if (urlNickname && urlNickname !== nickname) {
       setNickname(urlNickname);
     }
-  }, [searchParams]); // 移除 nickname 依赖，避免循环更新
+  }, [searchParams]);
 
   const addEntry = () => {
     if (entries.length < 20) { // 限制最多 20 条
@@ -159,5 +159,13 @@ export default function NewEntry() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function NewEntry() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <NewEntryContent />
+    </Suspense>
   );
 }
