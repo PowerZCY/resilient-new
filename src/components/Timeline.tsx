@@ -42,11 +42,11 @@ export default function Timeline(): JSX.Element {
         );
         const data: ApiResponse = await res.json();
 
-        console.log('API response:', {
-          page: pageNum,
-          entries: data.entries.map((e: Entry) => e.id),
-          total: data.total,
-        });
+        // console.log('API response:', {
+        //   page: pageNum,
+        //   entries: data.entries.map((e: Entry) => e.id),
+        //   total: data.total,
+        // });
 
         const newEntries: Entry[] = data.entries || [];
         const total: number = data.total || 0;
@@ -57,7 +57,7 @@ export default function Timeline(): JSX.Element {
           const uniqueEntries: Entry[] = [
             ...new Map(combined.map((entry: Entry) => [entry.id, entry] as const)).values(),
           ];
-          console.log('Merged entries IDs:', uniqueEntries.map((e: Entry) => e.id));
+          // console.log('Merged entries IDs:', uniqueEntries.map((e: Entry) => e.id));
           return uniqueEntries;
         });
         setHasMore(pageNum * limit < total);
@@ -137,6 +137,20 @@ export default function Timeline(): JSX.Element {
     return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
   };
 
+  // 优化后的格式化函数，支持多种换行符
+  const formatContent = (content: string): JSX.Element => {
+    return (
+      <div className="whitespace-pre-wrap break-words text-gray-700">
+        {content.split(/\r\n|\n|\r/).map((line: string, index: number) => (
+          <span key={index}>
+            {line}
+            {index < content.split(/\r\n|\n|\r/).length - 1 && <br />}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
   if (!nickname) {
     return <div className="text-center text-gray-500">Loading...</div>;
   }
@@ -153,7 +167,8 @@ export default function Timeline(): JSX.Element {
               {formatDate(entry.date)}
             </div>
             <div className="p-4 bg-white rounded-lg shadow">
-              <p className="text-gray-700">{entry.content}</p>
+              {/* 使用 formatContent 渲染 content，显示换行 */}
+              {formatContent(entry.content)}
             </div>
           </div>
         ))}
