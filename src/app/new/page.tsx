@@ -5,26 +5,48 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar as CalendarIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { zhCN } from 'date-fns/locale';
 
+interface EntryForm {
+  date: Date | undefined;
+  content: string;
+}
+
 export default function NewEntry() {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [nickname, setNickname] = useState('');
-  const [content, setContent] = useState('');
+  const [nickname, setNickname] = useState<string>(''); // 昵称在表单顶部统一设置
+  const [entries, setEntries] = useState<EntryForm[]>([{ date: new Date(), content: '' }]); // 批量记录
   const router = useRouter();
+
+  const addEntry = () => {
+    if (entries.length < 20) { // 限制最多 20 条
+      setEntries([...entries, { date: new Date(), content: '' }]);
+    }
+  };
+
+  const updateEntry = (index: number, field: keyof EntryForm, value: string | Date | undefined) => {
+    const newEntries = [...entries];
+    newEntries[index] = { ...newEntries[index], [field]: value };
+    setEntries(newEntries);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!date || !nickname || !content) return;
+    if (!nickname || entries.some(entry => !entry.date || !entry.content)) return;
+
+    const formattedEntries = entries.map(entry => ({
+      date: entry.date!.toISOString(), // 转换为 ISO 字符串，后端可以解析
+      nickname,
+      content: entry.content,
+    }));
 
     const response = await fetch('/api/entries', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date, nickname, content }),
+      body: JSON.stringify(formattedEntries), // 批量提交
     });
 
     if (response.ok) {
@@ -35,54 +57,76 @@ export default function NewEntry() {
   return (
     <div className="container mx-auto px-4">
       <h1 className="text-2xl font-bold text-center my-8">记下今天的好体验、好事儿、成就</h1>
-      <form onSubmit={handleSubmit} className="w-1/3 mx-auto space-y-4 mt-16">
-        <div>
-          <label htmlFor="date" className="block mb-2">日期</label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"outline"}
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, "PPP", { locale: zhCN }) : <span>选择日期</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                initialFocus
-                locale={zhCN}
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-        <div>
-          <label htmlFor="nickname" className="block mb-2">昵称</label>
+      <form onSubmit={handleSubmit} className="w-2/3 mx-auto space-y-6 mt-16">
+        <div className="mb-6">
+          <label htmlFor="nickname" className="block mb-2 text-sm font-medium">昵称</label>
           <Input
             id="nickname"
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
             required
+            className="w-full max-w-md"
           />
         </div>
-        <div>
-          <label htmlFor="content" className="block mb-2">内容</label>
-          <textarea
-            id="content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            required
-            className="w-full p-2 rounded-md border"
-            rows={4}
-          />
+
+        {entries.map((entry, index) => (
+          <div key={index} className="p-4 border rounded-lg shadow-md bg-white flex flex-col space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="w-1/4">
+                <label className="block mb-2 text-sm font-medium">日期</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !entry.date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {entry.date ? format(entry.date, "PPP", { locale: zhCN }) : <span>选择日期</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={entry.date}
+                      onSelect={(date) => updateEntry(index, 'date', date)}
+                      initialFocus
+                      locale={zhCN}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="flex-1">
+                <label className="block mb-2 text-sm font-medium">内容</label>
+                <textarea
+                  value={entry.content}
+                  onChange={(e) => updateEntry(index, 'content', e.target.value)}
+                  required
+                  className="w-full p-2 rounded-md border h-20"
+                  placeholder="输入好体验、好事儿或成就"
+                />
+              </div>
+            </div>
+            {index === entries.length - 1 && (
+              <Button
+                type="button"
+                onClick={addEntry}
+                className="mt-2 bg-[#509863] hover:bg-[#509863]/90 text-white w-8 h-8 rounded-full flex items-center justify-center"
+                disabled={entries.length >= 20}
+              >
+                +
+              </Button>
+            )}
+          </div>
+        ))}
+
+        <div className="text-center">
+          <Button type="submit" className="bg-[#509863] hover:bg-[#509863]/90 text-white px-6 py-2">
+            批量提交
+          </Button>
         </div>
-        <Button type="submit" className="bg-[#509863] hover:bg-[#509863]/90 text-white">提交</Button>
       </form>
     </div>
   );
