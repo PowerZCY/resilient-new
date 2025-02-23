@@ -1,14 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { zhCN } from 'date-fns/locale';
 
 interface EntryForm {
@@ -17,9 +17,19 @@ interface EntryForm {
 }
 
 export default function NewEntry() {
-  const [nickname, setNickname] = useState<string>(''); // 昵称在表单顶部统一设置
-  const [entries, setEntries] = useState<EntryForm[]>([{ date: new Date(), content: '' }]); // 批量记录
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const defaultNickname = 'Zia慢成';
+  const [nickname, setNickname] = useState<string>(searchParams.get('nickname') || defaultNickname); // 从 URL 获取昵称
+  const [entries, setEntries] = useState<EntryForm[]>([{ date: new Date(), content: '' }]); // 批量记录
+
+  // 简化 useEffect，只在初次加载时同步 URL 的 nickname
+  useEffect(() => {
+    const urlNickname = searchParams.get('nickname');
+    if (urlNickname && urlNickname !== nickname) {
+      setNickname(urlNickname);
+    }
+  }, [searchParams]); // 移除 nickname 依赖，避免循环更新
 
   const addEntry = () => {
     if (entries.length < 20) { // 限制最多 20 条
@@ -56,7 +66,8 @@ export default function NewEntry() {
     });
 
     if (response.ok) {
-      router.push('/');
+      // 跳转回首页时带上用户在 NewEntry 选定的昵称
+      router.push(`/?nickname=${encodeURIComponent(nickname)}`);
     }
   };
 
@@ -66,13 +77,15 @@ export default function NewEntry() {
       <form onSubmit={handleSubmit} className="w-2/3 mx-auto space-y-6 mt-16">
         <div className="mb-6">
           <label htmlFor="nickname" className="block mb-2 text-sm font-medium">昵称</label>
-          <Input
-            id="nickname"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            required
-            className="w-full max-w-md"
-          />
+          <Select value={nickname} onValueChange={(value) => setNickname(value)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="选择昵称" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Zia慢成">Zia慢成</SelectItem>
+              <SelectItem value="帝八哥">帝八哥</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {entries.map((entry, index) => (

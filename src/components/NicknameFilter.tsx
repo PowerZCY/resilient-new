@@ -10,14 +10,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-export default function NicknameFilter() {
+export default function NicknameFilter(): JSX.Element {
   const router = useRouter();
   const searchParams = useSearchParams();
   const defaultNickname = 'Zia慢成';
-  const isFirstRender = useRef(true);
+  const isFirstRender = useRef<boolean>(true);
 
   // 确保初始化时处理 null 或 undefined
-  const [nickname, setNickname] = useState(() => {
+  const [nickname, setNickname] = useState<string>(() => {
     const param = searchParams.get('nickname');
     return param ? param : defaultNickname;
   });
@@ -27,18 +27,18 @@ export default function NicknameFilter() {
     const currentNickname = searchParams.get('nickname');
     if (isFirstRender.current && !currentNickname) {
       isFirstRender.current = false;
-      // console.log('Initializing URL with default nickname:', defaultNickname);
+      console.log('Initializing URL with default nickname:', defaultNickname);
       router.replace(`/?nickname=${encodeURIComponent(defaultNickname)}`, {
         scroll: false,
       });
     }
-  }, [router]); // 确保只依赖 router，避免 searchParams 的变化触发
+  }, [router]);
 
   // 处理用户选择
   const handleFilter = useCallback(
-    (value: string) => {
+    (value: string): void => {
       setNickname(value);
-      // console.log('User selected nickname:', value);
+      console.log('User selected nickname:', value);
       router.push(`/?nickname=${encodeURIComponent(value)}`, {
         scroll: false,
       });
