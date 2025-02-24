@@ -1,4 +1,4 @@
-# WindRun·Huaiin - 积极记录生活
+# WindRun·Huaiin - 积极记录生活[English](README.md)
 
 这是一个基于 Next.js 14 构建的全栈应用，用于记录生活中的积极事件和体验。
 
@@ -25,13 +25,14 @@
 
 - Node.js 18+ 
 - PostgreSQL 15+ (数据库服务)
+- pdadmin4 (数据库可视化工具)
 - pnpm 8+ (高性能的包管理器)
 
 ## 本地开发环境搭建
 
 1. 克隆项目并安装依赖
 ```bash
-git clone <repository-url>
+git clone https://github.com/PowerZCY/resilient-new/
 cd resilient-new
 pnpm install
 ```

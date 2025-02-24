@@ -1,4 +1,4 @@
-# WindRun·Huaiin - Positive Life Journal
+# WindRun·Huaiin - Positive Life Journal[中文版本](README.zh.md)
 
 A full-stack application built with Next.js 14 for recording positive events and experiences in life.
 
@@ -25,13 +25,14 @@ A full-stack application built with Next.js 14 for recording positive events and
 
 - Node.js 18+ 
 - PostgreSQL 15+ (database service)
+- pdadmin4 (database management tool)
 - pnpm 8+ (high-performance package manager)
 
 ## Local Development Setup
 
 1. Clone the repository and install dependencies
 ```bash
-git clone <repository-url>
+git clone https://github.com/PowerZCY/resilient-new/
 cd resilient-new
 pnpm install
 ```
