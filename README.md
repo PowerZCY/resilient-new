@@ -223,7 +223,7 @@ The project implements a custom logging system that automatically records all AP
 
 1. Fork the project
 2. Create a feature branch
-3. Commit your changes, please do follow the [Git Commit Guidelines](docs/GitRules.md)
+3. Commit your changes, please do follow the [Git Commit Guidelines](./docs/GitRule.md)
 4. Push to the branch
 5. Submit a Pull Request
 
