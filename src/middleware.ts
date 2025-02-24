@@ -1,3 +1,12 @@
+/**
+ * @license
+ * MIT License
+ * Copyright (c) 2025 D8ger
+ * 
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { Logger } from '@/lib/logger';
@@ -82,4 +91,4 @@ export const config = {
   matcher: [
     '/api/:path*'
   ]
-} 
+}
