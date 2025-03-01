@@ -45,7 +45,7 @@ export default function NicknameFilter(): JSX.Element {
         isUpdatingUrl.current = false;
       }, 100);
     }
-  }, [router, defaultNickname]);
+  }, [router, defaultNickname, searchParams]);
 
   // 处理用户选择
   const handleFilter = useCallback(

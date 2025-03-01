@@ -1,6 +1,6 @@
 'use client'; // 保持客户端组件标记
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import NicknameFilter from '@/components/NicknameFilter';
 import Timeline from '@/components/Timeline';
 import CalendarHeatmap from '@/components/CalendarHeatmap';
@@ -9,19 +9,10 @@ import { Sparkles, Calendar, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
-export default function Home() {
-  const [mounted, setMounted] = useState(false);
+// 创建一个包含 useSearchParams 的客户端组件
+function HomeContent() {
   const searchParams = useSearchParams();
   const nickname = searchParams.get('nickname') || 'Zia慢成';
-
-  // 确保组件在客户端渲染
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -108,5 +99,25 @@ export default function Home() {
         </div>
       </footer>
     </div>
+  );
+}
+
+// 主页组件，使用 Suspense 包装 HomeContent
+export default function Home() {
+  const [mounted, setMounted] = useState(false);
+
+  // 确保组件在客户端渲染
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
+
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">加载中...</div>}>
+      <HomeContent />
+    </Suspense>
   );
 }

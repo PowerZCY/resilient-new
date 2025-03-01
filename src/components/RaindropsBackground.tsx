@@ -121,7 +121,7 @@ export default function RaindropsBackground() {
         animationRef.current = null;
       }
     };
-  }, [raindrops]);
+  }, [raindrops, updateRaindrops]);
 
   return (
     <div 

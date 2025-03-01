@@ -1,6 +1,6 @@
 'use client'; // 保持客户端组件标记
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Calendar, Send, X, Plus, Trash2, Sparkles } from 'lucide-react';
@@ -14,7 +14,8 @@ interface EntryItem {
   content: string;
 }
 
-export default function NewEntryPage() {
+// 创建一个包含 useSearchParams 的客户端组件
+function NewEntryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nickname = searchParams.get('nickname') || '';
@@ -22,12 +23,6 @@ export default function NewEntryPage() {
     { id: Date.now().toString(), date: formatDateForInput(new Date()), content: '' }
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  // 确保组件在客户端渲染
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   function formatDateForInput(date: Date): string {
     const year = date.getFullYear();
@@ -116,10 +111,6 @@ export default function NewEntryPage() {
       console.error('Error submitting entries:', error);
       setIsSubmitting(false);
     }
-  }
-
-  if (!mounted) {
-    return null;
   }
 
   return (
@@ -251,58 +242,66 @@ export default function NewEntryPage() {
               </motion.div>
             ))}
             
+            {/* 添加新记录按钮 */}
             {entries.length < 20 && (
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={addNewEntry}
-                className="w-full py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-500 dark:text-slate-400 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors flex items-center justify-center"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-500 dark:text-slate-400 hover:border-blue-500 hover:text-blue-500 dark:hover:border-blue-400 dark:hover:text-blue-400 transition-colors flex items-center justify-center"
               >
                 <Plus className="h-5 w-5 mr-2" />
-                添加新记录
+                <span>添加新记录</span>
               </motion.button>
             )}
             
-            <div className="flex justify-end pt-6">
-              <Link href={`/?nickname=${encodeURIComponent(nickname)}`}>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  type="button"
-                  className="px-5 py-2 mr-3 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                >
-                  取消
-                </motion.button>
-              </Link>
-              
+            {/* 提交按钮 */}
+            <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={isSubmitting || !isValidSubmit()}
-                className={`px-5 py-2 rounded-lg text-white flex items-center ${
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center shadow-sm transition-all ${
                   isSubmitting || !isValidSubmit()
-                    ? 'bg-slate-400 dark:bg-slate-600 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-blue-600 to-violet-600 hover:shadow-md'
-                } transition-all`}
+                    ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-blue-600 to-violet-600 text-white hover:shadow-md'
+                }`}
               >
-                <Send className="h-4 w-4 mr-2" />
-                {isSubmitting ? '提交中...' : '批量提交'}
+                {isSubmitting ? (
+                  <span>提交中...</span>
+                ) : (
+                  <>
+                    <Send className="h-5 w-5 mr-2" />
+                    <span>提交记录</span>
+                  </>
+                )}
               </motion.button>
             </div>
           </form>
         </motion.div>
       </main>
-      
-      {/* 页脚 */}
-      <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-6 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-sm text-slate-500 dark:text-slate-400">
-            <p>© 2025 记录生活. 保留所有权利.</p>
-          </div>
-        </div>
-      </footer>
     </div>
+  );
+}
+
+// 主页组件，使用 Suspense 包装 NewEntryContent
+export default function NewEntryPage() {
+  const [mounted, setMounted] = useState(false);
+
+  // 确保组件在客户端渲染
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
+
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">加载中...</div>}>
+      <NewEntryContent />
+    </Suspense>
   );
 }

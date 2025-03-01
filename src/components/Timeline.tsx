@@ -163,7 +163,7 @@ export default function Timeline(): JSX.Element {
         observerInstance.current = null;
       }
     };
-  }, [hasMore, nickname, initialLoadDone.current]);
+  }, [hasMore, nickname]);
 
   const formatDate = (dateString: string): string => {
     const date: Date = new Date(dateString);
