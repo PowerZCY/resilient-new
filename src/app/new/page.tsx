@@ -3,15 +3,24 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar, Send, X } from 'lucide-react';
+import { ArrowLeft, Calendar, Send, X, Plus, Trash2, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import NicknameFilter from '@/components/NicknameFilter';
+
+// 定义单条记录的接口
+interface EntryItem {
+  id: string; // 前端临时ID，用于标识
+  date: string;
+  content: string;
+}
 
 export default function NewEntryPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nickname = searchParams.get('nickname') || '';
-  const [content, setContent] = useState('');
-  const [date, setDate] = useState(formatDateForInput(new Date()));
+  const [entries, setEntries] = useState<EntryItem[]>([
+    { id: Date.now().toString(), date: formatDateForInput(new Date()), content: '' }
+  ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -27,14 +36,60 @@ export default function NewEntryPage() {
     return `${year}-${month}-${day}`;
   }
 
+  // 添加新的一组数据
+  const addNewEntry = () => {
+    if (entries.length >= 20) {
+      alert('最多只能添加20组数据');
+      return;
+    }
+    
+    setEntries([
+      ...entries, 
+      { id: Date.now().toString(), date: formatDateForInput(new Date()), content: '' }
+    ]);
+  };
+
+  // 删除一组数据
+  const removeEntry = (id: string) => {
+    if (entries.length <= 1) {
+      return; // 如果只有一组数据，不允许删除
+    }
+    
+    setEntries(entries.filter(entry => entry.id !== id));
+  };
+
+  // 更新某一组数据的日期
+  const updateEntryDate = (id: string, newDate: string) => {
+    setEntries(entries.map(entry => 
+      entry.id === id ? { ...entry, date: newDate } : entry
+    ));
+  };
+
+  // 更新某一组数据的内容
+  const updateEntryContent = (id: string, newContent: string) => {
+    setEntries(entries.map(entry => 
+      entry.id === id ? { ...entry, content: newContent } : entry
+    ));
+  };
+
+  // 检查是否有效的提交
+  const isValidSubmit = () => {
+    return entries.some(entry => entry.content.trim() !== '');
+  };
+
+  // 提交所有数据
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     
-    if (!content.trim()) {
+    if (!isValidSubmit()) {
+      alert('请至少填写一条记录的内容');
       return;
     }
     
     setIsSubmitting(true);
+    
+    // 过滤掉空内容的条目
+    const validEntries = entries.filter(entry => entry.content.trim() !== '');
     
     try {
       const response = await fetch('/api/entries', {
@@ -42,21 +97,23 @@ export default function NewEntryPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          nickname,
-          content,
-          date: new Date(date).toISOString(),
-        }),
+        body: JSON.stringify(
+          validEntries.map(entry => ({
+            nickname,
+            content: entry.content,
+            date: new Date(entry.date).toISOString(),
+          }))
+        ),
       });
       
       if (response.ok) {
         router.push(`/?nickname=${encodeURIComponent(nickname)}`);
       } else {
-        console.error('Failed to submit entry');
+        console.error('Failed to submit entries');
         setIsSubmitting(false);
       }
     } catch (error) {
-      console.error('Error submitting entry:', error);
+      console.error('Error submitting entries:', error);
       setIsSubmitting(false);
     }
   }
@@ -76,22 +133,31 @@ export default function NewEntryPage() {
                 <motion.div
                   whileHover={{ x: -3 }}
                   whileTap={{ scale: 0.97 }}
-                  className="flex items-center text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-500"
+                  className="flex items-center text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-500 mr-4"
                 >
                   <ArrowLeft className="h-5 w-5 mr-2" />
                   <span className="font-medium">返回</span>
                 </motion.div>
               </Link>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-violet-600">
+              <motion.div
+                initial={{ rotate: -10, scale: 0.9 }}
+                animate={{ rotate: 0, scale: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Sparkles className="h-8 w-8 text-blue-600" />
+              </motion.div>
+              <h1 className="ml-3 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-violet-600">
                 突破消极偏见😎
-              </div>
-              <div className="hidden md:block text-sm text-[#509863] dark:text-emerald-400 mt-1">
-                每天都有好体验、好事儿、成就 ✔
-              </div>
+              </h1>
             </div>
-            <div className="w-20"></div> {/* 占位，保持标题居中 */}
+            <div className="hidden md:flex items-center justify-center">
+              <p className="text-base font-medium text-[#509863] dark:text-emerald-400">
+                每天都有好体验、好事儿、成就 ✔
+              </p>
+            </div>
+            <div className="flex items-center space-x-4">
+              <NicknameFilter />
+            </div>
           </div>
         </div>
       </header>
@@ -104,56 +170,101 @@ export default function NewEntryPage() {
           transition={{ duration: 0.5 }}
           className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6"
         >
-          <div className="flex items-center mb-6">
-            <Calendar className="h-5 w-5 text-blue-500 mr-2" />
-            <h1 className="text-xl font-medium">记下今天的好体验、好事儿、成就</h1>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <Calendar className="h-5 w-5 text-blue-500 mr-2" />
+              <h1 className="text-xl font-medium">批量记录好体验、好事儿、成就</h1>
+            </div>
+            <div className="text-sm text-slate-500 dark:text-slate-400">
+              {entries.length}/20 组
+            </div>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="date" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                日期
-              </label>
-              <input
-                type="date"
-                id="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
-                required
-              />
-            </div>
+            {entries.map((entry, index) => (
+              <motion.div 
+                key={entry.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/50"
+              >
+                <div className="flex justify-between items-center mb-3">
+                  <div className="font-medium text-slate-700 dark:text-slate-300">
+                    记录 #{index + 1}
+                  </div>
+                  {entries.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeEntry(entry.id)}
+                      className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-1">
+                    <label htmlFor={`date-${entry.id}`} className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      日期
+                    </label>
+                    <input
+                      type="date"
+                      id={`date-${entry.id}`}
+                      value={entry.date}
+                      onChange={(e) => updateEntryDate(entry.id, e.target.value)}
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="md:col-span-2">
+                    <label htmlFor={`content-${entry.id}`} className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      内容
+                    </label>
+                    <div className="relative">
+                      <textarea
+                        id={`content-${entry.id}`}
+                        value={entry.content}
+                        onChange={(e) => updateEntryContent(entry.id, e.target.value)}
+                        placeholder="输入好体验、好事儿或成就..."
+                        rows={3}
+                        className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                        required
+                      />
+                      {entry.content && (
+                        <button
+                          type="button"
+                          onClick={() => updateEntryContent(entry.id, '')}
+                          className="absolute top-3 right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        >
+                          <X className="h-5 w-5" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="text-xs text-right mt-1 text-slate-500 dark:text-slate-400">
+                      {entry.content.length} 个字符
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
             
-            <div>
-              <label htmlFor="content" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                内容
-              </label>
-              <div className="relative">
-                <textarea
-                  id="content"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="输入好体验、好事儿或成就..."
-                  rows={6}
-                  className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
-                  required
-                />
-                {content && (
-                  <button
-                    type="button"
-                    onClick={() => setContent('')}
-                    className="absolute top-3 right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                )}
-              </div>
-              <div className="text-xs text-right mt-1 text-slate-500 dark:text-slate-400">
-                {content.length} 个字符
-              </div>
-            </div>
+            {entries.length < 20 && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={addNewEntry}
+                className="w-full py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-500 dark:text-slate-400 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors flex items-center justify-center"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                添加新记录
+              </motion.button>
+            )}
             
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-end pt-6">
               <Link href={`/?nickname=${encodeURIComponent(nickname)}`}>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -169,20 +280,29 @@ export default function NewEntryPage() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                disabled={isSubmitting || !content.trim()}
+                disabled={isSubmitting || !isValidSubmit()}
                 className={`px-5 py-2 rounded-lg text-white flex items-center ${
-                  isSubmitting || !content.trim()
+                  isSubmitting || !isValidSubmit()
                     ? 'bg-slate-400 dark:bg-slate-600 cursor-not-allowed'
                     : 'bg-gradient-to-r from-blue-600 to-violet-600 hover:shadow-md'
                 } transition-all`}
               >
                 <Send className="h-4 w-4 mr-2" />
-                {isSubmitting ? '提交中...' : '提交记录'}
+                {isSubmitting ? '提交中...' : '批量提交'}
               </motion.button>
             </div>
           </form>
         </motion.div>
       </main>
+      
+      {/* 页脚 */}
+      <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-6 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center text-sm text-slate-500 dark:text-slate-400">
+            <p>© 2025 记录生活. 保留所有权利.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

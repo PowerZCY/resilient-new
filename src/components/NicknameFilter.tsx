@@ -9,6 +9,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { User } from 'lucide-react';
+
+// 定义用户数据，包括名称和对应的颜色
+const users = [
+  { name: 'Zia慢成', color: '#4f46e5' }, // 靛蓝色
+  { name: '帝八哥', color: '#ec4899' },  // 粉色
+];
 
 export default function NicknameFilter(): JSX.Element {
   const router = useRouter();
@@ -68,14 +75,32 @@ export default function NicknameFilter(): JSX.Element {
     [router, nickname]
   );
 
+  // 获取当前用户的颜色
+  const getCurrentUserColor = () => {
+    const user = users.find(u => u.name === nickname);
+    return user ? user.color : '#4f46e5'; // 默认颜色
+  };
+
   return (
     <Select value={nickname} onValueChange={handleFilter}>
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="选择昵称" />
+      <SelectTrigger className="w-[180px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg">
+        <div className="flex items-center">
+          <User className="h-4 w-4 text-slate-500 dark:text-slate-400 mr-2" />
+          <SelectValue />
+        </div>
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="Zia慢成">Zia慢成</SelectItem>
-        <SelectItem value="帝八哥">帝八哥</SelectItem>
+        {users.map((user) => (
+          <SelectItem key={user.name} value={user.name}>
+            <div className="flex items-center">
+              <div 
+                className="h-3 w-3 rounded-full mr-2" 
+                style={{ backgroundColor: user.color }}
+              />
+              {user.name}
+            </div>
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   );

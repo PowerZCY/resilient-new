@@ -26,7 +26,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* 顶部导航栏 */}
-      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10 shadow-sm">
+      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
@@ -94,7 +94,7 @@ export default function Home() {
         </div>
         
         {/* 第二行：时间轴 */}
-        <div className="border-t border-red-300 pt-8">
+        <div className="pt-8">
           <Timeline />
         </div>
       </main>
