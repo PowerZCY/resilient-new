@@ -24,13 +24,14 @@ export default function Timeline(): JSX.Element {
   const searchParams = useSearchParams();
   const nickname: string | null = searchParams.get('nickname');
   const limit: number = 20;
-  const observerInitialized: React.MutableRefObject<boolean> = useRef<boolean>(false);
+  const observerInstance = useRef<IntersectionObserver | null>(null);
   const debouncedFetch: React.MutableRefObject<ReturnType<typeof setTimeout> | null> = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loadedPages = useRef<Set<number>>(new Set([1]));
 
   const fetchEntries = useCallback(
     async (pageNum: number): Promise<void> => {
-      if (!nickname || loading) {
-        console.log(`Skipping fetch for page=${pageNum}: no nickname or loading`);
+      if (!nickname || loading || loadedPages.current.has(pageNum)) {
+        console.log(`Skipping fetch for page=${pageNum}: no nickname, loading, or already loaded`);
         return;
       }
 
@@ -42,24 +43,18 @@ export default function Timeline(): JSX.Element {
         );
         const data: ApiResponse = await res.json();
 
-        // console.log('API response:', {
-        //   page: pageNum,
-        //   entries: data.entries.map((e: Entry) => e.id),
-        //   total: data.total,
-        // });
-
         const newEntries: Entry[] = data.entries || [];
         const total: number = data.total || 0;
 
-        // 去重：基于 id 合并新旧数据
         setEntries((prev: Entry[]): Entry[] => {
           const combined: Entry[] = [...prev, ...newEntries];
           const uniqueEntries: Entry[] = [
             ...new Map(combined.map((entry: Entry) => [entry.id, entry] as const)).values(),
           ];
-          // console.log('Merged entries IDs:', uniqueEntries.map((e: Entry) => e.id));
           return uniqueEntries;
         });
+        
+        loadedPages.current.add(pageNum);
         setHasMore(pageNum * limit < total);
       } catch (error: unknown) {
         Logger.error('Error fetching entries:', error as Error);
@@ -67,49 +62,50 @@ export default function Timeline(): JSX.Element {
         setLoading(false);
       }
     },
-    [nickname, limit]
+    [nickname, limit, loading]
   );
 
-  // 每次 nickname 变化时重新加载第一页数据，并重置所有状态
   useEffect(() => {
     if (nickname) {
       console.log('Nickname changed, reloading for nickname:', nickname);
-      setEntries([]); // 重置数据
-      setPage(1); // 重置页面
-      setLoading(false); // 重置加载状态
-      setHasMore(true); // 重置是否有更多数据
-      fetchEntries(1); // 加载新昵称的第一页数据
+      setEntries([]);
+      setPage(1);
+      setLoading(false);
+      setHasMore(true);
+      
+      loadedPages.current = new Set();
+      
+      if (observerInstance.current) {
+        observerInstance.current.disconnect();
+        observerInstance.current = null;
+      }
+      
+      fetchEntries(1);
     }
-  }, [nickname, fetchEntries]);
+  }, [nickname]);
 
-  // 设置 Intersection Observer 监听滚动
   useEffect(() => {
-    if (!nickname || !hasMore || loading || observerInitialized.current) {
-      console.log('Observer setup skipped or already initialized:', {
-        hasMore,
-        loading,
-        nickname,
-        observerInitialized: observerInitialized.current,
-      });
+    if (!nickname || !hasMore || loading || observerInstance.current) {
       return;
     }
 
-    console.log('Setting up observer for page:', page);
-    observerInitialized.current = true;
-
-    const observer: IntersectionObserver = new IntersectionObserver(
+    console.log('Setting up observer for infinite scrolling');
+    
+    observerInstance.current = new IntersectionObserver(
       (entries: IntersectionObserverEntry[]): void => {
-        if (entries[0].isIntersecting && !loading) {
-          console.log('Observer triggered, loading page:', page + 1);
+        if (entries[0].isIntersecting && !loading && hasMore) {
+          const nextPage = page + 1;
+          console.log('Observer triggered, loading page:', nextPage);
+          
           if (debouncedFetch.current) {
             clearTimeout(debouncedFetch.current);
           }
+          
           debouncedFetch.current = setTimeout(() => {
-            setPage((prevPage: number): number => {
-              const nextPage: number = prevPage + 1;
+            if (!loadedPages.current.has(nextPage)) {
+              setPage(nextPage);
               fetchEntries(nextPage);
-              return nextPage;
-            });
+            }
           }, 500);
         }
       },
@@ -118,26 +114,27 @@ export default function Timeline(): JSX.Element {
 
     const currentRef: HTMLDivElement | null = observerRef.current;
     if (currentRef) {
-      observer.observe(currentRef);
+      observerInstance.current.observe(currentRef);
     }
 
     return () => {
-      observerInitialized.current = false;
-      if (currentRef) {
-        observer.unobserve(currentRef);
+      if (observerInstance.current) {
+        observerInstance.current.disconnect();
+        observerInstance.current = null;
       }
+      
       if (debouncedFetch.current) {
         clearTimeout(debouncedFetch.current);
+        debouncedFetch.current = null;
       }
     };
-  }, [hasMore, nickname, fetchEntries]);
+  }, [hasMore, loading, page, nickname]);
 
   const formatDate = (dateString: string): string => {
     const date: Date = new Date(dateString);
     return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
   };
 
-  // 优化后的格式化函数，支持多种换行符
   const formatContent = (content: string): JSX.Element => {
     return (
       <div className="whitespace-pre-wrap break-words text-gray-700">
@@ -167,7 +164,6 @@ export default function Timeline(): JSX.Element {
               {formatDate(entry.date)}
             </div>
             <div className="p-4 bg-white rounded-lg shadow">
-              {/* 使用 formatContent 渲染 content，显示换行 */}
               {formatContent(entry.content)}
             </div>
           </div>
