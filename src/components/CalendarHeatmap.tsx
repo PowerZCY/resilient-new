@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Card } from '@tremor/react';
 import { useSearchParams } from 'next/navigation';
 import CalendarHeatmap from 'react-calendar-heatmap';
@@ -20,24 +20,63 @@ export default function ContributionHeatmap() {
   const [data, setData] = useState<DataPoint[]>([]);
   const searchParams = useSearchParams();
   const nickname = searchParams.get('nickname');
+  const dataCache = useRef<Record<string, DataPoint[]>>({});
+  const isLoadingRef = useRef<boolean>(false);
 
   useEffect(() => {
     // 只在有 nickname 时才加载数据
-    if (nickname) {
-      fetch(`/api/entries/heatmap?nickname=${encodeURIComponent(nickname)}`)
-        .then(res => res.json())
-        .then(entries => {
-          const processedData = processDataForHeatmap(entries);
-          setData(processedData);
-        });
+    if (!nickname) return;
+    
+    // 如果已经有缓存数据，直接使用
+    if (dataCache.current[nickname]) {
+      console.log('使用缓存的热力图数据:', nickname);
+      setData(dataCache.current[nickname]);
+      return;
     }
+    
+    // 防止重复请求
+    if (isLoadingRef.current) {
+      console.log('热力图数据正在加载中，跳过请求:', nickname);
+      return;
+    }
+    
+    console.log('获取热力图数据:', nickname);
+    isLoadingRef.current = true;
+    
+    fetch(`/api/entries/heatmap?nickname=${encodeURIComponent(nickname)}`)
+      .then(res => res.json())
+      .then(entries => {
+        const processedData = processDataForHeatmap(entries);
+        // 缓存数据
+        dataCache.current[nickname] = processedData;
+        setData(processedData);
+        console.log('热力图数据已加载:', nickname);
+      })
+      .catch(err => {
+        console.error('Failed to fetch heatmap data:', err);
+        setData([]);
+      })
+      .finally(() => {
+        isLoadingRef.current = false;
+      });
   }, [nickname]);
 
   const processDataForHeatmap = (entries: EntryData[]): DataPoint[] => {
+    if (!Array.isArray(entries)) {
+      console.warn('Entries is not an array:', entries);
+      return [];
+    }
+    
     const countByDate = entries.reduce((acc, entry) => {
-      const date = new Date(entry.date);
-      const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-      acc[formattedDate] = (acc[formattedDate] || 0) + 1;
+      if (!entry || !entry.date) return acc;
+      
+      try {
+        const date = new Date(entry.date);
+        const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        acc[formattedDate] = (acc[formattedDate] || 0) + 1;
+      } catch (error) {
+        console.error('Error processing date:', error);
+      }
       return acc;
     }, {} as Record<string, number>);
 

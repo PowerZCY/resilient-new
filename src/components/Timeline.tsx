@@ -27,21 +27,32 @@ export default function Timeline(): JSX.Element {
   const observerInstance = useRef<IntersectionObserver | null>(null);
   const debouncedFetch: React.MutableRefObject<ReturnType<typeof setTimeout> | null> = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadedPages = useRef<Set<number>>(new Set([1]));
+  const isLoadingRef = useRef<boolean>(false);
+  const initialLoadDone = useRef<boolean>(false);
+  const currentPageRef = useRef<number>(1);
 
   const fetchEntries = useCallback(
     async (pageNum: number): Promise<void> => {
-      if (!nickname || loading || loadedPages.current.has(pageNum)) {
-        console.log(`Skipping fetch for page=${pageNum}: no nickname, loading, or already loaded`);
+      if (!nickname || isLoadingRef.current || loadedPages.current.has(pageNum)) {
+        console.log(`跳过请求: page=${pageNum}, nickname=${nickname}, 原因: ${!nickname ? '无昵称' : isLoadingRef.current ? '正在加载中' : '页面已加载'}`);
         return;
       }
 
-      console.log(`Fetching entries: page=${pageNum}, nickname=${nickname}`);
+      console.log(`获取数据: page=${pageNum}, nickname=${nickname}`);
+      isLoadingRef.current = true;
       setLoading(true);
+      
       try {
         const res: Response = await fetch(
-          `/api/entries?nickname=${encodeURIComponent(nickname || '')}&page=${pageNum}&limit=${limit}`
+          `/api/entries?nickname=${encodeURIComponent(nickname)}&page=${pageNum}&limit=${limit}`
         );
+        
+        if (!res.ok) {
+          throw new Error(`请求失败: ${res.status}`);
+        }
+        
         const data: ApiResponse = await res.json();
+        console.log(`获取到数据: page=${pageNum}, 条目数=${data.entries.length}, 总数=${data.total}`);
 
         const newEntries: Entry[] = data.entries || [];
         const total: number = data.total || 0;
@@ -55,80 +66,102 @@ export default function Timeline(): JSX.Element {
         });
         
         loadedPages.current.add(pageNum);
-        setHasMore(pageNum * limit < total);
+        const hasMoreData = pageNum * limit < total;
+        setHasMore(hasMoreData);
+        
+        if (pageNum === 1) {
+          initialLoadDone.current = true;
+        }
+        
+        if (!hasMoreData && observerInstance.current) {
+          console.log('没有更多数据，断开观察器');
+          observerInstance.current.disconnect();
+        }
       } catch (error: unknown) {
-        Logger.error('Error fetching entries:', error as Error);
+        console.error('获取数据出错:', error);
       } finally {
+        isLoadingRef.current = false;
         setLoading(false);
       }
     },
-    [nickname, limit, loading]
+    [nickname, limit]
   );
 
   useEffect(() => {
-    if (nickname) {
-      console.log('Nickname changed, reloading for nickname:', nickname);
-      setEntries([]);
-      setPage(1);
-      setLoading(false);
-      setHasMore(true);
-      
-      loadedPages.current = new Set();
-      
-      if (observerInstance.current) {
-        observerInstance.current.disconnect();
-        observerInstance.current = null;
-      }
-      
-      fetchEntries(1);
+    console.log('昵称变化，重新加载:', nickname);
+    
+    setEntries([]);
+    setPage(1);
+    currentPageRef.current = 1;
+    setLoading(false);
+    setHasMore(true);
+    initialLoadDone.current = false;
+    
+    loadedPages.current.clear();
+    isLoadingRef.current = false;
+    
+    if (observerInstance.current) {
+      observerInstance.current.disconnect();
+      observerInstance.current = null;
     }
-  }, [nickname]);
+    
+    fetchEntries(1);
+  }, [nickname, fetchEntries]);
 
   useEffect(() => {
-    if (!nickname || !hasMore || loading || observerInstance.current) {
+    currentPageRef.current = page;
+    
+    if (page > 1 && !loadedPages.current.has(page)) {
+      console.log(`页码变化，加载新页面: ${page}`);
+      fetchEntries(page);
+    }
+  }, [page, fetchEntries]);
+
+  useEffect(() => {
+    if (observerInstance.current) {
+      observerInstance.current.disconnect();
+      observerInstance.current = null;
+    }
+    
+    if (!nickname || !hasMore || !initialLoadDone.current) {
       return;
     }
 
-    console.log('Setting up observer for infinite scrolling');
+    console.log('设置无限滚动观察器, 当前页码:', currentPageRef.current);
     
     observerInstance.current = new IntersectionObserver(
       (entries: IntersectionObserverEntry[]): void => {
-        if (entries[0].isIntersecting && !loading && hasMore) {
-          const nextPage = page + 1;
-          console.log('Observer triggered, loading page:', nextPage);
+        if (entries[0].isIntersecting && !isLoadingRef.current && hasMore) {
+          const nextPage = currentPageRef.current + 1;
+          console.log('触发观察器，准备加载页面:', nextPage);
           
-          if (debouncedFetch.current) {
-            clearTimeout(debouncedFetch.current);
+          if (!loadedPages.current.has(nextPage)) {
+            console.log('开始加载下一页:', nextPage);
+            setPage(nextPage);
+          } else {
+            console.log('页面已加载，跳过:', nextPage);
           }
-          
-          debouncedFetch.current = setTimeout(() => {
-            if (!loadedPages.current.has(nextPage)) {
-              setPage(nextPage);
-              fetchEntries(nextPage);
-            }
-          }, 500);
         }
       },
-      { threshold: 0.2, rootMargin: '500px' }
+      { threshold: 0.1, rootMargin: '100px' }
     );
 
     const currentRef: HTMLDivElement | null = observerRef.current;
     if (currentRef) {
+      console.log('开始观察底部元素');
       observerInstance.current.observe(currentRef);
+    } else {
+      console.log('底部元素不存在，无法观察');
     }
 
     return () => {
       if (observerInstance.current) {
+        console.log('清理观察器');
         observerInstance.current.disconnect();
         observerInstance.current = null;
       }
-      
-      if (debouncedFetch.current) {
-        clearTimeout(debouncedFetch.current);
-        debouncedFetch.current = null;
-      }
     };
-  }, [hasMore, loading, page, nickname]);
+  }, [hasMore, nickname, initialLoadDone.current]);
 
   const formatDate = (dateString: string): string => {
     const date: Date = new Date(dateString);
