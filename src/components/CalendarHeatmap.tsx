@@ -92,37 +92,46 @@ export default function ContributionHeatmap() {
   // 如果没有 nickname，显示加载状态或空状态
   if (!nickname) {
     return (
-      <Card className="border border-[#509863] p-4 rounded-lg">
-        <div className="text-center text-gray-500">
-          Loading...
-        </div>
-      </Card>
+      <div className="relative group">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-violet-600 rounded-lg opacity-0 group-hover:opacity-75 transition duration-500 blur-sm animate-pulse" />
+        <Card className="relative border border-[#509863] p-4 rounded-lg bg-white dark:bg-slate-800">
+          <div className="text-center text-gray-500">
+            Loading...
+          </div>
+        </Card>
+      </div>
     );
   }
 
   return (
     <>
       <h2 className="text-2xl font-semibold mb-2">{nickname}&apos;s Contributions</h2>
-      <Card className="border border-[#509863] p-4 rounded-lg">
-        <CalendarHeatmap
-          startDate={oneYearAgo}
-          endDate={today}
-          values={data}
-          classForValue={(value) => {
-            if (!value) {
-              return 'color-empty'
-            }
-            return `color-scale-${Math.min(value.count, 4)}`
-          }}
-          titleForValue={(value) => value ? `${value.date}: ${value.count} 条记录` : '无记录'}
-        />
-        <style jsx global>{`
-          .react-calendar-heatmap .color-scale-1 { fill: #9BE9A8; }
-          .react-calendar-heatmap .color-scale-2 { fill: #40C463; }
-          .react-calendar-heatmap .color-scale-3 { fill: #30A14E; }
-          .react-calendar-heatmap .color-scale-4 { fill: #216E39; }
-        `}</style>
-      </Card>
+      <div className="relative group">
+        {/* 发光边框效果 */}
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-violet-600 rounded-lg opacity-0 group-hover:opacity-75 transition duration-500 blur-sm animate-glow" />
+        
+        {/* 主卡片内容 */}
+        <Card className="relative border border-[#509863] p-4 rounded-lg bg-white dark:bg-slate-800">
+          <CalendarHeatmap
+            startDate={oneYearAgo}
+            endDate={today}
+            values={data}
+            classForValue={(value) => {
+              if (!value) {
+                return 'color-empty'
+              }
+              return `color-scale-${Math.min(value.count, 4)}`
+            }}
+            titleForValue={(value) => value ? `${value.date}: ${value.count} 条记录` : '无记录'}
+          />
+          <style jsx global>{`
+            .react-calendar-heatmap .color-scale-1 { fill: #9BE9A8; }
+            .react-calendar-heatmap .color-scale-2 { fill: #40C463; }
+            .react-calendar-heatmap .color-scale-3 { fill: #30A14E; }
+            .react-calendar-heatmap .color-scale-4 { fill: #216E39; }
+          `}</style>
+        </Card>
+      </div>
     </>
   );
 }

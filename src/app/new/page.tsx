@@ -37,9 +37,9 @@ function NewEntryContent() {
       alert('最多只能添加20组数据');
       return;
     }
-    
+
     setEntries([
-      ...entries, 
+      ...entries,
       { id: Date.now().toString(), date: formatDateForInput(new Date()), content: '' }
     ]);
   };
@@ -49,20 +49,20 @@ function NewEntryContent() {
     if (entries.length <= 1) {
       return; // 如果只有一组数据，不允许删除
     }
-    
+
     setEntries(entries.filter(entry => entry.id !== id));
   };
 
   // 更新某一组数据的日期
   const updateEntryDate = (id: string, newDate: string) => {
-    setEntries(entries.map(entry => 
+    setEntries(entries.map(entry =>
       entry.id === id ? { ...entry, date: newDate } : entry
     ));
   };
 
   // 更新某一组数据的内容
   const updateEntryContent = (id: string, newContent: string) => {
-    setEntries(entries.map(entry => 
+    setEntries(entries.map(entry =>
       entry.id === id ? { ...entry, content: newContent } : entry
     ));
   };
@@ -75,17 +75,17 @@ function NewEntryContent() {
   // 提交所有数据
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    
+
     if (!isValidSubmit()) {
       alert('请至少填写一条记录的内容');
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     // 过滤掉空内容的条目
     const validEntries = entries.filter(entry => entry.content.trim() !== '');
-    
+
     try {
       const response = await fetch('/api/entries', {
         method: 'POST',
@@ -100,7 +100,7 @@ function NewEntryContent() {
           }))
         ),
       });
-      
+
       if (response.ok) {
         router.push(`/?nickname=${encodeURIComponent(nickname)}`);
       } else {
@@ -138,7 +138,7 @@ function NewEntryContent() {
                 <Sparkles className="h-8 w-8 text-blue-600" />
               </motion.div>
               <h1 className="ml-3 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-violet-600">
-                突破消极偏见😎
+                突破消极偏见♾️
               </h1>
             </div>
             <div className="hidden md:flex items-center justify-center">
@@ -164,16 +164,16 @@ function NewEntryContent() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               <Calendar className="h-5 w-5 text-blue-500 mr-2" />
-              <h1 className="text-xl font-medium">批量记录好体验、好事儿、成就</h1>
+              <h1 className="text-xl font-medium">上报好体验、好事儿、成就</h1>
             </div>
             <div className="text-sm text-slate-500 dark:text-slate-400">
               {entries.length}/20 组
             </div>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {entries.map((entry, index) => (
-              <motion.div 
+              <motion.div
                 key={entry.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -182,7 +182,7 @@ function NewEntryContent() {
               >
                 <div className="flex justify-between items-center mb-3">
                   <div className="font-medium text-slate-700 dark:text-slate-300">
-                    记录 #{index + 1}
+                    体验 #{index + 1}
                   </div>
                   {entries.length > 1 && (
                     <button
@@ -194,7 +194,7 @@ function NewEntryContent() {
                     </button>
                   )}
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="md:col-span-1">
                     <label htmlFor={`date-${entry.id}`} className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -209,7 +209,7 @@ function NewEntryContent() {
                       required
                     />
                   </div>
-                  
+
                   <div className="md:col-span-2">
                     <label htmlFor={`content-${entry.id}`} className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       内容
@@ -241,7 +241,7 @@ function NewEntryContent() {
                 </div>
               </motion.div>
             ))}
-            
+
             {/* 添加新记录按钮 */}
             {entries.length < 20 && (
               <motion.button
@@ -252,10 +252,10 @@ function NewEntryContent() {
                 className="w-full py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-500 dark:text-slate-400 hover:border-blue-500 hover:text-blue-500 dark:hover:border-blue-400 dark:hover:text-blue-400 transition-colors flex items-center justify-center"
               >
                 <Plus className="h-5 w-5 mr-2" />
-                <span>添加新记录</span>
+                <span>添加新体验</span>
               </motion.button>
             )}
-            
+
             {/* 提交按钮 */}
             <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
               <motion.button
@@ -263,18 +263,17 @@ function NewEntryContent() {
                 disabled={isSubmitting || !isValidSubmit()}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className={`w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center shadow-sm transition-all ${
-                  isSubmitting || !isValidSubmit()
+                className={`w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center shadow-sm transition-all ${isSubmitting || !isValidSubmit()
                     ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed'
                     : 'bg-gradient-to-r from-blue-600 to-violet-600 text-white hover:shadow-md'
-                }`}
+                  }`}
               >
                 {isSubmitting ? (
                   <span>提交中...</span>
                 ) : (
                   <>
                     <Send className="h-5 w-5 mr-2" />
-                    <span>提交记录</span>
+                    <span>提交</span>
                   </>
                 )}
               </motion.button>

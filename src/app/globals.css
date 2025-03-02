@@ -68,3 +68,59 @@
   }
 }
 
+@keyframes wave {
+  0% {
+    transform: translateX(-100%) translateY(10%) rotate(0deg);
+  }
+  50% {
+    transform: translateX(0%) translateY(-10%) rotate(180deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(10%) rotate(360deg);
+  }
+}
+
+.wave-animation {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: linear-gradient(
+    45deg,
+    rgba(59, 130, 246, 0.1),
+    rgba(124, 58, 237, 0.1),
+    rgba(59, 130, 246, 0.1)
+  );
+  animation: wave 8s linear infinite;
+  pointer-events: none;
+}
+
+.wave-animation::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  animation: wave 8s linear infinite reverse;
+  animation-delay: -4s;
+}
+
+@keyframes glow {
+  0% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.01);
+  }
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+

@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { Sparkles, Calendar, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import AnimatedCard from '@/components/AnimatedCard';
 
 // 创建一个包含 useSearchParams 的客户端组件
 function HomeContent() {
@@ -29,7 +30,7 @@ function HomeContent() {
                 <Sparkles className="h-8 w-8 text-blue-600" />
               </motion.div>
               <h1 className="ml-3 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-violet-600">
-                突破消极偏见😎
+                突破消极偏见♾️
               </h1>
             </div>
             <div className="hidden md:flex items-center justify-center">
@@ -54,15 +55,15 @@ function HomeContent() {
               <CalendarHeatmap />
             </div>
           </div>
-          
+
           {/* 右侧 - 记录今日 (占据1/4宽度) */}
           <div className="lg:w-1/4 flex">
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 flex flex-col w-full">
+            <AnimatedCard>
               <h2 className="text-lg font-medium mb-4 flex items-center">
                 <Calendar className="h-5 w-5 text-blue-500 mr-2" />
-                <span>记录今日</span>
+                <span>今日来一发</span>
               </h2>
-              
+
               <Link href={`/new?nickname=${encodeURIComponent(nickname)}`} className="mt-2">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -70,31 +71,31 @@ function HomeContent() {
                   className="w-full py-2.5 px-4 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg font-medium flex items-center justify-center shadow-sm hover:shadow-md transition-all"
                 >
                   <PlusCircle className="h-5 w-5 mr-2" />
-                  <span>添加新记录</span>
+                  <span>上报体验</span>
                 </motion.button>
               </Link>
-              
+
               <div className="mt-auto pt-6 border-t border-slate-200 dark:border-slate-700">
                 <div className="text-sm text-slate-500 dark:text-slate-400">
                   <p className="mb-2">记录美好时光</p>
-                  <p>每一天的点滴都值得铭记</p>
+                  <p>作别西去的自我，把头埋低，向东生长</p>
                 </div>
               </div>
-            </div>
+            </AnimatedCard>
           </div>
         </div>
-        
+
         {/* 第二行：时间轴 */}
         <div className="pt-8">
           <Timeline />
         </div>
       </main>
-      
+
       {/* 页脚 */}
       <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-6 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center text-sm text-slate-500 dark:text-slate-400">
-            <p>© 2025 记录生活. 保留所有权利.</p>
+            <p>Copyright &copy; {new Date().getFullYear()} 巽川·怀因 All rights reserved.</p>
           </div>
         </div>
       </footer>
