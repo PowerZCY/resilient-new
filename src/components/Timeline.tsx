@@ -16,6 +16,38 @@ interface ApiResponse {
   total: number;
 }
 
+// 首先添加骨架组件
+// 骨架组件优化
+const TimelineSkeleton = () => {
+  return (
+    <div className="animate-pulse space-y-8">
+      {[1, 2, 3].map((item) => (
+        <div key={item} className="relative pl-8 pb-8">
+          {/* 骨架圆点 - 增加大小和发光效果 */}
+          <div className="absolute left-0 top-2 w-5 h-5 rounded-full bg-violet-200 dark:bg-violet-700 shadow-[0_0_12px_rgba(139,92,246,0.3)]"></div>
+          
+          {/* 骨架连接线 - 渐变效果 */}
+          <div className="absolute left-[10px] top-[40px] w-[2px] h-[calc(100%-48px)] bg-gradient-to-b from-violet-200 via-violet-300 to-violet-200 dark:from-violet-700 dark:via-violet-600 dark:to-violet-700"></div>
+          
+          {/* 骨架日期 - 更窄的宽度 */}
+          <div className="mb-2 h-4 w-32 bg-violet-100 dark:bg-violet-800 rounded-full"></div>
+          
+          {/* 骨架内容卡片 - 增加层次感 */}
+          <div className="p-6 rounded-lg bg-white dark:bg-slate-800 shadow-sm border border-violet-100 dark:border-violet-800">
+            <div className="space-y-4">
+              <div className="h-4 bg-violet-50 dark:bg-violet-900/50 rounded-full w-full"></div>
+              <div className="h-4 bg-violet-50 dark:bg-violet-900/50 rounded-full w-4/5"></div>
+              <div className="h-4 bg-violet-50 dark:bg-violet-900/50 rounded-full w-2/3"></div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+import React, { memo } from 'react';
+
 export default function Timeline(): JSX.Element {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [page, setPage] = useState<number>(1);
@@ -283,9 +315,24 @@ export default function Timeline(): JSX.Element {
     <div>
       <h2 className="text-2xl font-semibold mb-4">时光轴</h2>
       <div className="relative">
+        {/* 初始加载时显示骨架屏 */}
+        {entries.length === 0 && loading && (
+          <>
+            <TimelineSkeleton />
+            <motion.p 
+              className="text-center text-gray-500 mt-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+            >
+              正在加载记忆...
+            </motion.p>
+          </>
+        )}
+        
+        {/* 已有数据的渲染 */}
         {entries.map((entry: Entry, index: number) => {
           const isActive = activeEntryId === entry.id;
-          
           return (
             <motion.div
               key={entry.id}
