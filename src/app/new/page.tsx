@@ -3,7 +3,8 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar, Send, X, Plus, Trash2, Sparkles } from 'lucide-react';
+// 在顶部导入中添加 Home 图标
+import { Home, Calendar, Send, X, Plus, Trash2, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import NicknameFilter from '@/components/NicknameFilter';
 
@@ -122,12 +123,11 @@ function NewEntryContent() {
             <div className="flex items-center">
               <Link href={`/?nickname=${encodeURIComponent(nickname)}`}>
                 <motion.div
-                  whileHover={{ x: -3 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
                   className="flex items-center text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-500 mr-4"
                 >
-                  <ArrowLeft className="h-5 w-5 mr-2" />
-                  <span className="font-medium">返回</span>
+                  <Home className="h-6 w-6" />
                 </motion.div>
               </Link>
               <motion.div
@@ -159,8 +159,9 @@ function NewEntryContent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6"
+          className="relative bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6 border-[3px] border-violet-500/30 dark:border-violet-400/30 animate-border-pulse"
         >
+          {/* 原有内容保持不变 */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               <Calendar className="h-5 w-5 text-blue-500 mr-2" />

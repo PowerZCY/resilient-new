@@ -61,7 +61,7 @@ function HomeContent() {
             <AnimatedCard>
               <h2 className="text-lg font-medium mb-4 flex items-center">
                 <Calendar className="h-5 w-5 text-blue-500 mr-2" />
-                <span>今日来一发</span>
+                <span>今日发条</span>
               </h2>
 
               <Link href={`/new?nickname=${encodeURIComponent(nickname)}`} className="mt-2">
