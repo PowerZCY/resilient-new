@@ -155,7 +155,7 @@ export default function Timeline(): JSX.Element {
       observerInstance.current.disconnect();
       observerInstance.current = null;
     }
-    
+
     // 使用函数来封装观察器的设置逻辑
     const setupObserver = () => {
       if (!nickname || !hasMore || !initialLoadDone.current) {
@@ -199,7 +199,7 @@ export default function Timeline(): JSX.Element {
         observerInstance.current = null;
       }
     };
-  }, [hasMore, nickname]); // 移除 initialLoadDone.current 作为依赖
+  }, [hasMore, nickname, initialLoadDone.current]);
 
   const formatDate = (dateString: string): string => {
     const date: Date = new Date(dateString);
