@@ -199,6 +199,7 @@ export default function Timeline(): JSX.Element {
         observerInstance.current = null;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasMore, nickname, initialLoadDone.current]);
 
   const formatDate = (dateString: string): string => {
