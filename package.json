@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint --fix . && next lint",
     "postinstall": "prisma generate",
     "vercel-build": "prisma generate && prisma migrate deploy && next build"
   },
@@ -43,6 +43,7 @@
     "@typescript-eslint/typescript-estree": "^8.24.1",
     "eslint": "^8",
     "eslint-config-next": "14.2.7",
+    "eslint-plugin-unused-imports": "^4.1.4",
     "postcss": "^8",
     "prisma": "^6.3.1",
     "tailwindcss": "^3.4.1",

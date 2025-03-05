@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
 interface Raindrop {
@@ -43,46 +43,42 @@ export default function RaindropsBackground() {
   };
 
   // 更新雨滴位置
-  const updateRaindrops = (timestamp: number) => {
+  // 使用 useCallback 包装 updateRaindrops 函数
+  const updateRaindrops = useCallback((timestamp: number) => {
     if (!containerRef.current) return;
-    
+
     const { width, height } = dimensions;
     const deltaTime = timestamp - (lastTime.current || timestamp);
     lastTime.current = timestamp;
-    
-    // 确保deltaTime合理，防止过大的跳跃
+
     const normalizedDelta = Math.min(deltaTime, 100) / 16.67;
-    
-    setRaindrops(prev => 
+
+    setRaindrops(prev =>
       prev.map(drop => {
-        // 更新位置，使用deltaTime使动画更平滑
         const newY = drop.y + drop.speed * normalizedDelta;
-        
-        // 添加轻微的水平摇摆
         const swingOffset = Math.sin(timestamp / 1000 + drop.id) * drop.swing;
-        
-        // 如果雨滴超出屏幕底部，重置到顶部
+
         if (newY > height) {
           return {
             ...drop,
-            y: -drop.size * 4, // 重置到屏幕上方
-            x: Math.random() * width, // 随机水平位置
-            speed: Math.random() * 1.5 + 0.5, // 重新随机速度
-            opacity: Math.random() * 0.5 + 0.3, // 重新随机透明度，增强了可见性
-            swing: Math.random() * 2 - 1 // 重新随机摇摆幅度
+            y: -drop.size * 4,
+            x: Math.random() * width,
+            speed: Math.random() * 1.5 + 0.5,
+            opacity: Math.random() * 0.5 + 0.3,
+            swing: Math.random() * 2 - 1
           };
         }
-        
+
         return {
           ...drop,
           y: newY,
-          x: drop.x + swingOffset * 0.1 // 添加轻微的水平摇摆
+          x: drop.x + swingOffset * 0.1
         };
       })
     );
-    
+
     animationRef.current = requestAnimationFrame(updateRaindrops);
-  };
+  }, [dimensions]); // 只依赖 dimensions
 
   // 初始化和调整大小
   useEffect(() => {
@@ -90,7 +86,7 @@ export default function RaindropsBackground() {
       if (containerRef.current) {
         const { width, height } = containerRef.current.getBoundingClientRect();
         setDimensions({ width, height });
-        
+
         if (!isInitialized.current) {
           // 初次设置雨滴 - 增加数量以确保效果可见
           const initialRaindrops = generateRaindrops(120, width, height);
@@ -124,7 +120,7 @@ export default function RaindropsBackground() {
   }, [raindrops, updateRaindrops]);
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className="fixed inset-0 w-full h-full pointer-events-none z-0 overflow-hidden"
       aria-hidden="true"
@@ -145,10 +141,10 @@ export default function RaindropsBackground() {
             boxShadow: `0 0 2px rgba(255, 255, 255, 0.5)`, // 添加轻微发光效果
           }}
           initial={{ y: -20, opacity: 0 }}
-          animate={{ 
-            y: 0, 
+          animate={{
+            y: 0,
             opacity: drop.opacity,
-            transition: { 
+            transition: {
               delay: drop.delay,
               duration: 1.5, // 减少了动画时间
               ease: "easeOut"
@@ -158,4 +154,4 @@ export default function RaindropsBackground() {
       ))}
     </div>
   );
-} 
+}

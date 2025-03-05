@@ -7,6 +7,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import dayjs from 'dayjs';
 
 type LogLevel = 'info' | 'warn' | 'error'
@@ -35,7 +36,7 @@ export class Logger {
       data,
       error
     }
-    const timestamp =  dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss.SSS');
+    const timestamp = dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss.SSS');
     // 在开发环境使用格式化输出
     if (process.env.NODE_ENV === 'development') {
       console.log(`[${level}][${timestamp}][${requestId}][${message}]`, this.formatLog(entry))

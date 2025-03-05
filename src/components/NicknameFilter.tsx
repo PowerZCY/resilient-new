@@ -55,12 +55,12 @@ export default function NicknameFilter(): JSX.Element {
         console.log('相同昵称，跳过更新:', value);
         return;
       }
-      
+
       if (isUpdatingUrl.current) {
         console.log('URL正在更新中，跳过请求');
         return;
       }
-      
+
       setNickname(value);
       console.log('User selected nickname:', value);
       isUpdatingUrl.current = true;
@@ -75,12 +75,6 @@ export default function NicknameFilter(): JSX.Element {
     [router, nickname]
   );
 
-  // 获取当前用户的颜色
-  const getCurrentUserColor = () => {
-    const user = users.find(u => u.name === nickname);
-    return user ? user.color : '#4f46e5'; // 默认颜色
-  };
-
   return (
     <Select value={nickname} onValueChange={handleFilter}>
       <SelectTrigger className="w-[180px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg">
@@ -93,8 +87,8 @@ export default function NicknameFilter(): JSX.Element {
         {users.map((user) => (
           <SelectItem key={user.name} value={user.name}>
             <div className="flex items-center">
-              <div 
-                className="h-3 w-3 rounded-full mr-2" 
+              <div
+                className="h-3 w-3 rounded-full mr-2"
                 style={{ backgroundColor: user.color }}
               />
               {user.name}

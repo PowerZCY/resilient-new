@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Logger } from '@/lib/logger';
 import { motion } from 'framer-motion';
 
 interface Entry {
@@ -25,13 +24,13 @@ const TimelineSkeleton = () => {
         <div key={item} className="relative pl-8 pb-8">
           {/* 骨架圆点 - 增加大小和发光效果 */}
           <div className="absolute left-0 top-2 w-5 h-5 rounded-full bg-violet-200 dark:bg-violet-700 shadow-[0_0_12px_rgba(139,92,246,0.3)]"></div>
-          
+
           {/* 骨架连接线 - 渐变效果 */}
           <div className="absolute left-[10px] top-[40px] w-[2px] h-[calc(100%-48px)] bg-gradient-to-b from-violet-200 via-violet-300 to-violet-200 dark:from-violet-700 dark:via-violet-600 dark:to-violet-700"></div>
-          
+
           {/* 骨架日期 - 更窄的宽度 */}
           <div className="mb-2 h-4 w-32 bg-violet-100 dark:bg-violet-800 rounded-full"></div>
-          
+
           {/* 骨架内容卡片 - 增加层次感 */}
           <div className="p-6 rounded-lg bg-white dark:bg-slate-800 shadow-sm border border-violet-100 dark:border-violet-800">
             <div className="space-y-4">
@@ -46,7 +45,7 @@ const TimelineSkeleton = () => {
   );
 };
 
-import React, { memo } from 'react';
+import React from 'react';
 
 export default function Timeline(): JSX.Element {
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -59,7 +58,6 @@ export default function Timeline(): JSX.Element {
   const nickname: string | null = searchParams.get('nickname');
   const limit: number = 20;
   const observerInstance = useRef<IntersectionObserver | null>(null);
-  const debouncedFetch: React.MutableRefObject<ReturnType<typeof setTimeout> | null> = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadedPages = useRef<Set<number>>(new Set([1]));
   const isLoadingRef = useRef<boolean>(false);
   const initialLoadDone = useRef<boolean>(false);
@@ -75,16 +73,16 @@ export default function Timeline(): JSX.Element {
       console.log(`获取数据: page=${pageNum}, nickname=${nickname}`);
       isLoadingRef.current = true;
       setLoading(true);
-      
+
       try {
         const res: Response = await fetch(
           `/api/entries?nickname=${encodeURIComponent(nickname)}&page=${pageNum}&limit=${limit}`
         );
-        
+
         if (!res.ok) {
           throw new Error(`请求失败: ${res.status}`);
         }
-        
+
         const data: ApiResponse = await res.json();
         console.log(`获取到数据: page=${pageNum}, 条目数=${data.entries.length}, 总数=${data.total}`);
 
@@ -98,15 +96,15 @@ export default function Timeline(): JSX.Element {
           ];
           return uniqueEntries;
         });
-        
+
         loadedPages.current.add(pageNum);
         const hasMoreData = pageNum * limit < total;
         setHasMore(hasMoreData);
-        
+
         if (pageNum === 1) {
           initialLoadDone.current = true;
         }
-        
+
         if (!hasMoreData && observerInstance.current) {
           console.log('没有更多数据，断开观察器');
           observerInstance.current.disconnect();
@@ -123,28 +121,28 @@ export default function Timeline(): JSX.Element {
 
   useEffect(() => {
     console.log('昵称变化，重新加载:', nickname);
-    
+
     setEntries([]);
     setPage(1);
     currentPageRef.current = 1;
     setLoading(false);
     setHasMore(true);
     initialLoadDone.current = false;
-    
+
     loadedPages.current.clear();
     isLoadingRef.current = false;
-    
+
     if (observerInstance.current) {
       observerInstance.current.disconnect();
       observerInstance.current = null;
     }
-    
+
     fetchEntries(1);
   }, [nickname, fetchEntries]);
 
   useEffect(() => {
     currentPageRef.current = page;
-    
+
     if (page > 1 && !loadedPages.current.has(page)) {
       console.log(`页码变化，加载新页面: ${page}`);
       fetchEntries(page);
@@ -152,42 +150,48 @@ export default function Timeline(): JSX.Element {
   }, [page, fetchEntries]);
 
   useEffect(() => {
+    // 保持清理逻辑
     if (observerInstance.current) {
       observerInstance.current.disconnect();
       observerInstance.current = null;
     }
     
-    if (!nickname || !hasMore || !initialLoadDone.current) {
-      return;
-    }
+    // 使用函数来封装观察器的设置逻辑
+    const setupObserver = () => {
+      if (!nickname || !hasMore || !initialLoadDone.current) {
+        return;
+      }
 
-    console.log('设置无限滚动观察器, 当前页码:', currentPageRef.current);
-    
-    observerInstance.current = new IntersectionObserver(
-      (entries: IntersectionObserverEntry[]): void => {
-        if (entries[0].isIntersecting && !isLoadingRef.current && hasMore) {
-          const nextPage = currentPageRef.current + 1;
-          console.log('触发观察器，准备加载页面:', nextPage);
-          
-          if (!loadedPages.current.has(nextPage)) {
-            console.log('开始加载下一页:', nextPage);
-            setPage(nextPage);
-          } else {
-            console.log('页面已加载，跳过:', nextPage);
+      console.log('设置无限滚动观察器, 当前页码:', currentPageRef.current);
+
+      observerInstance.current = new IntersectionObserver(
+        (entries: IntersectionObserverEntry[]): void => {
+          if (entries[0].isIntersecting && !isLoadingRef.current && hasMore) {
+            const nextPage = currentPageRef.current + 1;
+            console.log('触发观察器，准备加载页面:', nextPage);
+
+            if (!loadedPages.current.has(nextPage)) {
+              console.log('开始加载下一页:', nextPage);
+              setPage(nextPage);
+            } else {
+              console.log('页面已加载，跳过:', nextPage);
+            }
           }
-        }
-      },
-      { threshold: 0.1, rootMargin: '100px' }
-    );
+        },
+        { threshold: 0.1, rootMargin: '100px' }
+      );
 
-    const currentRef: HTMLDivElement | null = observerRef.current;
-    if (currentRef) {
-      console.log('开始观察底部元素');
-      observerInstance.current.observe(currentRef);
-    } else {
-      console.log('底部元素不存在，无法观察');
-    }
+      const currentRef = observerRef.current;
+      if (currentRef) {
+        console.log('开始观察底部元素');
+        observerInstance.current.observe(currentRef);
+      }
+    };
 
+    // 设置观察器
+    setupObserver();
+
+    // 清理函数
     return () => {
       if (observerInstance.current) {
         console.log('清理观察器');
@@ -195,7 +199,7 @@ export default function Timeline(): JSX.Element {
         observerInstance.current = null;
       }
     };
-  }, [hasMore, nickname, initialLoadDone.current]);
+  }, [hasMore, nickname]); // 移除 initialLoadDone.current 作为依赖
 
   const formatDate = (dateString: string): string => {
     const date: Date = new Date(dateString);
@@ -231,12 +235,12 @@ export default function Timeline(): JSX.Element {
 
   // 圆点动画变体
   const circleVariants = {
-    initial: { 
+    initial: {
       scale: 1,
       backgroundColor: "#509863",
       boxShadow: "0 0 0 4px rgba(80, 152, 99, 0.2)"
     },
-    hover: { 
+    hover: {
       scale: 1.2,
       backgroundColor: "#8B5CF6",
       boxShadow: "0 0 0 8px rgba(139, 92, 246, 0.3), 0 0 20px rgba(139, 92, 246, 0.5)",
@@ -319,7 +323,7 @@ export default function Timeline(): JSX.Element {
         {entries.length === 0 && loading && (
           <>
             <TimelineSkeleton />
-            <motion.p 
+            <motion.p
               className="text-center text-gray-500 mt-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -329,7 +333,7 @@ export default function Timeline(): JSX.Element {
             </motion.p>
           </>
         )}
-        
+
         {/* 已有数据的渲染 */}
         {entries.map((entry: Entry, index: number) => {
           const isActive = activeEntryId === entry.id;
@@ -352,7 +356,7 @@ export default function Timeline(): JSX.Element {
                 variants={circleVariants}
                 whileHover={{ scale: 1.3 }}
               ></motion.div>
-              
+
               {/* 连接前一个条目的气泡链 */}
               {index > 0 && (
                 <div className="absolute left-[10px] top-[-30px] h-[40px] flex flex-col justify-between items-center">
@@ -392,7 +396,7 @@ export default function Timeline(): JSX.Element {
                   ))}
                 </div>
               )}
-              
+
               {/* 连接下一个条目的气泡链 */}
               {index < entries.length - 1 && (
                 <div className="absolute left-[10px] top-[40px] h-[calc(100%-48px)] flex flex-col justify-between items-center">
@@ -433,7 +437,7 @@ export default function Timeline(): JSX.Element {
                   ))}
                 </div>
               )}
-              
+
               {/* 日期 */}
               <motion.div
                 className="mb-2 text-sm font-semibold text-gray-500"
@@ -443,7 +447,7 @@ export default function Timeline(): JSX.Element {
               >
                 {formatDate(entry.date)}
               </motion.div>
-              
+
               {/* 内容卡片 */}
               <motion.div
                 className="p-4 rounded-lg shadow"
@@ -461,11 +465,11 @@ export default function Timeline(): JSX.Element {
           );
         })}
       </div>
-      
+
       {hasMore && (
         <div ref={observerRef} className="h-10">
           {loading && (
-            <motion.p 
+            <motion.p
               className="text-center text-gray-500"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -476,9 +480,9 @@ export default function Timeline(): JSX.Element {
           )}
         </div>
       )}
-      
+
       {!hasMore && entries.length > 0 && (
-        <motion.p 
+        <motion.p
           className="text-center text-gray-500 italic mt-8 mb-12"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
