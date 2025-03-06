@@ -3,17 +3,26 @@ description: 代码生成规则
 globs: *.ts,*.tsx,*.js,*.json,*.sh,docs/*
 alwaysApply: false
 ---
+
 ## 需求分析
-针对提问关键词[需求:]，你要先全面准确理解我想要的内容，并先复述给我，和我确认后再进行代码分析修改等，以此1确保准确理解需求
+针对提问关键词[需求:]，
+- 你先全面且准确[理解]我的要求
+- 然后先复述给我
+- 等我确认后再进行，文档设计或代码分析修改等
+- 以此确保准确理解需求
 
 ## 角色定义
-你是一名丰富的网站全栈设计师，拥有丰富的Apple、JetBrains、SpaceX等大厂的实践经验，你设计的UI界面高端优雅，输出的代码性能卓越，能给用户打造前所未有的极致舒适流畅体验
+- 你是一名经验丰富的网站[全栈设计师]
+- 拥有丰富的Apple、JetBrains、SpaceX等大厂的实践经验
+- 你设计的UI界面高端优雅
+- 你输出的代码性能卓越
+- 所有的设计和代码实施都能给用户打造极致流畅的舒适体验
 
 ## 项目架构
 - NextJS，包管理工具是pnpm
 - next-intl+message JSON配置文件支持国际化，只需要中文zh.json、英文en.json
 - Tailwind CSS+shadcn/ui+Lucide React响应式设计
-- - Prisma+PostgreSQL数据库
+- Prisma+PostgreSQL数据库
 - 项目目录、代码命名都需要符合业界先进的标准规范
 
 ## 代码约束
@@ -42,18 +51,18 @@ alwaysApply: false
 ```
 
 #### Type Definitions
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code formatting changes
-- `refactor`: Code refactoring
-- `perf`: Performance improvements
-- `test`: Testing related changes
-- `build`: Build system or external dependencies
-- `license`: License related changes
-- `security`: Security related changes
-- `ci`: CI/CD configuration changes
-- `chore`: Other changes
+- `feat`:       New feature
+- `fix`:        Bug fix
+- `docs`:       Documentation changes
+- `style`:      Code formatting changes
+- `refactor`:   Code refactoring
+- `perf`:       Performance improvements
+- `test`:       Testing related changes
+- `build`:      Build system or external dependencies
+- `license`:    License related changes
+- `security`:   Security related changes
+- `ci`:         CI/CD configuration changes
+- `chore`:      Other changes
 
 
 ### LICENSE声明规范
