@@ -139,10 +139,25 @@ pnpm install
 ```
 
 2. 环境变量配置
-创建 `.env` 文件，添加以下配置：
+创建 `.env.local` 文件，添加以下配置：
 ```plaintext
+# 数据库连接
 POSTGRES_PRISMA_URL="postgresql://username:password@localhost:5432/your-database"
 POSTGRES_URL_NON_POOLING="postgresql://username:password@localhost:5432/your-database"
+
+# JWT配置
+JWT_SECRET="your_secure_jwt_secret_key_here"
+
+# 用户凭据配置
+USER1_ID="1"
+USER1_USERNAME="admin"
+USER1_PASSWORD="admin123"
+USER1_NICKNAME="Zia慢成"
+
+USER2_ID="2"
+USER2_USERNAME="user"
+USER2_PASSWORD="user123"
+USER2_NICKNAME="帝八哥"
 ```
 
 3. 数据库迁移
@@ -220,6 +235,187 @@ src/
   }
 ]
 ```
+
+##登录鉴权
+- 一期简单实现
+  - 角色设计：
+    用户：系统的最终使用者
+    前端：Next.js应用的客户端部分
+    Middleware：Next.js的中间件，负责请求拦截和JWT验证
+    秘钥配置文件(.env.local)：存储JWT_SECRET等敏感信息
+  - JWT认证流程：
+    用户登录成功后，服务端生成JWT令牌并返回
+    前端将JWT令牌存储在Cookie中
+    所有API请求都会经过Middleware检查
+    Middleware负责验证JWT令牌的有效性
+  - Middleware实现要点：
+    扩展现有的middleware.ts，增加JWT验证逻辑
+    对于API请求，检查Cookie中的JWT令牌
+    使用环境变量中的JWT_SECRET验证令牌
+    验证失败时返回401错误
+  - 安全考虑：
+    JWT令牌应设置适当的过期时间
+    Cookie应使用HttpOnly和Secure标志
+    敏感API应使用CSRF保护
+```mermaid
+sequenceDiagram
+    participant User as 用户
+    participant Frontend as 前端应用
+    participant Middleware as Middleware
+    participant API as API服务
+    participant ENV as .env.local
+
+    %% 初始化阶段
+    Note over Middleware,ENV: 应用启动时
+    Middleware->>ENV: 读取JWT密钥
+    ENV->>Middleware: 返回JWT_SECRET
+
+    %% 登录流程
+    User->>Frontend: 访问应用
+    Frontend->>Frontend: 检查Cookie中的JWT令牌
+    
+    alt 无有效令牌
+        Frontend->>Frontend: 显示登录界面
+        User->>Frontend: 输入用户名和密码
+        Frontend->>API: 发送登录请求 POST /api/auth/login
+        
+        Note over API,Middleware: API请求经过Middleware
+        Middleware->>API: 转发请求(添加X-Request-ID)
+        
+        API->>API: 验证用户凭证
+        
+        alt 验证成功
+            API->>API: 生成JWT令牌(使用JWT_SECRET签名)
+            API->>Frontend: 返回成功响应和JWT令牌
+            Frontend->>Frontend: 将JWT令牌存储在Cookie中
+            Frontend->>User: 显示登录成功，重定向到主页
+        else 验证失败
+            API->>Frontend: 返回401错误
+            Frontend->>User: 显示登录失败信息
+        end
+    else 有有效令牌
+        Frontend->>User: 直接显示应用内容
+    end
+    
+    %% 受保护资源访问流程
+    User->>Frontend: 请求受保护资源
+    Frontend->>API: 发送API请求(Cookie中包含JWT令牌)
+    
+    Note over API,Middleware: 所有API请求经过Middleware
+    Middleware->>Middleware: 从Cookie中提取JWT令牌
+    Middleware->>Middleware: 使用JWT_SECRET验证令牌
+    
+    alt 令牌有效
+        Middleware->>API: 转发请求(添加用户信息)
+        API->>API: 处理业务逻辑
+        API->>Frontend: 返回请求的资源
+        Frontend->>User: 显示资源
+    else 令牌无效或过期
+        Middleware->>Frontend: 返回401未授权
+        Frontend->>Frontend: 清除无效令牌
+        Frontend->>Frontend: 显示登录界面
+        User->>Frontend: 重新登录
+    end
+    
+    %% 登出流程
+    User->>Frontend: 点击登出
+    Frontend->>Frontend: 清除Cookie中的JWT令牌
+    Frontend->>API: 发送登出请求 POST /api/auth/logout
+    API->>Frontend: 返回登出成功
+    Frontend->>User: 重定向到登录页面
+```
+
+- 后期构建标准SSO
+```mermaid
+sequenceDiagram
+    participant User as 用户
+    participant Client as 客户端应用
+    participant SSO as SSO服务
+    participant Auth as 认证服务
+    participant IdP as 身份提供商
+    participant API as API服务
+    participant DB as 用户数据库
+
+    %% 初始访问流程
+    User->>Client: 访问应用
+    Client->>Client: 检查本地会话
+    
+    alt 无有效会话
+        Client->>SSO: 重定向到SSO登录页
+        SSO->>SSO: 检查SSO会话Cookie
+        
+        alt 无SSO会话
+            SSO->>User: 显示登录选项
+            
+            alt 选择第三方登录
+                User->>SSO: 选择身份提供商(如GitHub)
+                SSO->>IdP: 重定向到IdP登录页
+                IdP->>User: 请求用户凭证
+                User->>IdP: 提供凭证
+                IdP->>IdP: 验证凭证
+                IdP->>SSO: 返回认证码
+                SSO->>IdP: 使用认证码请求令牌
+                IdP->>SSO: 返回访问令牌和用户信息
+            else 选择账号密码登录
+                User->>SSO: 输入用户名和密码
+                SSO->>Auth: 验证凭证
+                Auth->>DB: 查询用户信息
+                DB->>Auth: 返回用户数据
+                Auth->>Auth: 验证密码
+                Auth->>SSO: 返回认证结果
+            end
+            
+            SSO->>DB: 查找/创建用户记录
+            DB->>SSO: 返回用户ID和角色
+            SSO->>SSO: 生成JWT令牌和刷新令牌
+            SSO->>SSO: 设置SSO会话Cookie
+        else 有SSO会话
+            SSO->>SSO: 验证会话有效性
+        end
+        
+        SSO->>Client: 重定向回应用(带授权码)
+        Client->>SSO: 使用授权码请求令牌
+        SSO->>Client: 返回访问令牌和刷新令牌
+        Client->>Client: 存储令牌(localStorage/Cookie)
+    else 有有效会话
+        Client->>Client: 继续使用现有会话
+    end
+    
+    %% API访问流程
+    User->>Client: 请求受保护资源
+    Client->>API: 请求API(带访问令牌)
+    API->>API: 验证令牌
+    
+    alt 令牌有效
+        API->>DB: 查询所需数据
+        DB->>API: 返回数据
+        API->>Client: 返回请求的资源
+        Client->>User: 显示资源
+    else 令牌无效或过期
+        API->>Client: 返回401未授权
+        Client->>SSO: 使用刷新令牌请求新访问令牌
+        
+        alt 刷新令牌有效
+            SSO->>Client: 返回新的访问令牌
+            Client->>API: 重新请求API(带新令牌)
+            API->>Client: 返回请求的资源
+            Client->>User: 显示资源
+        else 刷新令牌无效
+            SSO->>Client: 返回认证错误
+            Client->>SSO: 重定向到SSO登录页
+        end
+    end
+    
+    %% 登出流程
+    User->>Client: 请求登出
+    Client->>Client: 清除本地令牌
+    Client->>SSO: 请求SSO登出
+    SSO->>SSO: 清除SSO会话
+    SSO->>IdP: 请求IdP登出(可选)
+    SSO->>Client: 返回登出成功
+    Client->>User: 显示登出成功页面
+```
+
 
 ## 数据库模型
 

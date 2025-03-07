@@ -32,6 +32,8 @@ alwaysApply: false
 - 客户端和服务端设计遵循如下最佳实践
     - 除非组件需要使用客户端特性，否则优先使用服务端组件RSC，以便性能提升和SEO优化
     - 如果组件使用了客户端特性，那么组件代码开头必须标注'use client';
+- 定义接口时请注意不能触发ES Lint检查!
+  - An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
 
 ### Git提交规范
 

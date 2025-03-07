@@ -139,10 +139,25 @@ pnpm install
 ```
 
 2. Environment Variables Configuration
-Create a `.env` file and add the following configuration:
+Create a `.env.local` file and add the following configuration:
 ```plaintext
+# Database connection
 POSTGRES_PRISMA_URL="postgresql://username:password@localhost:5432/your-database"
 POSTGRES_URL_NON_POOLING="postgresql://username:password@localhost:5432/your-database"
+
+# JWT configuration
+JWT_SECRET="your_secure_jwt_secret_key_here"
+
+# User credentials configuration
+USER1_ID="1"
+USER1_USERNAME="admin"
+USER1_PASSWORD="admin123"
+USER1_NICKNAME="Zia慢成"
+
+USER2_ID="2"
+USER2_USERNAME="user"
+USER2_PASSWORD="user123"
+USER2_NICKNAME="帝八哥"
 ```
 
 3. Database Migration
