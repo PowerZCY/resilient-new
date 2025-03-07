@@ -1,8 +1,16 @@
+/**
+ * @license
+ * MIT License
+ * Copyright (c) 2025 D8ger
+ * 
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import React from 'react';
 import { useInView } from 'react-intersection-observer';
 
@@ -162,6 +170,106 @@ const floatingBubbleVariants = {
     }
   })
 };
+
+// 进度指示器组件
+const ProgressIndicator = React.memo(({ 
+  loadedCount, 
+  totalCount,
+  activeEntryIndex // 添加当前选中条目的索引参数
+}: { 
+  loadedCount: number, 
+  totalCount: number,
+  activeEntryIndex: number | null // 当前选中条目的索引，如果没有选中则为null
+}) => {
+  // 计算加载百分比
+  const percentage = Math.min(100, Math.round((loadedCount / totalCount) * 100)) || 0;
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="fixed right-8 top-1/2 transform -translate-y-1/2 z-50"
+    >
+      <div className="relative flex items-center justify-center">
+        {/* 外圆 */}
+        <motion.div 
+          className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500/20 to-violet-500/20 backdrop-blur-sm border border-white/20 shadow-lg flex items-center justify-center"
+          animate={{
+            boxShadow: [
+              "0 0 0 rgba(139, 92, 246, 0.2)",
+              "0 0 20px rgba(139, 92, 246, 0.4)",
+              "0 0 0 rgba(139, 92, 246, 0.2)"
+            ]
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            repeatType: "mirror"
+          }}
+        >
+          {/* 内圆 - 进度指示 */}
+          <motion.div 
+            className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center text-white font-medium"
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="text-center">
+              <div className="text-lg font-bold">{loadedCount}/{totalCount}</div>
+              <div className="text-sm opacity-90">{percentage}%</div>
+              
+              {/* 当前选中条目指示器 */}
+              {activeEntryIndex !== null && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  className="mt-1 text-xs bg-white/20 px-2 py-0.5 rounded-full"
+                >
+                  <span className="font-bold text-yellow-300">#{activeEntryIndex + 1}</span>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
+        
+        {/* 提示文本 - 悬停时显示 */}
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          whileHover={{ opacity: 1, x: 0 }}
+          className="absolute right-full mr-4 bg-white dark:bg-slate-800 px-4 py-2 rounded-lg shadow-md text-sm whitespace-nowrap"
+        >
+          <div>已加载 {loadedCount} / 共 {totalCount} 条</div>
+          {activeEntryIndex !== null && (
+            <div className="mt-1 text-yellow-500 dark:text-yellow-400">
+              当前查看: 第 {activeEntryIndex + 1} 条
+            </div>
+          )}
+        </motion.div>
+        
+        {/* 当前位置指示线 - 只在有选中条目时显示 */}
+        {activeEntryIndex !== null && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ 
+              opacity: 1, 
+              height: `${Math.min(100, (activeEntryIndex + 1) / totalCount * 100)}%` 
+            }}
+            transition={{ duration: 0.5 }}
+            className="absolute left-[-30px] bottom-0 w-1 bg-gradient-to-t from-yellow-500 to-yellow-300 rounded-full"
+            style={{ 
+              transformOrigin: 'bottom',
+              boxShadow: '0 0 8px rgba(234, 179, 8, 0.5)'
+            }}
+          />
+        )}
+      </div>
+    </motion.div>
+  );
+});
+
+ProgressIndicator.displayName = 'ProgressIndicator';
 
 // 使用React.memo创建记忆化的TimelineItem组件
 const TimelineItem = React.memo(({ 
@@ -328,11 +436,13 @@ TimelineItem.displayName = 'TimelineItem';
 const VirtualizedTimeline = React.memo(({ 
   entries, 
   activeEntryId, 
-  setActiveEntryId 
+  setActiveEntryId,
+  clearActiveEntry
 }: { 
   entries: Entry[], 
   activeEntryId: string | null, 
-  setActiveEntryId: (id: string | null) => void 
+  setActiveEntryId: (id: string, index: number) => void,
+  clearActiveEntry: () => void
 }) => {
   // 使用分段渲染的方式实现虚拟化
   const [visibleRange, setVisibleRange] = useState({ start: 0, end: 10 });
@@ -386,8 +496,8 @@ const VirtualizedTimeline = React.memo(({
               index={globalIndex}
               isActive={activeEntryId === entry.id}
               totalEntries={entries.length}
-              onHoverStart={() => setActiveEntryId(entry.id)}
-              onHoverEnd={() => setActiveEntryId(null)}
+              onHoverStart={() => setActiveEntryId(entry.id, globalIndex)}
+              onHoverEnd={clearActiveEntry}
             />
           );
         })}
@@ -404,6 +514,7 @@ export default function Timeline(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [activeEntryId, setActiveEntryId] = useState<string | null>(null);
+  const [activeEntryIndex, setActiveEntryIndex] = useState<number | null>(null);
   const observerRef = useRef<HTMLDivElement | null>(null);
   const searchParams = useSearchParams();
   const nickname: string | null = searchParams.get('nickname');
@@ -413,6 +524,8 @@ export default function Timeline(): JSX.Element {
   const isLoadingRef = useRef<boolean>(false);
   const initialLoadDone = useRef<boolean>(false);
   const currentPageRef = useRef<number>(1);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [showProgress, setShowProgress] = useState<boolean>(false);
 
   const fetchEntries = useCallback(
     async (pageNum: number): Promise<void> => {
@@ -439,6 +552,12 @@ export default function Timeline(): JSX.Element {
 
         const newEntries: Entry[] = data.entries || [];
         const total: number = data.total || 0;
+        
+        // 更新总条数
+        setTotalCount(total);
+        
+        // 显示进度指示器
+        setShowProgress(true);
 
         setEntries((prev: Entry[]): Entry[] => {
           const combined: Entry[] = [...prev, ...newEntries];
@@ -553,6 +672,16 @@ export default function Timeline(): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasMore, nickname, initialLoadDone.current]);
 
+  const handleEntryHoverStart = useCallback((id: string, index: number) => {
+    setActiveEntryId(id);
+    setActiveEntryIndex(index);
+  }, []);
+
+  const handleEntryHoverEnd = useCallback(() => {
+    setActiveEntryId(null);
+    setActiveEntryIndex(null);
+  }, []);
+
   if (!nickname) {
     return <div className="text-center text-gray-500">Loading...</div>;
   }
@@ -581,9 +710,21 @@ export default function Timeline(): JSX.Element {
           <VirtualizedTimeline 
             entries={entries} 
             activeEntryId={activeEntryId} 
-            setActiveEntryId={setActiveEntryId} 
+            setActiveEntryId={handleEntryHoverStart}
+            clearActiveEntry={handleEntryHoverEnd}
           />
         )}
+        
+        {/* 进度指示器 - 传递activeEntryIndex */}
+        <AnimatePresence>
+          {showProgress && totalCount > 0 && (
+            <ProgressIndicator 
+              loadedCount={entries.length} 
+              totalCount={totalCount}
+              activeEntryIndex={activeEntryIndex}
+            />
+          )}
+        </AnimatePresence>
       </div>
 
       {hasMore && (
