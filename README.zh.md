@@ -147,6 +147,10 @@ POSTGRES_URL_NON_POOLING="postgresql://username:password@localhost:5432/your-dat
 
 # JWT配置
 JWT_SECRET="your_secure_jwt_secret_key_here"
+```bash
+# 64字符的随机秘钥
+openssl rand -hex 32 | tr '[:lower:]' '[:upper:]'
+```
 
 # Cookie配置
 COOKIE_MAX_AGE_DAYS="7"
