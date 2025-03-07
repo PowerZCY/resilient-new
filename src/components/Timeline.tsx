@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
+import React from 'react';
 
 interface Entry {
   id: string;
@@ -44,8 +45,6 @@ const TimelineSkeleton = () => {
     </div>
   );
 };
-
-import React from 'react';
 
 export default function Timeline(): JSX.Element {
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -227,8 +226,8 @@ export default function Timeline(): JSX.Element {
       opacity: 1,
       y: 0,
       transition: {
-        delay: i * 0.1,
-        duration: 0.5,
+        delay: Math.min(i, 3) * 0.1,
+        duration: 0.4,
         ease: "easeOut"
       }
     })
@@ -290,8 +289,8 @@ export default function Timeline(): JSX.Element {
       scale: [0, 1.2, 1],
       opacity: [0, 0.7, 1],
       transition: {
-        delay: custom * 0.05,
-        duration: 0.5,
+        delay: Math.min(custom, 3) * 0.05,
+        duration: 0.4,
         ease: "easeOut"
       }
     })
@@ -303,14 +302,165 @@ export default function Timeline(): JSX.Element {
     animate: (custom: number) => ({
       y: [0, -3, 0, 3, 0],
       transition: {
-        delay: custom * 0.1,
+        delay: Math.min(custom, 3) * 0.1,
         duration: 2,
-        repeat: Infinity,
+        repeat: 3,
         repeatType: "mirror" as const,
         ease: "easeInOut"
       }
     })
   };
+
+  // 使用React.memo创建记忆化的TimelineItem组件
+  const TimelineItem = React.memo(({ 
+    entry, 
+    index, 
+    isActive, 
+    totalEntries,
+    onHoverStart, 
+    onHoverEnd 
+  }: { 
+    entry: Entry, 
+    index: number, 
+    isActive: boolean, 
+    totalEntries: number,
+    onHoverStart: () => void, 
+    onHoverEnd: () => void 
+  }) => {
+    // 计算相对索引，用于动画延迟
+    const relativeIndex = index % 10;
+    
+    return (
+      <motion.div
+        className="relative pl-8 pb-8"
+        initial="hidden"
+        animate="visible"
+        custom={relativeIndex}
+        variants={timelineVariants}
+        onHoverStart={onHoverStart}
+        onHoverEnd={onHoverEnd}
+      >
+        {/* 主圆点 */}
+        <motion.div
+          className="absolute left-0 top-2 w-5 h-5 rounded-full z-10"
+          initial="initial"
+          animate={isActive ? "hover" : "initial"}
+          variants={circleVariants}
+          whileHover={{ scale: 1.3 }}
+        ></motion.div>
+
+        {/* 连接前一个条目的气泡链 */}
+        {index > 0 && (
+          <div className="absolute left-[10px] top-[-30px] h-[40px] flex flex-col justify-between items-center">
+            {/* 限制气泡数量为最多3个 */}
+            {[...Array(3)].map((_, i) => (
+              <motion.div
+                key={`bubble-up-${i}`}
+                className="w-[6px] h-[6px] rounded-full"
+                initial="initial"
+                animate={isActive ? ["animate", "animate"] : "initial"}
+                variants={{
+                  initial: bubbleVariants.initial,
+                  animate: bubbleVariants.animate(3 - i)
+                }}
+                custom={i}
+                style={{
+                  opacity: isActive ? 1 : 0.5,
+                  backgroundColor: isActive ? "#8B5CF6" : "#94a3b8",
+                  boxShadow: isActive ? "0 0 4px rgba(139, 92, 246, 0.5)" : "none"
+                }}
+              >
+                {/* 气泡内部发光效果 */}
+                {isActive && (
+                  <motion.div
+                    className="absolute inset-0 rounded-full"
+                    animate={{
+                      boxShadow: ["0 0 0px rgba(139, 92, 246, 0.3)", "0 0 8px rgba(139, 92, 246, 0.6)", "0 0 0px rgba(139, 92, 246, 0.3)"]
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: 2,
+                      repeatType: "mirror",
+                      ease: "easeInOut"
+                    }}
+                  />
+                )}
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {/* 连接下一个条目的气泡链 */}
+        {index < totalEntries - 1 && (
+          <div className="absolute left-[10px] top-[40px] h-[calc(100%-48px)] flex flex-col justify-between items-center">
+            {/* 限制气泡数量为固定的5个 */}
+            {[...Array(5)].map((_, i) => (
+              <motion.div
+                key={`bubble-down-${i}`}
+                className="w-[6px] h-[6px] rounded-full"
+                initial="initial"
+                animate={isActive ? ["animate", "floating"] : "initial"}
+                variants={{
+                  initial: bubbleVariants.initial,
+                  animate: bubbleVariants.animate(i),
+                  floating: floatingBubbleVariants.animate(i)
+                }}
+                style={{
+                  opacity: isActive ? 1 : 0.5,
+                  backgroundColor: isActive ? "#8B5CF6" : "#94a3b8",
+                  boxShadow: isActive ? "0 0 4px rgba(139, 92, 246, 0.5)" : "none"
+                }}
+              >
+                {/* 气泡内部发光效果 */}
+                {isActive && (
+                  <motion.div
+                    className="absolute inset-0 rounded-full"
+                    animate={{
+                      boxShadow: ["0 0 0px rgba(139, 92, 246, 0.3)", "0 0 8px rgba(139, 92, 246, 0.6)", "0 0 0px rgba(139, 92, 246, 0.3)"]
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: 2,
+                      repeatType: "mirror",
+                      ease: "easeInOut",
+                      delay: i * 0.2
+                    }}
+                  />
+                )}
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {/* 日期 */}
+        <motion.div
+          className="mb-2 text-sm font-semibold text-gray-500"
+          initial="initial"
+          animate={isActive ? "hover" : "initial"}
+          variants={dateVariants}
+        >
+          {formatDate(entry.date)}
+        </motion.div>
+
+        {/* 内容卡片 */}
+        <motion.div
+          className="p-4 rounded-lg shadow"
+          initial="initial"
+          animate={isActive ? "hover" : "initial"}
+          variants={cardVariants}
+          whileHover={{
+            y: -5,
+            transition: { duration: 0.3 }
+          }}
+        >
+          {formatContent(entry.content)}
+        </motion.div>
+      </motion.div>
+    );
+  });
+
+  // 确保组件名称在React DevTools中显示
+  TimelineItem.displayName = 'TimelineItem';
 
   if (!nickname) {
     return <div className="text-center text-gray-500">Loading...</div>;
@@ -335,136 +485,18 @@ export default function Timeline(): JSX.Element {
           </>
         )}
 
-        {/* 已有数据的渲染 */}
-        {entries.map((entry: Entry, index: number) => {
-          const isActive = activeEntryId === entry.id;
-          return (
-            <motion.div
-              key={entry.id}
-              className="relative pl-8 pb-8"
-              initial="hidden"
-              animate="visible"
-              custom={index}
-              variants={timelineVariants}
-              onHoverStart={() => setActiveEntryId(entry.id)}
-              onHoverEnd={() => setActiveEntryId(null)}
-            >
-              {/* 主圆点 */}
-              <motion.div
-                className="absolute left-0 top-2 w-5 h-5 rounded-full z-10"
-                initial="initial"
-                animate={isActive ? "hover" : "initial"}
-                variants={circleVariants}
-                whileHover={{ scale: 1.3 }}
-              ></motion.div>
-
-              {/* 连接前一个条目的气泡链 */}
-              {index > 0 && (
-                <div className="absolute left-[10px] top-[-30px] h-[40px] flex flex-col justify-between items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <motion.div
-                      key={`bubble-up-${i}`}
-                      className="w-[6px] h-[6px] rounded-full"
-                      initial="initial"
-                      animate={isActive ? ["animate", "animate"] : "initial"}
-                      variants={{
-                        initial: bubbleVariants.initial,
-                        animate: bubbleVariants.animate(5 - i)
-                      }}
-                      custom={i}
-                      style={{
-                        opacity: isActive ? 1 : 0.5,
-                        backgroundColor: isActive ? "#8B5CF6" : "#94a3b8",
-                        boxShadow: isActive ? "0 0 4px rgba(139, 92, 246, 0.5)" : "none"
-                      }}
-                    >
-                      {/* 气泡内部发光效果 */}
-                      {isActive && (
-                        <motion.div
-                          className="absolute inset-0 rounded-full"
-                          animate={{
-                            boxShadow: ["0 0 0px rgba(139, 92, 246, 0.3)", "0 0 8px rgba(139, 92, 246, 0.6)", "0 0 0px rgba(139, 92, 246, 0.3)"]
-                          }}
-                          transition={{
-                            duration: 1.5,
-                            repeat: Infinity,
-                            repeatType: "mirror",
-                            ease: "easeInOut"
-                          }}
-                        />
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-
-              {/* 连接下一个条目的气泡链 */}
-              {index < entries.length - 1 && (
-                <div className="absolute left-[10px] top-[40px] h-[calc(100%-48px)] flex flex-col justify-between items-center">
-                  {[...Array(Math.min(10, Math.floor((index === 0 ? 100 : 80) / 8)))].map((_, i) => (
-                    <motion.div
-                      key={`bubble-down-${i}`}
-                      className="w-[6px] h-[6px] rounded-full"
-                      initial="initial"
-                      animate={isActive ? ["animate", "floating"] : "initial"}
-                      variants={{
-                        initial: bubbleVariants.initial,
-                        animate: bubbleVariants.animate(i),
-                        floating: floatingBubbleVariants.animate(i)
-                      }}
-                      style={{
-                        opacity: isActive ? 1 : 0.5,
-                        backgroundColor: isActive ? "#8B5CF6" : "#94a3b8",
-                        boxShadow: isActive ? "0 0 4px rgba(139, 92, 246, 0.5)" : "none"
-                      }}
-                    >
-                      {/* 气泡内部发光效果 */}
-                      {isActive && (
-                        <motion.div
-                          className="absolute inset-0 rounded-full"
-                          animate={{
-                            boxShadow: ["0 0 0px rgba(139, 92, 246, 0.3)", "0 0 8px rgba(139, 92, 246, 0.6)", "0 0 0px rgba(139, 92, 246, 0.3)"]
-                          }}
-                          transition={{
-                            duration: 1.5,
-                            repeat: Infinity,
-                            repeatType: "mirror",
-                            ease: "easeInOut",
-                            delay: i * 0.2
-                          }}
-                        />
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-
-              {/* 日期 */}
-              <motion.div
-                className="mb-2 text-sm font-semibold text-gray-500"
-                initial="initial"
-                animate={isActive ? "hover" : "initial"}
-                variants={dateVariants}
-              >
-                {formatDate(entry.date)}
-              </motion.div>
-
-              {/* 内容卡片 */}
-              <motion.div
-                className="p-4 rounded-lg shadow"
-                initial="initial"
-                animate={isActive ? "hover" : "initial"}
-                variants={cardVariants}
-                whileHover={{
-                  y: -5,
-                  transition: { duration: 0.3 }
-                }}
-              >
-                {formatContent(entry.content)}
-              </motion.div>
-            </motion.div>
-          );
-        })}
+        {/* 使用记忆化的TimelineItem组件渲染条目 */}
+        {entries.map((entry: Entry, index: number) => (
+          <TimelineItem
+            key={entry.id}
+            entry={entry}
+            index={index}
+            isActive={activeEntryId === entry.id}
+            totalEntries={entries.length}
+            onHoverStart={() => setActiveEntryId(entry.id)}
+            onHoverEnd={() => setActiveEntryId(null)}
+          />
+        ))}
       </div>
 
       {hasMore && (
