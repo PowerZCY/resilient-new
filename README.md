@@ -15,6 +15,107 @@ A full-stack application built with Next.js 14 for recording positive events and
   - React Calendar Heatmap (calendar heatmap)
   - Tremor (data visualization components)
 
+## UI Design and Components
+
+The application features a modern, minimalist, and elegant design style that follows JetBrains design language, focusing on user experience and visual consistency.
+
+### Core Components
+
+#### Timeline Component
+- **Design Features**: Vertical flowing timeline displaying positive events recorded by users
+- **Interactive Experience**:
+  - Smooth scroll loading animations
+  - Progressive content display with fade-in effects for new entries
+  - Virtual list rendering ensuring performance with large datasets
+- **Visual Elements**:
+  - Card-style design for each entry with subtle shadows and rounded corners
+  - Time markers with distinctive colors for differentiation
+  - Content areas with clear typography and appropriate whitespace
+
+#### Progress Indicator
+- **Design Features**: Spherical progress indicator showing data loading status and currently selected item
+- **Interactive Experience**:
+  - Smooth animation transitions
+  - Tooltip displaying detailed information on hover
+- **Visual Elements**:
+  - Concentric circle design with outer and inner circles
+  - Dynamic color feedback based on loading progress
+  - Highlight indication for currently selected item
+
+#### User Switcher (NicknameFilter)
+- **Design Features**:
+  - Tab-style switching interface replacing traditional dropdown menus, providing more intuitive user identity switching
+  - Combination of user icons and text labels enhancing visual recognition
+  - Gradient background providing a premium feel while conveying state information through color changes
+  - Compact yet elegant layout, occupying appropriate space while maintaining visual appeal
+  - Seamless integration into the application's top navigation area, allowing for easy user identity switching
+
+- **Interactive Experience**:
+  - Smooth transition animations when switching between users, implemented with Framer Motion for visual continuity during state changes
+  - Hover states providing subtle scaling and background changes, enhancing clickability perception
+  - Click states with clear visual feedback, including background color changes and indicator dot movement
+  - Related data (timeline, heatmap, etc.) updates following user switching, maintaining contextual consistency
+  - Current user selection persisted to URL parameters, supporting state preservation after page refresh
+
+- **Visual Elements**:
+  - Gradient background transitioning from pink to indigo, creating a modern and energetic feel
+  - Active user identified through triple indicators: white background, color dot, and text style changes
+  - Circular user icon area with dynamic coloring based on the currently selected user
+  - Subtle glow animation around icons, enhancing visual hierarchy and focus
+  - Text labels with clear font and appropriate weight, ensuring readability across various screen sizes
+
+- **Technical Implementation**:
+  - Built on React state management and Next.js routing system
+  - Current selection stored in URL query parameters (`?nickname=username`), supporting navigation between pages and refresh
+  - Component internally uses `useSearchParams` and `useRouter` hooks to handle routing state
+  - Debouncing implemented to prevent excessive route updates during frequent switching
+  - Default user automatically set on first load, ensuring the application always has a valid user context
+
+- **Customizability**:
+  - User data (names and colors) defined through configuration objects, easily extensible or modifiable
+  - Visual styling implemented through a combination of Tailwind classes and inline styles, facilitating theme adjustments
+  - Component structure modularized, allowing features to be added or removed as needed (such as user avatars, additional information, etc.)
+  - Animation parameters adjustable to accommodate different performance requirements or visual preferences
+
+- **Use Cases**:
+  - Multi-user shared device applications requiring quick user identity switching
+  - Dashboards or management interfaces needing to switch between different roles or perspectives
+  - Family sharing applications such as family notebooks, shared calendars, etc.
+  - Any modern web application requiring an elegant user switching solution
+
+#### Heatmap
+- **Design Features**: Calendar-style heatmap visually representing recording frequency
+- **Interactive Experience**:
+  - Hover displays specific dates and record counts
+  - Clicking navigates to detailed records for corresponding dates
+- **Visual Elements**:
+  - Color intensity indicating record density
+  - Grid layout ensuring date alignment
+  - Clear month and weekday markers
+
+### Page Designs
+
+#### Homepage
+- **Layout**: Sectioned design with user switching and statistics overview at the top, timeline in the middle, and heatmap on the right
+- **Responsiveness**: Layout automatically adjusts for different screen sizes ensuring optimal display
+- **Theme**: Bright background tones paired with soft accent colors creating a positive and cheerful atmosphere
+
+#### New Record Page
+- **Layout**: Clean form design focused on content creation
+- **Interaction**: Real-time preview and form validation providing immediate feedback
+- **Auxiliary Features**: Date picker, rich text editor, and emoji selector
+
+### Design Principles
+- **Consistency**: All components follow a unified design language including colors, fonts, and spacing
+- **Accessibility**: Complies with WCAG standards ensuring usability for users with different abilities
+- **Performance Priority**: Optimized rendering and animations ensuring smooth user experience
+- **Intuitive Operation**: Reduced learning curve with self-explanatory interface elements
+
+### Animations and Transitions
+- Framer Motion implementation for smooth state transitions and micro-interactions
+- Progressive animations for loading states reducing perceived waiting time
+- Page transition effects enhancing navigation coherence
+
 ### Backend
 - **API**: Next.js API Routes (REST API)
 - **Database**: PostgreSQL (relational database providing robust data consistency and query capabilities)
