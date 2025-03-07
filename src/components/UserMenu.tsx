@@ -9,16 +9,13 @@
 
 'use client';
 
-import { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { User } from 'lucide-react';
+import { useState } from 'react';
 import LogoutDialog from './LogoutDialog';
 
 export default function UserMenu() {
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
-  const searchParams = useSearchParams();
-  const nickname = searchParams.get('nickname') || '';
   
   // 打开登出对话框
   const handleUserIconClick = () => {

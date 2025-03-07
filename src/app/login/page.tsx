@@ -86,8 +86,8 @@ export default function LoginPage() {
                 className="object-contain"
               />
             </div>
-            <h1 className="text-2xl font-semibold text-gray-800">WindRun·Huaiin</h1>
-            <p className="text-gray-500 mt-1">Record positive moments in life</p>
+            <h1 className="text-2xl font-semibold text-gray-800">巽川·怀因</h1>
+            <p className="text-gray-500 mt-1">记录美好时光</p>
           </div>
           
           {/* 表单区域 */}
@@ -107,7 +107,7 @@ export default function LoginPage() {
               {/* 用户名输入框 */}
               <div className="mb-4">
                 <Label htmlFor="username" className="text-sm font-medium text-gray-700 mb-1 block">
-                  Username
+                  用户名
                 </Label>
                 <Input
                   id="username"
@@ -115,7 +115,7 @@ export default function LoginPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full h-11 px-4 rounded-md border border-gray-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                  placeholder="Enter your username"
+                  placeholder="请输入你的狗名"
                   disabled={isLoading}
                   autoComplete="username"
                 />
@@ -124,7 +124,7 @@ export default function LoginPage() {
               {/* 密码输入框 */}
               <div className="mb-6">
                 <Label htmlFor="password" className="text-sm font-medium text-gray-700 mb-1 block">
-                  Password
+                  密码
                 </Label>
                 <div className="relative">
                   <Input
@@ -133,7 +133,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full h-11 px-4 rounded-md border border-gray-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                    placeholder="Enter your password"
+                    placeholder="请输入你的狗码"
                     disabled={isLoading}
                     autoComplete="current-password"
                   />
@@ -165,7 +165,7 @@ export default function LoginPage() {
                   htmlFor="remember-me"
                   className="ml-2 block text-sm text-gray-700"
                 >
-                  Remember me
+                  记住你这个老六
                 </Label>
               </div>
               
@@ -183,10 +183,10 @@ export default function LoginPage() {
                 {isLoading ? (
                   <>
                     <Loader2 size={18} className="animate-spin mr-2" />
-                    Logging in...
+                    登录中...
                   </>
                 ) : (
-                  "Log in"
+                  "登录"
                 )}
               </Button>
             </form>
