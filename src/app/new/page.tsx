@@ -39,9 +39,18 @@ function NewEntryContent() {
       return;
     }
 
+    // 获取最后一条记录的日期
+    const lastEntry = entries[entries.length - 1];
+    const lastDate = new Date(lastEntry.date);
+    
+    // 计算新记录的日期（最后一条记录的日期加1天）
+    const newDate = new Date(lastDate);
+    newDate.setDate(newDate.getDate() + 1);
+    
+    // 直接使用计算出的日期，不再限制是否超过今天
     setEntries([
       ...entries,
-      { id: Date.now().toString(), date: formatDateForInput(new Date()), content: '' }
+      { id: Date.now().toString(), date: formatDateForInput(newDate), content: '' }
     ]);
   };
 
