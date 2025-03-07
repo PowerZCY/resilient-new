@@ -2,13 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { motion } from 'framer-motion';
 import { User } from 'lucide-react';
 
 // 定义用户数据，包括名称和对应的颜色
@@ -75,27 +69,67 @@ export default function NicknameFilter(): JSX.Element {
     [router, nickname]
   );
 
+  // 获取当前选中用户的颜色
+  const activeUserColor = users.find(user => user.name === nickname)?.color || users[0].color;
+
   return (
-    <Select value={nickname} onValueChange={handleFilter}>
-      <SelectTrigger className="w-[180px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg">
-        <div className="flex items-center">
-          <User className="h-4 w-4 text-slate-500 dark:text-slate-400 mr-2" />
-          <SelectValue />
-        </div>
-      </SelectTrigger>
-      <SelectContent>
-        {users.map((user) => (
-          <SelectItem key={user.name} value={user.name}>
-            <div className="flex items-center">
-              <div
-                className="h-3 w-3 rounded-full mr-2"
-                style={{ backgroundColor: user.color }}
+    <div className="flex items-center">
+      <div className="relative flex rounded-full p-1 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 shadow-lg">
+        <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 rounded-full blur-sm opacity-50"></div>
+        
+        {/* 用户图标 */}
+        <div className="relative z-10 flex items-center justify-center w-10 h-10 rounded-full bg-white/90 mr-1">
+          <motion.div 
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="flex items-center justify-center"
+          >
+            <div className="relative">
+              <User className="h-5 w-5" style={{ color: activeUserColor }} />
+              <motion.div 
+                className="absolute inset-0 rounded-full"
+                animate={{ 
+                  boxShadow: [
+                    `0 0 0 rgba(${activeUserColor}, 0)`,
+                    `0 0 8px rgba(${activeUserColor}, 0.5)`,
+                    `0 0 0 rgba(${activeUserColor}, 0)`
+                  ]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
               />
-              {user.name}
             </div>
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+          </motion.div>
+        </div>
+        
+        {users.map((user) => {
+          const isActive = nickname === user.name;
+          
+          return (
+            <motion.button
+              key={user.name}
+              onClick={() => handleFilter(user.name)}
+              className={`relative z-10 px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-200 flex items-center justify-center min-w-[120px] ${
+                isActive 
+                  ? 'bg-white text-purple-900 shadow-md' 
+                  : 'bg-transparent text-white hover:bg-white/10'
+              }`}
+              whileHover={{ scale: isActive ? 1 : 1.05 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {isActive && (
+                <motion.div 
+                  className="w-3 h-3 rounded-full mr-2 flex-shrink-0"
+                  style={{ backgroundColor: user.color }}
+                  layoutId="activeUserDot"
+                  transition={{ type: "spring", duration: 0.5 }}
+                />
+              )}
+              <span className={isActive ? "" : ""}>{user.name}</span>
+            </motion.button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
