@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { User } from 'lucide-react';
+import LogoutDialog from './LogoutDialog';
 
 // 定义用户数据，包括名称和对应的颜色
 const users = [
@@ -17,6 +18,7 @@ export default function NicknameFilter(): JSX.Element {
   const defaultNickname = 'Zia慢成';
   const isFirstRender = useRef<boolean>(true);
   const isUpdatingUrl = useRef<boolean>(false);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState<boolean>(false);
 
   // 确保初始化时处理 null 或 undefined
   const [nickname, setNickname] = useState<string>(() => {
@@ -69,6 +71,16 @@ export default function NicknameFilter(): JSX.Element {
     [router, nickname]
   );
 
+  // 处理用户图标点击，打开登出对话框
+  const handleUserIconClick = () => {
+    setIsLogoutDialogOpen(true);
+  };
+
+  // 关闭登出对话框
+  const handleCloseLogoutDialog = () => {
+    setIsLogoutDialogOpen(false);
+  };
+
   // 获取当前选中用户的颜色
   const activeUserColor = users.find(user => user.name === nickname)?.color || users[0].color;
 
@@ -77,8 +89,11 @@ export default function NicknameFilter(): JSX.Element {
       <div className="relative flex rounded-full p-1 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 shadow-lg">
         <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 rounded-full blur-sm opacity-50"></div>
         
-        {/* 用户图标 */}
-        <div className="relative z-10 flex items-center justify-center w-10 h-10 rounded-full bg-white/90 mr-1">
+        {/* 用户图标 - 添加点击事件打开登出对话框 */}
+        <div 
+          className="relative z-10 flex items-center justify-center w-10 h-10 rounded-full bg-white/90 mr-1 cursor-pointer"
+          onClick={handleUserIconClick}
+        >
           <motion.div 
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
@@ -130,6 +145,12 @@ export default function NicknameFilter(): JSX.Element {
           );
         })}
       </div>
+      
+      {/* 登出确认对话框 */}
+      <LogoutDialog 
+        isOpen={isLogoutDialogOpen} 
+        onClose={handleCloseLogoutDialog} 
+      />
     </div>
   );
 }

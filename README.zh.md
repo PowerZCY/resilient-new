@@ -148,6 +148,10 @@ POSTGRES_URL_NON_POOLING="postgresql://username:password@localhost:5432/your-dat
 # JWT配置
 JWT_SECRET="your_secure_jwt_secret_key_here"
 
+# Cookie配置
+COOKIE_MAX_AGE_DAYS="7"
+COOKIE_REMEMBER_ME_DAYS="30"
+
 # 用户凭据配置
 USER1_ID="1"
 USER1_USERNAME="admin"
@@ -158,6 +162,9 @@ USER2_ID="2"
 USER2_USERNAME="user"
 USER2_PASSWORD="user123"
 USER2_NICKNAME="帝八哥"
+
+# API配置
+API_DEFAULT_PAGE_SIZE="20"
 ```
 
 3. 数据库迁移
@@ -253,6 +260,12 @@ src/
     对于API请求，检查Cookie中的JWT令牌
     使用环境变量中的JWT_SECRET验证令牌
     验证失败时返回401错误
+  - 登出流程：
+    用户点击界面上的用户图标
+    系统弹出确认对话框，询问用户是否确认登出
+    用户确认后，前端发送POST请求到/api/auth/logout
+    服务端清除认证Cookie
+    前端重定向到登录页面
   - 安全考虑：
     JWT令牌应设置适当的过期时间
     Cookie应使用HttpOnly和Secure标志

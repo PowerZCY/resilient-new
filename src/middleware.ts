@@ -12,6 +12,7 @@ import type { NextRequest } from 'next/server'
 import { Logger } from '@/lib/logger';
 import dayjs from 'dayjs';
 import { jwtVerify } from 'jose';
+import { AppConfig } from '@/lib/appConfig';
 
 // 定义需要保护的路径
 const PROTECTED_PATHS = [
@@ -24,6 +25,7 @@ const PROTECTED_PATHS = [
 // 不需要验证的路径
 const PUBLIC_PATHS = [
   '/api/auth/login',
+  '/api/auth/logout',
   '/login',
   '/_next',
   '/favicon.ico',
@@ -76,7 +78,7 @@ export async function middleware(request: NextRequest) {
     
     try {
       // 验证令牌
-      const jwtSecret = process.env.JWT_SECRET;
+      const jwtSecret = AppConfig.JWT_SECRET;
       if (!jwtSecret) {
         throw new Error('JWT_SECRET environment variable is not set');
       }

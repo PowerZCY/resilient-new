@@ -195,7 +195,7 @@ export default function LoginPage() {
         
         {/* 页脚信息 */}
         <div className="mt-6 text-center text-sm text-gray-500">
-          <p>© 2025 D8ger. All rights reserved.</p>
+          <p>Copyright &copy; {new Date().getFullYear()} 巽川·怀因 All rights reserved.</p>
         </div>
       </motion.div>
     </div>
