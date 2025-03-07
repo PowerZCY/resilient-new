@@ -1,19 +1,45 @@
 'use client'; // 保持客户端组件标记
 
+import React from 'react';
 import { useState, useEffect, Suspense } from 'react';
 import NicknameFilter from '@/components/NicknameFilter';
-import Timeline from '@/components/Timeline';
 import CalendarHeatmap from '@/components/CalendarHeatmap';
 import { motion } from 'framer-motion';
 import { Sparkles, Calendar, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import AnimatedCard from '@/components/AnimatedCard';
+import dynamic from 'next/dynamic';
+
+// 动态导入Timeline组件，禁用SSR以避免水合不匹配
+const Timeline = dynamic(() => import('@/components/Timeline'), {
+  ssr: false,
+  loading: () => (
+    <div className="animate-pulse space-y-8 py-8">
+      <div className="text-center text-gray-500">加载时间轴中...</div>
+      {[1, 2, 3].map((item) => (
+        <div key={item} className="relative pl-8 pb-8">
+          <div className="absolute left-0 top-2 w-5 h-5 rounded-full bg-violet-200 dark:bg-violet-700 shadow-[0_0_12px_rgba(139,92,246,0.3)]"></div>
+          <div className="absolute left-[10px] top-[40px] w-[2px] h-[calc(100%-48px)] bg-gradient-to-b from-violet-200 via-violet-300 to-violet-200 dark:from-violet-700 dark:via-violet-600 dark:to-violet-700"></div>
+          <div className="mb-2 h-4 w-32 bg-violet-100 dark:bg-violet-800 rounded-full"></div>
+          <div className="p-6 rounded-lg bg-white dark:bg-slate-800 shadow-sm border border-violet-100 dark:border-violet-800">
+            <div className="space-y-4">
+              <div className="h-4 bg-violet-50 dark:bg-violet-900/50 rounded-full w-full"></div>
+              <div className="h-4 bg-violet-50 dark:bg-violet-900/50 rounded-full w-4/5"></div>
+              <div className="h-4 bg-violet-50 dark:bg-violet-900/50 rounded-full w-2/3"></div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+});
 
 // 创建一个包含 useSearchParams 的客户端组件
 function HomeContent() {
   const searchParams = useSearchParams();
   const nickname = searchParams.get('nickname') || 'Zia慢成';
+  const [timelineError] = useState<Error | null>(null);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -87,7 +113,33 @@ function HomeContent() {
 
         {/* 第二行：时间轴 */}
         <div className="pt-8">
-          <Timeline />
+          {timelineError ? (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+              <h2 className="text-lg font-medium text-red-800">加载时间轴时出现问题</h2>
+              <p className="text-red-600">请尝试刷新页面</p>
+              <button 
+                onClick={() => window.location.reload()}
+                className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                刷新页面
+              </button>
+            </div>
+          ) : (
+            <ErrorBoundary fallback={
+              <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+                <h2 className="text-lg font-medium text-red-800">时间轴渲染出错</h2>
+                <p className="text-red-600">请尝试刷新页面</p>
+                <button 
+                  onClick={() => window.location.reload()}
+                  className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                >
+                  刷新页面
+                </button>
+              </div>
+            }>
+              <Timeline />
+            </ErrorBoundary>
+          )}
         </div>
       </main>
 
@@ -101,6 +153,30 @@ function HomeContent() {
       </footer>
     </div>
   );
+}
+
+// 错误边界组件
+class ErrorBoundary extends React.Component<{
+  children: React.ReactNode;
+  fallback: React.ReactNode;
+}> {
+  state = { hasError: false };
+  
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error('Timeline error caught by ErrorBoundary:', error, info);
+  }
+  
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    
+    return this.props.children;
+  }
 }
 
 // 主页组件，使用 Suspense 包装 HomeContent

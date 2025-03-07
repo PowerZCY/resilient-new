@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import React from 'react';
+import { useInView } from 'react-intersection-observer';
 
 interface Entry {
   id: string;
@@ -45,6 +46,357 @@ const TimelineSkeleton = () => {
     </div>
   );
 };
+
+// 格式化日期函数
+const formatDate = (dateString: string): string => {
+  const date: Date = new Date(dateString);
+  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+};
+
+// 格式化内容函数
+const formatContent = (content: string): JSX.Element => {
+  return (
+    <div className="whitespace-pre-wrap break-words text-gray-700">
+      {content.split(/\r\n|\n|\r/).map((line: string, index: number) => (
+        <span key={index}>
+          {line}
+          {index < content.split(/\r\n|\n|\r/).length - 1 && <br />}
+        </span>
+      ))}
+    </div>
+  );
+};
+
+// 动画变体定义
+const timelineVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      // 限制最大延迟为0.3秒，避免延迟累加问题
+      delay: Math.min(i, 3) * 0.1,
+      duration: 0.4, // 稍微缩短动画时间
+      ease: "easeOut"
+    }
+  })
+};
+
+// 圆点动画变体
+const circleVariants = {
+  initial: {
+    scale: 1,
+    backgroundColor: "#509863",
+    boxShadow: "0 0 0 4px rgba(80, 152, 99, 0.2)"
+  },
+  hover: {
+    scale: 1.2,
+    backgroundColor: "#8B5CF6",
+    boxShadow: "0 0 0 8px rgba(139, 92, 246, 0.3), 0 0 20px rgba(139, 92, 246, 0.5)",
+    transition: {
+      duration: 0.4,
+      ease: "easeOut"
+    }
+  }
+};
+
+// 内容卡片动画变体
+const cardVariants = {
+  initial: {
+    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+    backgroundColor: "rgba(255, 255, 255, 1)"
+  },
+  hover: {
+    boxShadow: "0 10px 25px -5px rgba(59, 130, 246, 0.1), 0 8px 10px -6px rgba(59, 130, 246, 0.1)",
+    backgroundColor: "rgba(249, 250, 251, 1)",
+    transition: {
+      duration: 0.3
+    }
+  }
+};
+
+// 日期动画变体
+const dateVariants = {
+  initial: {
+    color: "#6b7280"
+  },
+  hover: {
+    color: "#8B5CF6",
+    transition: {
+      duration: 0.3
+    }
+  }
+};
+
+// 气泡动画变体
+const bubbleVariants = {
+  initial: {
+    scale: 0,
+    opacity: 0
+  },
+  animate: (custom: number) => ({
+    scale: [0, 1.2, 1],
+    opacity: [0, 0.7, 1],
+    transition: {
+      // 限制最大延迟
+      delay: Math.min(custom, 3) * 0.05,
+      duration: 0.4,
+      ease: "easeOut"
+    }
+  })
+};
+
+// 气泡浮动动画 - 修改为有限次数的动画，不再使用Infinity
+const floatingBubbleVariants = {
+  initial: { y: 0 },
+  animate: (custom: number) => ({
+    y: [0, -3, 0, 3, 0],
+    transition: {
+      // 限制最大延迟
+      delay: Math.min(custom, 3) * 0.1,
+      duration: 2,
+      // 将无限循环改为有限次数，最多重复3次
+      repeat: 3,
+      repeatType: "mirror" as const,
+      ease: "easeInOut"
+    }
+  })
+};
+
+// 使用React.memo创建记忆化的TimelineItem组件
+const TimelineItem = React.memo(({ 
+  entry, 
+  index, 
+  isActive, 
+  totalEntries,
+  onHoverStart, 
+  onHoverEnd 
+}: { 
+  entry: Entry, 
+  index: number, 
+  isActive: boolean, 
+  totalEntries: number,
+  onHoverStart: () => void, 
+  onHoverEnd: () => void 
+}) => {
+  // 使用useInView检测条目是否在视口中
+  const [ref, inView] = useInView({
+    triggerOnce: false,
+    threshold: 0.1,
+    rootMargin: '100px 0px'
+  });
+
+  // 计算相对索引，用于动画延迟
+  const relativeIndex = index % 10;
+  
+  // 简化渲染 - 只有在视口中的条目才应用完整动画
+  const shouldAnimate = inView;
+  
+  return (
+    <motion.div
+      ref={ref}
+      className="relative pl-8 pb-8"
+      initial="hidden"
+      animate={inView ? "visible" : "hidden"}
+      custom={relativeIndex}
+      variants={timelineVariants}
+      onHoverStart={onHoverStart}
+      onHoverEnd={onHoverEnd}
+    >
+      {/* 主圆点 */}
+      <motion.div
+        className="absolute left-0 top-2 w-5 h-5 rounded-full z-10"
+        initial="initial"
+        animate={isActive && inView ? "hover" : "initial"}
+        variants={circleVariants}
+        whileHover={{ scale: 1.3 }}
+      ></motion.div>
+
+      {/* 连接前一个条目的气泡链 - 简化渲染逻辑 */}
+      {index > 0 && shouldAnimate && (
+        <div className="absolute left-[10px] top-[-30px] h-[40px] flex flex-col justify-between items-center">
+          {/* 限制气泡数量为最多3个 */}
+          {[...Array(3)].map((_, i) => (
+            <motion.div
+              key={`bubble-up-${i}`}
+              className="w-[6px] h-[6px] rounded-full"
+              initial="initial"
+              animate={isActive ? "animate" : "initial"}
+              variants={{
+                initial: bubbleVariants.initial,
+                animate: bubbleVariants.animate(3 - i)
+              }}
+              style={{
+                opacity: isActive ? 1 : 0.5,
+                backgroundColor: isActive ? "#8B5CF6" : "#94a3b8",
+                boxShadow: isActive ? "0 0 4px rgba(139, 92, 246, 0.5)" : "none"
+              }}
+            >
+              {/* 气泡内部发光效果 - 只在激活状态显示 */}
+              {isActive && (
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  animate={{
+                    boxShadow: ["0 0 0px rgba(139, 92, 246, 0.3)", "0 0 8px rgba(139, 92, 246, 0.6)", "0 0 0px rgba(139, 92, 246, 0.3)"]
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: 2,
+                    repeatType: "mirror",
+                    ease: "easeInOut"
+                  }}
+                />
+              )}
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {/* 连接下一个条目的气泡链 - 简化渲染逻辑 */}
+      {index < totalEntries - 1 && shouldAnimate && (
+        <div className="absolute left-[10px] top-[40px] h-[calc(100%-48px)] flex flex-col justify-between items-center">
+          {/* 限制气泡数量为固定的5个 */}
+          {[...Array(5)].map((_, i) => (
+            <motion.div
+              key={`bubble-down-${i}`}
+              className="w-[6px] h-[6px] rounded-full"
+              initial="initial"
+              animate={isActive ? ["animate", "floating"] : "initial"}
+              variants={{
+                initial: bubbleVariants.initial,
+                animate: bubbleVariants.animate(i),
+                floating: floatingBubbleVariants.animate(i)
+              }}
+              style={{
+                opacity: isActive ? 1 : 0.5,
+                backgroundColor: isActive ? "#8B5CF6" : "#94a3b8",
+                boxShadow: isActive ? "0 0 4px rgba(139, 92, 246, 0.5)" : "none"
+              }}
+            >
+              {/* 气泡内部发光效果 - 只在激活状态显示 */}
+              {isActive && (
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  animate={{
+                    boxShadow: ["0 0 0px rgba(139, 92, 246, 0.3)", "0 0 8px rgba(139, 92, 246, 0.6)", "0 0 0px rgba(139, 92, 246, 0.3)"]
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: 2,
+                    repeatType: "mirror",
+                    ease: "easeInOut",
+                    delay: i * 0.2
+                  }}
+                />
+              )}
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {/* 日期 */}
+      <motion.div
+        className="mb-2 text-sm font-semibold text-gray-500"
+        initial="initial"
+        animate={isActive && inView ? "hover" : "initial"}
+        variants={dateVariants}
+      >
+        {formatDate(entry.date)}
+      </motion.div>
+
+      {/* 内容卡片 */}
+      <motion.div
+        className="p-4 rounded-lg shadow"
+        initial="initial"
+        animate={isActive && inView ? "hover" : "initial"}
+        variants={cardVariants}
+        whileHover={{
+          y: -5,
+          transition: { duration: 0.3 }
+        }}
+      >
+        {formatContent(entry.content)}
+      </motion.div>
+    </motion.div>
+  );
+});
+
+// 确保组件名称在React DevTools中显示
+TimelineItem.displayName = 'TimelineItem';
+
+// 创建一个虚拟化的时间轴容器组件
+const VirtualizedTimeline = React.memo(({ 
+  entries, 
+  activeEntryId, 
+  setActiveEntryId 
+}: { 
+  entries: Entry[], 
+  activeEntryId: string | null, 
+  setActiveEntryId: (id: string | null) => void 
+}) => {
+  // 使用分段渲染的方式实现虚拟化
+  const [visibleRange, setVisibleRange] = useState({ start: 0, end: 10 });
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // 监听滚动事件，更新可见范围
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!containerRef.current) return;
+      
+      const scrollTop = window.scrollY;
+      const viewportHeight = window.innerHeight;
+      
+      // 估算每个条目的平均高度
+      const estimatedItemHeight = 250; // 像素
+      
+      // 计算可见范围内的条目索引
+      const visibleItemsCount = Math.ceil(viewportHeight / estimatedItemHeight) + 4; // 额外缓冲
+      const startIndex = Math.max(0, Math.floor(scrollTop / estimatedItemHeight) - 2); // 提前2个
+      const endIndex = Math.min(entries.length, startIndex + visibleItemsCount);
+      
+      setVisibleRange({ start: startIndex, end: endIndex });
+    };
+    
+    // 初始计算
+    handleScroll();
+    
+    // 添加滚动监听
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [entries.length]);
+  
+  // 渲染占位符，保持滚动高度
+  const totalHeight = entries.length * 250; // 估算总高度
+  const visibleItems = entries.slice(visibleRange.start, visibleRange.end);
+  
+  return (
+    <div ref={containerRef} style={{ position: 'relative', height: totalHeight }}>
+      <div style={{ position: 'absolute', top: visibleRange.start * 250, width: '100%' }}>
+        {visibleItems.map((entry, localIndex) => {
+          const globalIndex = visibleRange.start + localIndex;
+          return (
+            <TimelineItem
+              key={entry.id}
+              entry={entry}
+              index={globalIndex}
+              isActive={activeEntryId === entry.id}
+              totalEntries={entries.length}
+              onHoverStart={() => setActiveEntryId(entry.id)}
+              onHoverEnd={() => setActiveEntryId(null)}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+});
+
+VirtualizedTimeline.displayName = 'VirtualizedTimeline';
 
 export default function Timeline(): JSX.Element {
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -201,267 +553,6 @@ export default function Timeline(): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasMore, nickname, initialLoadDone.current]);
 
-  const formatDate = (dateString: string): string => {
-    const date: Date = new Date(dateString);
-    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
-  };
-
-  const formatContent = (content: string): JSX.Element => {
-    return (
-      <div className="whitespace-pre-wrap break-words text-gray-700">
-        {content.split(/\r\n|\n|\r/).map((line: string, index: number) => (
-          <span key={index}>
-            {line}
-            {index < content.split(/\r\n|\n|\r/).length - 1 && <br />}
-          </span>
-        ))}
-      </div>
-    );
-  };
-
-  // 动画变体定义
-  const timelineVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: Math.min(i, 3) * 0.1,
-        duration: 0.4,
-        ease: "easeOut"
-      }
-    })
-  };
-
-  // 圆点动画变体
-  const circleVariants = {
-    initial: {
-      scale: 1,
-      backgroundColor: "#509863",
-      boxShadow: "0 0 0 4px rgba(80, 152, 99, 0.2)"
-    },
-    hover: {
-      scale: 1.2,
-      backgroundColor: "#8B5CF6",
-      boxShadow: "0 0 0 8px rgba(139, 92, 246, 0.3), 0 0 20px rgba(139, 92, 246, 0.5)",
-      transition: {
-        duration: 0.4,
-        ease: "easeOut"
-      }
-    }
-  };
-
-  // 内容卡片动画变体
-  const cardVariants = {
-    initial: {
-      boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-      backgroundColor: "rgba(255, 255, 255, 1)"
-    },
-    hover: {
-      boxShadow: "0 10px 25px -5px rgba(59, 130, 246, 0.1), 0 8px 10px -6px rgba(59, 130, 246, 0.1)",
-      backgroundColor: "rgba(249, 250, 251, 1)",
-      transition: {
-        duration: 0.3
-      }
-    }
-  };
-
-  // 日期动画变体
-  const dateVariants = {
-    initial: {
-      color: "#6b7280"
-    },
-    hover: {
-      color: "#8B5CF6",
-      transition: {
-        duration: 0.3
-      }
-    }
-  };
-
-  // 气泡动画变体
-  const bubbleVariants = {
-    initial: {
-      scale: 0,
-      opacity: 0
-    },
-    animate: (custom: number) => ({
-      scale: [0, 1.2, 1],
-      opacity: [0, 0.7, 1],
-      transition: {
-        delay: Math.min(custom, 3) * 0.05,
-        duration: 0.4,
-        ease: "easeOut"
-      }
-    })
-  };
-
-  // 气泡浮动动画
-  const floatingBubbleVariants = {
-    initial: { y: 0 },
-    animate: (custom: number) => ({
-      y: [0, -3, 0, 3, 0],
-      transition: {
-        delay: Math.min(custom, 3) * 0.1,
-        duration: 2,
-        repeat: 3,
-        repeatType: "mirror" as const,
-        ease: "easeInOut"
-      }
-    })
-  };
-
-  // 使用React.memo创建记忆化的TimelineItem组件
-  const TimelineItem = React.memo(({ 
-    entry, 
-    index, 
-    isActive, 
-    totalEntries,
-    onHoverStart, 
-    onHoverEnd 
-  }: { 
-    entry: Entry, 
-    index: number, 
-    isActive: boolean, 
-    totalEntries: number,
-    onHoverStart: () => void, 
-    onHoverEnd: () => void 
-  }) => {
-    // 计算相对索引，用于动画延迟
-    const relativeIndex = index % 10;
-    
-    return (
-      <motion.div
-        className="relative pl-8 pb-8"
-        initial="hidden"
-        animate="visible"
-        custom={relativeIndex}
-        variants={timelineVariants}
-        onHoverStart={onHoverStart}
-        onHoverEnd={onHoverEnd}
-      >
-        {/* 主圆点 */}
-        <motion.div
-          className="absolute left-0 top-2 w-5 h-5 rounded-full z-10"
-          initial="initial"
-          animate={isActive ? "hover" : "initial"}
-          variants={circleVariants}
-          whileHover={{ scale: 1.3 }}
-        ></motion.div>
-
-        {/* 连接前一个条目的气泡链 */}
-        {index > 0 && (
-          <div className="absolute left-[10px] top-[-30px] h-[40px] flex flex-col justify-between items-center">
-            {/* 限制气泡数量为最多3个 */}
-            {[...Array(3)].map((_, i) => (
-              <motion.div
-                key={`bubble-up-${i}`}
-                className="w-[6px] h-[6px] rounded-full"
-                initial="initial"
-                animate={isActive ? ["animate", "animate"] : "initial"}
-                variants={{
-                  initial: bubbleVariants.initial,
-                  animate: bubbleVariants.animate(3 - i)
-                }}
-                custom={i}
-                style={{
-                  opacity: isActive ? 1 : 0.5,
-                  backgroundColor: isActive ? "#8B5CF6" : "#94a3b8",
-                  boxShadow: isActive ? "0 0 4px rgba(139, 92, 246, 0.5)" : "none"
-                }}
-              >
-                {/* 气泡内部发光效果 */}
-                {isActive && (
-                  <motion.div
-                    className="absolute inset-0 rounded-full"
-                    animate={{
-                      boxShadow: ["0 0 0px rgba(139, 92, 246, 0.3)", "0 0 8px rgba(139, 92, 246, 0.6)", "0 0 0px rgba(139, 92, 246, 0.3)"]
-                    }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: 2,
-                      repeatType: "mirror",
-                      ease: "easeInOut"
-                    }}
-                  />
-                )}
-              </motion.div>
-            ))}
-          </div>
-        )}
-
-        {/* 连接下一个条目的气泡链 */}
-        {index < totalEntries - 1 && (
-          <div className="absolute left-[10px] top-[40px] h-[calc(100%-48px)] flex flex-col justify-between items-center">
-            {/* 限制气泡数量为固定的5个 */}
-            {[...Array(5)].map((_, i) => (
-              <motion.div
-                key={`bubble-down-${i}`}
-                className="w-[6px] h-[6px] rounded-full"
-                initial="initial"
-                animate={isActive ? ["animate", "floating"] : "initial"}
-                variants={{
-                  initial: bubbleVariants.initial,
-                  animate: bubbleVariants.animate(i),
-                  floating: floatingBubbleVariants.animate(i)
-                }}
-                style={{
-                  opacity: isActive ? 1 : 0.5,
-                  backgroundColor: isActive ? "#8B5CF6" : "#94a3b8",
-                  boxShadow: isActive ? "0 0 4px rgba(139, 92, 246, 0.5)" : "none"
-                }}
-              >
-                {/* 气泡内部发光效果 */}
-                {isActive && (
-                  <motion.div
-                    className="absolute inset-0 rounded-full"
-                    animate={{
-                      boxShadow: ["0 0 0px rgba(139, 92, 246, 0.3)", "0 0 8px rgba(139, 92, 246, 0.6)", "0 0 0px rgba(139, 92, 246, 0.3)"]
-                    }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: 2,
-                      repeatType: "mirror",
-                      ease: "easeInOut",
-                      delay: i * 0.2
-                    }}
-                  />
-                )}
-              </motion.div>
-            ))}
-          </div>
-        )}
-
-        {/* 日期 */}
-        <motion.div
-          className="mb-2 text-sm font-semibold text-gray-500"
-          initial="initial"
-          animate={isActive ? "hover" : "initial"}
-          variants={dateVariants}
-        >
-          {formatDate(entry.date)}
-        </motion.div>
-
-        {/* 内容卡片 */}
-        <motion.div
-          className="p-4 rounded-lg shadow"
-          initial="initial"
-          animate={isActive ? "hover" : "initial"}
-          variants={cardVariants}
-          whileHover={{
-            y: -5,
-            transition: { duration: 0.3 }
-          }}
-        >
-          {formatContent(entry.content)}
-        </motion.div>
-      </motion.div>
-    );
-  });
-
-  // 确保组件名称在React DevTools中显示
-  TimelineItem.displayName = 'TimelineItem';
-
   if (!nickname) {
     return <div className="text-center text-gray-500">Loading...</div>;
   }
@@ -485,18 +576,14 @@ export default function Timeline(): JSX.Element {
           </>
         )}
 
-        {/* 使用记忆化的TimelineItem组件渲染条目 */}
-        {entries.map((entry: Entry, index: number) => (
-          <TimelineItem
-            key={entry.id}
-            entry={entry}
-            index={index}
-            isActive={activeEntryId === entry.id}
-            totalEntries={entries.length}
-            onHoverStart={() => setActiveEntryId(entry.id)}
-            onHoverEnd={() => setActiveEntryId(null)}
+        {/* 使用虚拟化的时间轴组件 */}
+        {entries.length > 0 && (
+          <VirtualizedTimeline 
+            entries={entries} 
+            activeEntryId={activeEntryId} 
+            setActiveEntryId={setActiveEntryId} 
           />
-        ))}
+        )}
       </div>
 
       {hasMore && (
