@@ -37,15 +37,15 @@ $$
 $$
 
 $$
-\begin{cases}
--\frac{\hbar^2}{2m}\nabla^2\psi(\mathbf{r})+V(\mathbf{r})\psi(\mathbf{r}) = E\psi(\mathbf{r}) & \quad(1)\\
-i\hbar\frac{\partial\Psi(\mathbf{r},t)}{\partial t}=-\frac{\hbar^2}{2m}\nabla^2\Psi(\mathbf{r},t)+V(\mathbf{r},t)\Psi(\mathbf{r},t) & \quad(2)
-\end{cases}
-$$
-
-$$
 \left.\begin{array}{l}
 (1)\quad-\frac{\hbar^2}{2m}\nabla^2\psi(\mathbf{r})+V(\mathbf{r})\psi(\mathbf{r}) = E\psi(\mathbf{r})\\
 (2)\quad i\hbar\frac{\partial\Psi(\mathbf{r},t)}{\partial t}=-\frac{\hbar^2}{2m}\nabla^2\Psi(\mathbf{r},t)+V(\mathbf{r},t)\Psi(\mathbf{r},t)
 \end{array}\right\}
+$$
+
+$$
+\begin{cases}
+-\frac{\hbar^2}{2m}\nabla^2\psi(\mathbf{r})+V(\mathbf{r})\psi(\mathbf{r}) = E\psi(\mathbf{r}) & \quad(1)\\
+i\hbar\frac{\partial\Psi(\mathbf{r},t)}{\partial t}=-\frac{\hbar^2}{2m}\nabla^2\Psi(\mathbf{r},t)+V(\mathbf{r},t)\Psi(\mathbf{r},t) & \quad(2)
+\end{cases}
 $$
