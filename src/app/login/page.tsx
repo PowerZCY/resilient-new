@@ -94,7 +94,7 @@ export default function LoginPage() {
 
             {/* 表单区域 */}
             <div className="p-6 pt-2">
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} method="post">
                 {/* 错误提示 */}
                 {error && (
                   <motion.div
@@ -113,6 +113,7 @@ export default function LoginPage() {
                   </Label>
                   <Input
                     id="username"
+                    name="username"  // 添加name属性
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -131,6 +132,7 @@ export default function LoginPage() {
                   <div className="relative">
                     <Input
                       id="password"
+                      name="password"  // 添加name属性
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}

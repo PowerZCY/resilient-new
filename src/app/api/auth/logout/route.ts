@@ -15,14 +15,15 @@ export async function POST(request: NextRequest) {
   try {
     // 清除认证Cookie
     cookies().delete('auth_token');
-    
+    const requestId = request.headers.get('X-Request-ID') || '';
     // 记录登出操作
     Logger.info('User logged out successfully', {
       ip: request.ip,
       userAgent: request.headers.get('user-agent')
-    });
-    
-    return NextResponse.json({ 
+    }, requestId);
+
+
+    return NextResponse.json({
       success: true,
       message: 'Logged out successfully'
     });
