@@ -22,22 +22,22 @@ interface LogoutDialogProps {
 export default function LogoutDialog({ isOpen, onClose }: LogoutDialogProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const handleLogout = async () => {
     try {
       setIsLoading(true);
-      
+
       const response = await fetch('/api/auth/logout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         }
       });
-      
+
       if (!response.ok) {
         throw new Error('Logout failed');
       }
-      
+
       // Redirect to login page after successful logout
       router.push('/login');
     } catch (error) {
@@ -48,20 +48,20 @@ export default function LogoutDialog({ isOpen, onClose }: LogoutDialogProps) {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           {/* Background overlay */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.5 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 bg-black"
             onClick={onClose}
           />
-          
+
           {/* Dialog */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -72,7 +72,7 @@ export default function LogoutDialog({ isOpen, onClose }: LogoutDialogProps) {
           >
             {/* Dialog header */}
             <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="text-lg font-semibold text-gray-900">Confirm Logout</h3>
+              <h3 className="text-lg font-semibold text-gray-900">登出</h3>
               <button
                 onClick={onClose}
                 className="text-gray-500 hover:text-gray-700 focus:outline-none"
@@ -80,14 +80,14 @@ export default function LogoutDialog({ isOpen, onClose }: LogoutDialogProps) {
                 <X size={20} />
               </button>
             </div>
-            
+
             {/* Dialog content */}
             <div className="p-6">
               <div className="flex items-center text-gray-700 mb-4">
                 <LogOut className="mr-3 text-indigo-500" size={24} />
-                <p>Are you sure you want to log out?</p>
+                <p>确认登出系统?</p>
               </div>
-              
+
               {/* Button area */}
               <div className="flex justify-end space-x-3 mt-6">
                 <button
@@ -95,7 +95,7 @@ export default function LogoutDialog({ isOpen, onClose }: LogoutDialogProps) {
                   disabled={isLoading}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                 >
-                  Cancel
+                  取消
                 </button>
                 <button
                   onClick={handleLogout}
@@ -108,10 +108,10 @@ export default function LogoutDialog({ isOpen, onClose }: LogoutDialogProps) {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Processing...
+                      处理中...
                     </>
                   ) : (
-                    'Confirm Logout'
+                    '确认'
                   )}
                 </button>
               </div>

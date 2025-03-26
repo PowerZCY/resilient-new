@@ -1,6 +1,6 @@
 ---
 description: 代码生成规则
-globs: *.ts,*.tsx,*.js,*.json,*.sh,docs/*
+globs: *.ts,*.tsx,*.js,*.mjs,*.sh,docs/*
 alwaysApply: false
 ---
 
