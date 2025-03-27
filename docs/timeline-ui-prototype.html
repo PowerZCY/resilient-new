@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间轴 UI 原型</title>
+    <style>
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 222.2 84% 4.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 222.2 84% 4.9%;
+            --primary: 222.2 47.4% 11.2%;
+            --primary-foreground: 210 40% 98%;
+            --border: 214.3 31.8% 91.4%;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .timeline-container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 40px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cards-container {
+            display: flex;
+            position: relative;
+            margin-top: 20px;
+            padding: 20px 40px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            gap: -100px;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .cards-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .timeline-card-wrapper {
+            position: relative;
+            padding-top: 16px;
+            flex: 0 0 320px;
+            margin: 0 -80px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .timeline-card {
+            height: 180px;
+            background: #fff;
+            border: 1px solid rgba(139, 92, 246, 0.1);
+            border-top-width: 0;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.05);
+            transform-origin: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 1;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+        }
+
+        .timeline-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 25%;
+            width: 50%;
+            height: 100%;
+            pointer-events: auto;
+            z-index: 2;
+        }
+
+        .card-clip {
+            position: absolute;
+            top: 0;
+            left: 12px;  /* 初始位置在左上角 */
+            transform: none;  /* 移除默认的居中变换 */
+            height: 24px;
+            padding: 0 12px;
+            background: rgba(124, 58, 237, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(139, 92, 246, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7C3AED;
+            font-size: 0.85rem;
+            font-weight: 500;
+            z-index: 3;
+            white-space: nowrap;
+        }
+
+        .card-content {
+            margin-top: 0;
+            flex: 1;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #4B5563;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .card-footer {
+            height: 40px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(139, 92, 246, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .card-footer-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #6B7280;
+            font-size: 0.9rem;
+        }
+
+        .card-footer-item svg {
+            width: 16px;
+            height: 16px;
+            color: #7C3AED;
+        }
+
+        .timeline-card-wrapper:hover,
+        .timeline-card-wrapper.selected {
+            margin: 0 30px;
+            z-index: 10;
+        }
+
+        .timeline-card-wrapper:hover .timeline-card,
+        .timeline-card-wrapper.selected .timeline-card {
+            height: 320px;
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(139, 92, 246, 0.1);
+            border: 2px solid #8B5CF6;
+            border-top: 2px solid #21D789;  /* JetBrains 绿色 */
+            background: #fff;
+            pointer-events: auto;
+        }
+
+        .timeline-card-wrapper:hover .card-content,
+        .timeline-card-wrapper.selected .card-content {
+            -webkit-line-clamp: unset;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .timeline-card-wrapper:hover .card-content::-webkit-scrollbar,
+        .timeline-card-wrapper.selected .card-content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .timeline-card-wrapper:hover .card-content::-webkit-scrollbar-thumb,
+        .timeline-card-wrapper.selected .card-content::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.2);
+            border-radius: 2px;
+        }
+
+        .timeline-card-wrapper:hover .card-clip,
+        .timeline-card-wrapper.selected .card-clip {
+            background: rgba(124, 58, 237, 0.15);
+            left: 50%;  /* 悬浮时移动到中间 */
+            transform: translateX(-50%) translateY(-2px);  /* 悬浮时居中并上移 */
+            transition: all 0.3s ease;
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="timeline-container">
+        <div class="cards-container">
+            <!-- 卡片将通过 JavaScript 动态生成 -->
+        </div>
+    </div>
+
+    <script>
+        const cardsContainer = document.querySelector('.cards-container');
+        const dates = Array.from({length: 20}, (_, i) => {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            return date;
+        });
+
+        const sampleContents = [
+            "今天的阳光真好，适合晒aceetoBe被子。生活就像晾衣服，需要阳光和耐心。",
+            "和朋友们一起度过了愉快的下午，分享了很多有趣的故事。",
+            "完成了一个重要的项目，团队合作非常愉快。",
+            "读了一本很有启发的书，记录下一些感悟。",
+            "今天去公园散步，看到了美丽的樱花。"
+        ];
+
+        dates.forEach((date, index) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'timeline-card-wrapper';
+            
+            const card = document.createElement('div');
+            card.className = 'timeline-card';
+            
+            const content = sampleContents[Math.floor(Math.random() * sampleContents.length)];
+            
+            card.innerHTML = `
+                <div class="card-clip">${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日</div>
+                <div class="card-content">
+                    <p>${content}</p>
+                    <p>这是第 ${index + 1} 条时光记录，记录生活中的点点滴滴...</p>
+                    <p>补充一些随机内容，让卡片看起来更加充实。时光飞逝，让我们记录下每一个精彩瞬间。</p>
+                </div>
+                <div class="card-footer">
+                    <div class="card-footer-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                        </svg>
+                        <span>${Math.floor(Math.random() * 100)}</span>
+                    </div>
+                    <div class="card-footer-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 12H4M12 4v16"></path>
+                        </svg>
+                        <span>￥${Math.floor(Math.random() * 1000)}</span>
+                    </div>
+                </div>
+            `;
+            
+            wrapper.appendChild(card);
+            cardsContainer.appendChild(wrapper);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.timeline-card-wrapper')) {
+                document.querySelectorAll('.timeline-card-wrapper').forEach(wrapper => {
+                    wrapper.classList.remove('selected');
+                });
+            }
+        });
+    
+        document.querySelectorAll('.timeline-card-wrapper').forEach(wrapper => {
+            wrapper.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.timeline-card-wrapper').forEach(w => {
+                    w.classList.remove('selected');
+                });
+                wrapper.classList.add('selected');
+            });
+        });
+    </script>
+</body>
+</html>
