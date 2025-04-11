@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "pnpm run lint",
+    "predev": "pnpm run lint && pnpm run generate-blog-data",
     "dev": "next dev",
+    "generate-blog-data": "cross-env AUTO_REFRESH_BLOG_ON_START=true NODE_ENV=development ts-node --project tsconfig.node.json scripts/generate-blog-data.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint --fix . && next lint",
@@ -67,6 +68,7 @@
     "@typescript-eslint/eslint-plugin": "^8.24.1",
     "@typescript-eslint/typescript-estree": "^8.24.1",
     "autoprefixer": "^10.4.20",
+    "cross-env": "^7.0.3",
     "eslint": "^8",
     "eslint-config-next": "14.2.7",
     "eslint-plugin-unused-imports": "^4.1.4",
@@ -77,6 +79,7 @@
     "prisma": "^6.6.0",
     "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   },
   "pnpm": {

@@ -9,7 +9,7 @@ author:
   avatar: "/images/default.webp"
 publishedAt: "2024-03-13"
 imageUrl: "/images/default.webp"
-featured: true
+featured: false
 ---
 
 # Markdown 博客实现方案

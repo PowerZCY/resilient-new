@@ -22,7 +22,7 @@
         "nextSlug": "markdown-module"
       },
       {
-        "id": "7",
+        "id": "6",
         "title": "基于 Markdown 的配置化博客实现方案",
         "slug": "markdown-module",
         "excerpt": "详细介绍项目中基于 Markdown 的博客系统实现方案，包括文件结构、处理流程和相关配置。",
@@ -37,7 +37,7 @@
         "publishedAt": "2024-03-13",
         "readTime": "3 min",
         "imageUrl": "/images/default.webp",
-        "featured": true,
+        "featured": false,
         "preSlug": "Httpie使用指南",
         "nextSlug": "MacOS软件初始化"
       },
@@ -62,7 +62,7 @@
         "nextSlug": "枚举处理规范"
       },
       {
-        "id": "8",
+        "id": "9",
         "title": "枚举处理规范",
         "slug": "枚举处理规范",
         "excerpt": "Java中枚举处理约束，最佳实践",
@@ -99,6 +99,25 @@
         "imageUrl": "/images/default.webp",
         "featured": false,
         "preSlug": "枚举处理规范",
+        "nextSlug": "mermaid-example"
+      },
+      {
+        "id": "7",
+        "title": "Mermaid流程图",
+        "slug": "mermaid-example",
+        "excerpt": "Mermaid/流程图/代码生图",
+        "tags": [
+          "tutorials"
+        ],
+        "author": {
+          "name": "帝八哥",
+          "avatar": "/images/default.webp"
+        },
+        "publishedAt": "2025-04-12",
+        "readTime": "1 min",
+        "imageUrl": "/images/default.webp",
+        "featured": true,
+        "preSlug": "Git指令整理",
         "nextSlug": "D8gerAutoCode插件使用指南"
       },
       {
@@ -117,7 +136,7 @@
         "readTime": "3 min",
         "imageUrl": "/images/default.webp",
         "featured": false,
-        "preSlug": "Git指令整理",
+        "preSlug": "mermaid-example",
         "nextSlug": "EasyHttp使用指南"
       },
       {
@@ -137,12 +156,12 @@
         "imageUrl": "/images/default.webp",
         "featured": false,
         "preSlug": "D8gerAutoCode插件使用指南",
-        "nextSlug": "Sentinel限流指南"
+        "nextSlug": "sentinel-instruction"
       },
       {
-        "id": "6",
+        "id": "8",
         "title": "Sentinel限流方案",
-        "slug": "Sentinel限流指南",
+        "slug": "sentinel-instruction",
         "excerpt": "Spring/SpringMVC/SpringBoot 丝滑接入Sentinel限流方案",
         "tags": [
           "tutorials"
@@ -164,5 +183,9 @@
       "insights",
       "makeMoney"
     ]
+  },
+  "en": {
+    "posts": [],
+    "tags": []
   }
 }

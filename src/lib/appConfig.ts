@@ -59,14 +59,6 @@ export const appConfig = {
     // 博客相关路径
     dir: 'public/md',
     config: 'public/md/blog-config.json',
-    // 标签定义: 决定了翻译文件字段
-    tags: [
-      'makeMoney',
-      'roadOverSea',
-      'productUpdates',
-      'insights',
-      'tutorials'
-    ],
     // 图片资源路径
     images: {
       default: '/images/default.webp',
@@ -76,7 +68,7 @@ export const appConfig = {
       return 2;
     },
     pageConfig: {
-      size: 2
+      size: 4
     }
   },
   // 菜单配置
