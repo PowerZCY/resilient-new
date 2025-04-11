@@ -1,12 +1,11 @@
 'use client'; // 保持客户端组件标记
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
 // 在顶部导入中添加 Home 图标
-import { Home, Calendar, Send, X, Plus, Trash2, Sparkles } from 'lucide-react';
-import Link from 'next/link';
-import NicknameFilter from '@/components/NicknameFilter';
+import { Calendar, Plus, Send, Trash2, X } from 'lucide-react';
+import { Header } from '@/components/Header';
 
 // 定义单条记录的接口
 interface EntryItem {
@@ -42,11 +41,11 @@ function NewEntryContent() {
     // 获取最后一条记录的日期
     const lastEntry = entries[entries.length - 1];
     const lastDate = new Date(lastEntry.date);
-    
+
     // 计算新记录的日期（最后一条记录的日期加1天）
     const newDate = new Date(lastDate);
     newDate.setDate(newDate.getDate() + 1);
-    
+
     // 直接使用计算出的日期，不再限制是否超过今天
     setEntries([
       ...entries,
@@ -125,43 +124,6 @@ function NewEntryContent() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* 顶部导航栏 */}
-      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Link href={`/?nickname=${encodeURIComponent(nickname)}`}>
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-500 mr-4"
-                >
-                  <Home className="h-6 w-6" />
-                </motion.div>
-              </Link>
-              <motion.div
-                initial={{ rotate: -10, scale: 0.9 }}
-                animate={{ rotate: 0, scale: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                <Sparkles className="h-8 w-8 text-blue-600" />
-              </motion.div>
-              <h1 className="ml-3 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-violet-600">
-                突破消极偏见♾️
-              </h1>
-            </div>
-            <div className="hidden md:flex items-center justify-center">
-              <p className="text-base font-medium text-[#509863] dark:text-emerald-400">
-                每天都有好体验、好事儿、成就 ✔
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <NicknameFilter />
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* 主要内容区 */}
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         <motion.div
@@ -274,8 +236,8 @@ function NewEntryContent() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className={`w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center shadow-sm transition-all ${isSubmitting || !isValidSubmit()
-                    ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-blue-600 to-violet-600 text-white hover:shadow-md'
+                  ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-blue-600 to-violet-600 text-white hover:shadow-md'
                   }`}
               >
                 {isSubmitting ? (
@@ -310,6 +272,7 @@ export default function NewEntryPage() {
 
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center">加载中...</div>}>
+      <Header />
       <NewEntryContent />
     </Suspense>
   );

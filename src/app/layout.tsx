@@ -12,6 +12,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import RaindropsBackground from "@/components/RaindropsBackground";
 import BackToTop from "@/components/BackToTop";
+import { Footer } from "@/components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -30,6 +31,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <RaindropsBackground />
         {children}
+        <Footer />
         <BackToTop />
       </body>
     </html>

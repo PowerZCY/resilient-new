@@ -198,12 +198,6 @@ export default function LoginPage() {
           </div>
         </motion.div>
       </div>
-      {/* 页脚信息 - 固定在底部 */}
-      <footer className="w-full py-4 bg-transparent">
-        <div className="text-center text-sm text-gray-500">
-          <p>Copyright &copy; {new Date().getFullYear()} 巽川·怀因 All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   );
 }

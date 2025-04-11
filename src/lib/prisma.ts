@@ -8,14 +8,14 @@
  */
 
 import { PrismaClient } from '@prisma/client';
-import { AppConfig } from '@/lib/appConfig';
+import { appConfig } from '@/lib/appConfig';
 
 declare global {
   // eslint-disable-next-line no-var
   var prisma: PrismaClient | undefined;
 }
 
-const prisma = AppConfig.IS_PRODUCTION
+const prisma = appConfig.IS_PRODUCTION
   ? new PrismaClient()
   : global.prisma ?? (global.prisma = new PrismaClient());
 

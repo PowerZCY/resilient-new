@@ -9,7 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dayjs from 'dayjs';
-import { AppConfig } from '@/lib/appConfig';
+import { appConfig } from '@/lib/appConfig';
 
 type LogLevel = 'info' | 'warn' | 'error'
 
@@ -39,7 +39,7 @@ export class Logger {
     }
     const timestamp = dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss.SSS');
     // 在开发环境使用格式化输出
-    if (AppConfig.IS_DEVELOPMENT) {
+    if (appConfig.IS_DEVELOPMENT) {
       console.log(`[${level}][${timestamp}][${requestId}][${message}]`, this.formatLog(entry))
     } else {
       // 在生产环境可以将日志发送到日志服务

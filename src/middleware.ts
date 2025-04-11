@@ -11,7 +11,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { Logger } from '@/lib/logger';
 import { jwtVerify } from 'jose';
-import { AppConfig } from '@/lib/appConfig';
+import { appConfig } from '@/lib/appConfig';
 
 // 定义需要保护的路径
 const PROTECTED_PATHS = [
@@ -75,7 +75,7 @@ export async function middleware(request: NextRequest) {
 
     try {
       // 验证令牌
-      const jwtSecret = AppConfig.JWT_SECRET;
+      const jwtSecret = appConfig.JWT_SECRET;
       if (!jwtSecret) {
         throw new Error('JWT_SECRET environment variable is not set');
       }

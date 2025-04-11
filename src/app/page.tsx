@@ -9,16 +9,15 @@
 
 'use client'; // 保持客户端组件标记
 
-import React from 'react';
-import { useState, useEffect, Suspense } from 'react';
-import NicknameFilter from '@/components/NicknameFilter';
+import AnimatedCard from '@/components/AnimatedCard';
 import CalendarHeatmap from '@/components/CalendarHeatmap';
+import { Header } from '@/components/Header';
 import { motion } from 'framer-motion';
-import { Sparkles, Calendar, PlusCircle } from 'lucide-react';
+import { Calendar, PlusCircle } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import AnimatedCard from '@/components/AnimatedCard';
-import dynamic from 'next/dynamic';
+import React, { Suspense, useEffect, useState } from 'react';
 
 // 动态导入Timeline组件，禁用SSR以避免水合不匹配
 const Timeline = dynamic(() => import('@/components/Timeline'), {
@@ -52,34 +51,6 @@ function HomeContent() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* 顶部导航栏 */}
-      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <motion.div
-                initial={{ rotate: -10, scale: 0.9 }}
-                animate={{ rotate: 0, scale: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                <Sparkles className="h-8 w-8 text-blue-600" />
-              </motion.div>
-              <h1 className="ml-3 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-violet-600">
-                突破消极偏见♾️
-              </h1>
-            </div>
-            <div className="hidden md:flex items-center justify-center">
-              <p className="text-base font-medium text-[#509863] dark:text-emerald-400">
-                每天都有好体验、好事儿、成就 ✔
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <NicknameFilter />
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* 主要内容区 */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 第一行：热力图(左)和记录今日(右) */}
@@ -126,7 +97,7 @@ function HomeContent() {
             <div className="p-4 bg-red-50 border border-red-200 rounded-md">
               <h2 className="text-lg font-medium text-red-800">加载时间轴时出现问题</h2>
               <p className="text-red-600">请尝试刷新页面</p>
-              <button 
+              <button
                 onClick={() => window.location.reload()}
                 className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
               >
@@ -138,7 +109,7 @@ function HomeContent() {
               <div className="p-4 bg-red-50 border border-red-200 rounded-md">
                 <h2 className="text-lg font-medium text-red-800">时间轴渲染出错</h2>
                 <p className="text-red-600">请尝试刷新页面</p>
-                <button 
+                <button
                   onClick={() => window.location.reload()}
                   className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
                 >
@@ -151,15 +122,6 @@ function HomeContent() {
           )}
         </div>
       </main>
-
-      {/* 页脚 */}
-      <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-6 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-sm text-slate-500 dark:text-slate-400">
-            <p>Copyright &copy; {new Date().getFullYear()} 巽川·怀因 All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
@@ -170,20 +132,20 @@ class ErrorBoundary extends React.Component<{
   fallback: React.ReactNode;
 }> {
   state = { hasError: false };
-  
+
   static getDerivedStateFromError() {
     return { hasError: true };
   }
-  
+
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error('Timeline error caught by ErrorBoundary:', error, info);
   }
-  
+
   render() {
     if (this.state.hasError) {
       return this.props.fallback;
     }
-    
+
     return this.props.children;
   }
 }
@@ -203,6 +165,7 @@ export default function Home() {
 
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center">加载中...</div>}>
+      <Header />
       <HomeContent />
     </Suspense>
   );
