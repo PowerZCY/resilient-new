@@ -94,7 +94,7 @@ export default function LoginPage() {
 
             {/* 表单区域 */}
             <div className="p-6 pt-2">
-              <form onSubmit={handleSubmit} method="post">
+              <form onSubmit={handleSubmit} method="post" autoComplete="on">
                 {/* 错误提示 */}
                 {error && (
                   <motion.div
@@ -113,7 +113,7 @@ export default function LoginPage() {
                   </Label>
                   <Input
                     id="username"
-                    name="username"  // 添加name属性
+                    name="username"
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -121,6 +121,7 @@ export default function LoginPage() {
                     placeholder="请输入你的狗名"
                     disabled={isLoading}
                     autoComplete="username"
+                    required
                   />
                 </div>
 
@@ -132,7 +133,7 @@ export default function LoginPage() {
                   <div className="relative">
                     <Input
                       id="password"
-                      name="password"  // 添加name属性
+                      name="password"
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -140,6 +141,7 @@ export default function LoginPage() {
                       placeholder="请输入你的狗码"
                       disabled={isLoading}
                       autoComplete="current-password"
+                      required
                     />
                     <button
                       type="button"
