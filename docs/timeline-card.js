@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const carouselGroups = document.querySelectorAll('.carousel-group');
     const ROTATION_STEP = (2 * Math.PI) / 5; // 5张卡片，每张旋转72度
     const RADIUS = 400; // 旋转半径
+    
+    // 选中卡片ID的默认值
+    let currentCardId = 1;
 
     // 初始化每个组的卡片位置
     carouselGroups.forEach((group) => {
@@ -22,6 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
             card.addEventListener('click', () => {
                 const rotationDiff = index - currentIndex;
                 currentIndex = index;
+                
+                // 获取卡片ID并更新进度指示器
+                const cardId = card.dataset.id;
+                if (cardId) {
+                    updateProgressIndicator(cardId);
+                }
 
                 // 更新所有卡片的位置
                 cards.forEach((c, i) => {
@@ -51,7 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.style.transform = currentTransform;
             });
         });
-
     });
 
     // 绑定导航按钮事件
@@ -70,8 +78,26 @@ document.addEventListener('DOMContentLoaded', () => {
             // 切换组显示
             groups[currentGroupIndex].classList.remove('active');
             groups[index].classList.add('active');
+            
+            // 更新当前组的第一张卡片为默认选中
+            const firstCard = groups[index].querySelector('.timeline-card');
+            if (firstCard && firstCard.dataset.id) {
+                updateProgressIndicator(firstCard.dataset.id);
+            }
 
             currentGroupIndex = index;
         });
     });
+    
+    // 更新进度指示器中显示的卡片ID
+    function updateProgressIndicator(cardId) {
+        currentCardId = cardId;
+        const highlightElements = document.querySelectorAll('.progress-highlight');
+        highlightElements.forEach(el => {
+            el.textContent = `#${cardId}`;
+        });
+    }
+    
+    // 初始化默认显示ID为1的卡片
+    updateProgressIndicator(1);
 });

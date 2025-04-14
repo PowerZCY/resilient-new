@@ -70,15 +70,16 @@
       position: relative;
     }
     
-    /* 分组导航样式 */
+    /* 分组导航样式 - 修改为左侧垂直布局 */
     .group-nav {
       position: absolute;
-      bottom: -60px;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 2rem; /* 设置左侧间距 */
+      top: 50%;   /* 垂直居中 */
+      transform: translateY(-50%); /* 垂直居中对齐 */
       display: flex;
+      flex-direction: column; /* 改为垂直排列 */
       gap: 1rem;
-      z-index: 100;
+      z-index: 200; /* 提高z-index确保在卡片上方 */
     }
 
     .nav-btn {
@@ -91,11 +92,33 @@
       font-weight: bold;
       cursor: pointer;
       transition: all 0.3s ease;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* 添加阴影增强可见性 */
     }
 
     .nav-btn.active {
       background: var(--primary-color);
       color: white;
+      box-shadow: 0 0 15px var(--primary-glow); /* 活跃状态增强阴影效果 */
+    }
+
+    /* 添加悬停效果 */
+    .nav-btn:hover:not(.active) {
+      transform: scale(1.1);
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    /* 为按钮添加背景，防止被卡片内容遮挡 */
+    .nav-btn::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      right: -8px;
+      bottom: -8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: -1;
     }
 
     /* 3D环绕轮播样式 */
@@ -215,6 +238,7 @@
         -webkit-line-clamp: var(--lines-to-show);
         -webkit-box-orient: vertical;
         overflow: hidden;
+        line-clamp: var(--lines-to-show);
       }
     }
     
@@ -446,15 +470,15 @@
   <h1>时间轴卡片设计原型</h1>
   
   <div class="container">
+    <!-- 分组导航移到这里，位于左侧 -->
+    <div class="group-nav">
+      <button class="nav-btn active" data-group="0">1</button>
+      <button class="nav-btn" data-group="1">2</button>
+      <button class="nav-btn" data-group="2">3</button>
+      <button class="nav-btn" data-group="3">4</button>
+    </div>
+
     <div class="carousel-container">
-      <!-- 分组导航 -->
-      <div class="group-nav">
-        <button class="nav-btn active" data-group="0">1</button>
-        <button class="nav-btn" data-group="1">2</button>
-        <button class="nav-btn" data-group="2">3</button>
-        <button class="nav-btn" data-group="3">4</button>
-      </div>
-      
       <!-- 第一组卡片(1-5) -->
       <div class="carousel-group active" data-group="0">
         <!-- 进度指示器 -->
@@ -472,7 +496,7 @@
         <div class="timeline">
       <!-- 第一组的5张卡片 -->
       <!-- 卡片1 -->
-      <div class="timeline-card" style="transform: rotateY(0deg)">
+      <div class="timeline-card" style="transform: rotateY(0deg)" data-id="1">
         <div class="card-date">2024年5月20日</div>
         <div class="card-content">
           <div class="content-text">
@@ -490,7 +514,7 @@
       </div>
       
       <!-- 卡片2 - 活跃状态 -->
-      <div class="timeline-card">
+      <div class="timeline-card" data-id="2">
         <div class="card-date">2024年5月15日</div>
         <div class="card-content">
           <div class="content-text">
@@ -513,7 +537,7 @@
       </div>
       
       <!-- 卡片3 - 普通状态，有较长内容 -->
-      <div class="timeline-card">
+      <div class="timeline-card" data-id="3">
         <div class="card-date">2024年5月10日</div>
         <div class="card-content">
           <div class="content-text">
@@ -536,7 +560,7 @@
       </div>
       
       <!-- 卡片4 - 普通状态 -->
-      <div class="timeline-card">
+      <div class="timeline-card" data-id="4">
         <div class="card-date">2024年5月1日</div>
         <div class="card-content">
           <div class="content-text">
@@ -556,7 +580,7 @@
       </div>
       
       <!-- 卡片18 - 普通状态 -->
-      <div class="timeline-card">
+      <div class="timeline-card" data-id="5">
         <div class="card-date">2024年2月25日</div>
         <div class="card-content">
           <div class="content-text">
@@ -594,7 +618,7 @@
         </div>
         <div class="timeline">
       <!-- 卡片6 - 普通状态 -->
-      <div class="timeline-card">
+      <div class="timeline-card" data-id="6">
         <div class="card-date">2024年4月28日</div>
         <div class="card-content">
           <div class="content-text">
@@ -614,7 +638,7 @@
       </div>
       
       <!-- 卡片6 - 普通状态，有较长内容 -->
-      <div class="timeline-card">
+      <div class="timeline-card" data-id="7">
         <div class="card-date">2024年4月25日</div>
         <div class="card-content">
           <div class="content-text">
@@ -637,7 +661,7 @@
       </div>
       
       <!-- 卡片7 - 普通状态 -->
-      <div class="timeline-card">
+      <div class="timeline-card" data-id="8">
         <div class="card-date">2024年4月20日</div>
         <div class="card-content">
           <div class="content-text">
@@ -657,7 +681,7 @@
       </div>
       
       <!-- 卡片8 - 活跃状态 -->
-      <div class="timeline-card">
+      <div class="timeline-card" data-id="9">
         <div class="card-date">2024年4月15日</div>
         <div class="card-content">
           <div class="content-text">
@@ -677,7 +701,7 @@
       </div>
       
       <!-- 卡片9 - 普通状态，有较长内容 -->
-      <div class="timeline-card">
+      <div class="timeline-card" data-id="10">
         <div class="card-date">2024年4月10日</div>
         <div class="card-content">
           <div class="content-text">
@@ -717,7 +741,7 @@
         </div>
         <div class="timeline">
       <!-- 卡片11 - 普通状态 -->
-      <div class="timeline-card">
+      <div class="timeline-card" data-id="11">
         <div class="card-date">2024年4月5日</div>
         <div class="card-content">
           <div class="content-text">
@@ -737,7 +761,7 @@
       </div>
       
       <!-- 卡片11 - 普通状态，有较长内容 -->
-      <div class="timeline-card">
+      <div class="timeline-card" data-id="12">
         <div class="card-date">2024年3月30日</div>
         <div class="card-content">
           <div class="content-text">
@@ -760,7 +784,7 @@
       </div>
       
       <!-- 卡片12 - 活跃状态 -->
-      <div class="timeline-card">
+      <div class="timeline-card" data-id="13">
         <div class="card-date">2024年3月25日</div>
         <div class="card-content">
           <div class="content-text">
@@ -780,7 +804,7 @@
       </div>
       
       <!-- 卡片13 - 普通状态 -->
-      <div class="timeline-card">
+      <div class="timeline-card" data-id="14">
         <div class="card-date">2024年3月20日</div>
         <div class="card-content">
           <div class="content-text">
@@ -800,7 +824,7 @@
       </div>
       
       <!-- 卡片14 - 普通状态，有较长内容 -->
-      <div class="timeline-card">
+      <div class="timeline-card" data-id="15">
         <div class="card-date">2024年3月15日</div>
         <div class="card-content">
           <div class="content-text">
@@ -841,7 +865,7 @@
         </div>
         <div class="timeline">
       <!-- 卡片16 - 普通状态 -->
-      <div class="timeline-card">
+      <div class="timeline-card" data-id="16">
         <div class="card-date">2024年3月10日</div>
         <div class="card-content">
           <div class="content-text">
@@ -861,7 +885,7 @@
       </div>
       
       <!-- 卡片16 - 活跃状态 -->
-      <div class="timeline-card">
+      <div class="timeline-card" data-id="17">
         <div class="card-date">2024年3月5日</div>
         <div class="card-content">
           <div class="content-text">
@@ -881,7 +905,7 @@
       </div>
       
       <!-- 卡片17 - 普通状态，有较长内容 -->
-      <div class="timeline-card">
+      <div class="timeline-card" data-id="18">
         <div class="card-date">2024年3月1日</div>
         <div class="card-content">
           <div class="content-text">
@@ -904,7 +928,7 @@
       </div>
       
       <!-- 占位卡片1 -->
-      <div class="timeline-card placeholder-card">
+      <div class="timeline-card placeholder-card" data-id="19">
         <div class="card-date" style="background-color: var(--primary-color); box-shadow: 0 2px 10px var(--primary-glow);">ZZZZ年CC月YY日</div>
         <div class="card-content" style="display: flex; align-items: center; justify-content: center;">
           <div class="content-text" style="font-style: italic; color: var(--primary-color); text-align: center; font-size: 1.2rem;">
@@ -922,7 +946,7 @@
       </div>
       
       <!-- 占位卡片2 -->
-      <div class="timeline-card placeholder-card">
+      <div class="timeline-card placeholder-card" data-id="20">
         <div class="card-date" style="background-color: var(--primary-color); box-shadow: 0 2px 10px var(--primary-glow);">ZZZZ年CC月YY日</div>
         <div class="card-content" style="display: flex; align-items: center; justify-content: center;">
           <div class="content-text" style="font-style: italic; color: var(--primary-color); text-align: center; font-size: 1.2rem;">
