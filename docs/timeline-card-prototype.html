@@ -18,7 +18,30 @@
       --gray-800: #1f2937;
       --line-height: 1.5;
       --lines-to-show: 6; /* 减少显示行数以适应新高度 */
+      --jetbrains-green: #4CAF50;
+      --jetbrains-green-light: rgba(76, 175, 80, 0.2);
+      --jetbrains-green-glow: rgba(76, 175, 80, 0.6);
     }
+    
+    /* 自定义虚线边框样式 */
+    .sparse-dashed-border {
+      background-image: linear-gradient(to right, var(--jetbrains-green) 40%, transparent 60%);
+      background-position: top;
+      background-size: 20px 3px;
+      background-repeat: repeat-x;
+      padding-top: 3px;
+      border-top: none !important;
+    }
+    
+    /* 占位卡片样式 */
+    .placeholder-card {
+      border: none !important;
+      position: relative;
+      background-color: var(--primary-light) !important;
+      opacity: 0.9 !important;
+      border-radius: 10px;
+    }
+    
     
     * {
       margin: 0;
@@ -291,13 +314,14 @@
     
     /* 进度指示器样式 */
     .progress-indicator {
-      position: fixed;
+      position: absolute;
       right: 2rem;
       top: 50%;
       transform: translateY(-50%);
       z-index: 100;
       display: flex;
       align-items: center;
+      pointer-events: none; /* 确保不会阻挡卡片的点击事件 */
     }
     
     .progress-circle {
@@ -433,6 +457,18 @@
       
       <!-- 第一组卡片(1-5) -->
       <div class="carousel-group active" data-group="0">
+        <!-- 进度指示器 -->
+        <div class="progress-indicator">
+          <div class="progress-circle">
+            <div class="progress-inner">
+              <div class="progress-count">38/100</div>
+              <div class="progress-percent">38%</div>
+              <div class="progress-active">
+                <span class="progress-highlight">#1</span>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="timeline">
       <!-- 第一组的5张卡片 -->
       <!-- 卡片1 -->
@@ -544,6 +580,18 @@
 
       <!-- 第二组卡片(6-10) -->
       <div class="carousel-group" data-group="1">
+        <!-- 进度指示器 -->
+        <div class="progress-indicator">
+          <div class="progress-circle">
+            <div class="progress-inner">
+              <div class="progress-count">38/100</div>
+              <div class="progress-percent">38%</div>
+              <div class="progress-active">
+                <span class="progress-highlight">#2</span>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="timeline">
       <!-- 卡片6 - 普通状态 -->
       <div class="timeline-card">
@@ -655,6 +703,18 @@
 
       <!-- 第三组卡片(11-15) -->
       <div class="carousel-group" data-group="2">
+        <!-- 进度指示器 -->
+        <div class="progress-indicator">
+          <div class="progress-circle">
+            <div class="progress-inner">
+              <div class="progress-count">38/100</div>
+              <div class="progress-percent">38%</div>
+              <div class="progress-active">
+                <span class="progress-highlight">#3</span>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="timeline">
       <!-- 卡片11 - 普通状态 -->
       <div class="timeline-card">
@@ -767,6 +827,18 @@
 
       <!-- 第四组卡片(16-18) -->
       <div class="carousel-group" data-group="3">
+        <!-- 进度指示器 -->
+        <div class="progress-indicator">
+          <div class="progress-circle">
+            <div class="progress-inner">
+              <div class="progress-count">38/100</div>
+              <div class="progress-percent">38%</div>
+              <div class="progress-active">
+                <span class="progress-highlight">#4</span>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="timeline">
       <!-- 卡片16 - 普通状态 -->
       <div class="timeline-card">
@@ -831,20 +903,42 @@
         </div>
       </div>
       
-      
-    </div>
-    
-    <!-- 进度指示器 -->
-    <div class="progress-indicator">
-      <div class="progress-circle">
-        <div class="progress-inner">
-          <div class="progress-count">38/100</div>
-          <div class="progress-percent">38%</div>
-          <div class="progress-active">
-            <span class="progress-highlight">#2</span>
+      <!-- 占位卡片1 -->
+      <div class="timeline-card placeholder-card">
+        <div class="card-date" style="background-color: var(--primary-color); box-shadow: 0 2px 10px var(--primary-glow);">ZZZZ年CC月YY日</div>
+        <div class="card-content" style="display: flex; align-items: center; justify-content: center;">
+          <div class="content-text" style="font-style: italic; color: var(--primary-color); text-align: center; font-size: 1.2rem;">
+            Coming Soon...
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="icon-holder" style="opacity: 0.5;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          </div>
+          <div class="icon-holder" style="opacity: 0.5;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
           </div>
         </div>
       </div>
+      
+      <!-- 占位卡片2 -->
+      <div class="timeline-card placeholder-card">
+        <div class="card-date" style="background-color: var(--primary-color); box-shadow: 0 2px 10px var(--primary-glow);">ZZZZ年CC月YY日</div>
+        <div class="card-content" style="display: flex; align-items: center; justify-content: center;">
+          <div class="content-text" style="font-style: italic; color: var(--primary-color); text-align: center; font-size: 1.2rem;">
+            Coming Soon...
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="icon-holder" style="opacity: 0.5;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          </div>
+          <div class="icon-holder" style="opacity: 0.5;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          </div>
+        </div>
+      </div>
+      
     </div>
     
     <!-- 添加模态框 -->
