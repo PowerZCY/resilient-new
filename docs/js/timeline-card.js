@@ -118,13 +118,14 @@ function calculateAndAnimateCards(cards, startX, startY, middleIndex) {
     const middleCardPosition = cardPositions.find(pos => pos.relativePos === 0);
     if (middleCardPosition) {
       const middleCard = middleCardPosition.card;
-      middleCard.style.transitionProperty = 'transform, opacity';
-      middleCard.style.transitionDuration = '0.5s';
-      middleCard.style.transitionTimingFunction = 'ease-out';
-      middleCard.style.transitionDelay = '0s';
+      
+      // 设置中心卡片最终位置
       middleCard.style.transform = middleCardPosition.finalTransform;
-      middleCard.style.opacity = '1';
       middleCard.style.zIndex = middleCardPosition.zIndex.toString();
+      
+      // 应用特殊的弹出旋转动画
+      middleCard.style.opacity = '1';
+      middleCard.style.animation = 'center-card-pop 1s ease-out forwards';
       
       // 设置中间卡片为活跃状态
       setTimeout(() => {
@@ -133,7 +134,7 @@ function calculateAndAnimateCards(cards, startX, startY, middleIndex) {
           updateProgressIndicator(middleCard.dataset.id);
         }
         
-        // 中间卡片显示后，再开始波浪式显示两侧卡片
+        // 等中间卡片旋转动画结束后，再开始波浪式显示两侧卡片
         setTimeout(() => {
           // 分别处理左侧和右侧卡片，按照与中间卡片的距离排序
           const leftPositions = cardPositions.filter(pos => pos.relativePos < 0)
@@ -150,34 +151,36 @@ function calculateAndAnimateCards(cards, startX, startY, middleIndex) {
             if (i < leftPositions.length) {
               const pos = leftPositions[i];
               const card = pos.card;
-              const delay = 0.1 + i * 0.1; // 左侧卡片延迟
+              // 左侧卡片延迟，第一个最近的卡片延迟短，越远延迟越长
+              const delay = 0.1 + i * 0.08;
               
               // 设置最终位置
               card.style.transform = pos.finalTransform;
               card.style.zIndex = pos.zIndex.toString();
               
-              // 应用波浪动画
-              card.style.opacity = '1'; // 确保卡片可见
-              card.style.animation = `wave-appear 0.6s ease-out ${delay}s backwards`;
+              // 应用波浪动画，更长的动画时间
+              card.style.opacity = '1';
+              card.style.animation = `wave-appear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s backwards`;
             }
             
             // 右侧卡片
             if (i < rightPositions.length) {
               const pos = rightPositions[i];
               const card = pos.card;
-              const delay = 0.15 + i * 0.1; // 右侧卡片延迟略微错开
+              // 右侧卡片延迟略微错开，形成交错效果
+              const delay = 0.15 + i * 0.08;
               
               // 设置最终位置
               card.style.transform = pos.finalTransform;
               card.style.zIndex = pos.zIndex.toString();
               
-              // 应用波浪动画
-              card.style.opacity = '1'; // 确保卡片可见
-              card.style.animation = `wave-appear 0.6s ease-out ${delay}s backwards`;
+              // 应用波浪动画，更长的动画时间
+              card.style.opacity = '1';
+              card.style.animation = `wave-appear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s backwards`;
             }
           }
-        }, 200); // 中间卡片出现后再显示两侧卡片
-      }, 200);
+        }, 600); // 等待中央卡片动画接近完成
+      }, 300);
     }
   }, 10);
 }
@@ -368,104 +371,36 @@ function rotateCardsToTarget(cards, targetIndex) {
     card.style.animation = ''; // 清除可能存在的动画
   });
   
-  // 找到目标卡片
-  const targetCard = cards[targetIndex];
+  // 计算每张卡片的位置
+  cards.forEach((card, index) => {
+    // 计算相对位置
+    let relativePos = index - targetIndex;
+    
+    // 确保相对位置在合理范围内
+    if (relativePos > cards.length / 2) relativePos -= cards.length;
+    if (relativePos < -cards.length / 2) relativePos += cards.length;
+    
+    // 计算角度和位置
+    const angle = relativePos * (VISIBLE_ANGLE / VISIBLE_CARDS);
+    const x = Math.sin(angle) * RADIUS;
+    const y = -40 + Math.abs(relativePos) * 5; // 调整高度避免堆叠
+    const z = Math.cos(angle) * RADIUS * 0.7;
+    const rotateY = -angle * 0.8;
+    
+    // 设置卡片样式 - 使用简单的过渡效果，没有波浪动画
+    card.style.transition = 'transform 0.4s ease-out, opacity 0.4s ease-out';
+    card.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${rotateY}rad)`;
+    card.style.zIndex = 100 - Math.abs(relativePos) * 10;
+    card.style.opacity = 1 - Math.min(Math.abs(relativePos), 5) * 0.15;
+  });
   
-  // 首先单独处理目标卡片
+  // 设置目标卡片为活跃状态
+  const targetCard = cards[targetIndex];
   if (targetCard) {
-    const angle = 0; // 目标卡片居中，角度为0
-    const x = 0;
-    const y = -40; // 保持与calculateAndAnimateCards中相同的y偏移
-    const z = RADIUS * 0.7;
-    const rotateY = 0;
-    
-    targetCard.style.transition = 'transform 0.4s ease-out, opacity 0.4s ease-out';
-    targetCard.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${rotateY}rad)`;
-    targetCard.style.zIndex = '100';
-    targetCard.style.opacity = '1';
-    
-    // 添加短暂延迟后添加active类
     setTimeout(() => {
       targetCard.classList.add('active');
     }, 50);
   }
-  
-  // 然后处理左右两侧的卡片
-  setTimeout(() => {
-    // 分离左侧和右侧卡片
-    const leftCards = [];
-    const rightCards = [];
-    
-    for (let i = 0; i < cards.length; i++) {
-      if (i === targetIndex) continue; // 跳过目标卡片
-      
-      // 计算相对位置
-      let relativePos = i - targetIndex;
-      
-      // 确保相对位置在合理范围内
-      if (relativePos > cards.length / 2) relativePos -= cards.length;
-      if (relativePos < -cards.length / 2) relativePos += cards.length;
-      
-      if (relativePos < 0) {
-        leftCards.push({ card: cards[i], relativePos });
-      } else {
-        rightCards.push({ card: cards[i], relativePos });
-      }
-    }
-    
-    // 按照与目标卡片的距离排序
-    leftCards.sort((a, b) => Math.abs(a.relativePos) - Math.abs(b.relativePos));
-    rightCards.sort((a, b) => Math.abs(a.relativePos) - Math.abs(b.relativePos));
-    
-    // 交错显示左右两侧卡片
-    const maxSides = Math.max(leftCards.length, rightCards.length);
-    
-    for (let i = 0; i < maxSides; i++) {
-      // 左侧卡片
-      if (i < leftCards.length) {
-        const { card, relativePos } = leftCards[i];
-        
-        // 计算角度和位置
-        const angle = relativePos * (VISIBLE_ANGLE / VISIBLE_CARDS);
-        const x = Math.sin(angle) * RADIUS;
-        const y = -40 + Math.abs(relativePos) * 5; // 调整高度避免堆叠
-        const z = Math.cos(angle) * RADIUS * 0.7;
-        const rotateY = -angle * 0.8;
-        const zIndex = 100 - Math.abs(relativePos) * 10;
-        const opacity = 1 - Math.min(Math.abs(relativePos), 5) * 0.15;
-        
-        // 设置波浪动画
-        const delay = 0.05 + i * 0.08; // 左侧卡片延迟
-        
-        card.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${rotateY}rad)`;
-        card.style.zIndex = zIndex;
-        card.style.opacity = opacity;
-        card.style.animation = `wave-appear 0.5s ease-out ${delay}s backwards`;
-      }
-      
-      // 右侧卡片
-      if (i < rightCards.length) {
-        const { card, relativePos } = rightCards[i];
-        
-        // 计算角度和位置
-        const angle = relativePos * (VISIBLE_ANGLE / VISIBLE_CARDS);
-        const x = Math.sin(angle) * RADIUS;
-        const y = -40 + Math.abs(relativePos) * 5; // 调整高度避免堆叠
-        const z = Math.cos(angle) * RADIUS * 0.7;
-        const rotateY = -angle * 0.8;
-        const zIndex = 100 - Math.abs(relativePos) * 10;
-        const opacity = 1 - Math.min(Math.abs(relativePos), 5) * 0.15;
-        
-        // 设置波浪动画
-        const delay = 0.1 + i * 0.08; // 右侧卡片延迟
-        
-        card.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${rotateY}rad)`;
-        card.style.zIndex = zIndex;
-        card.style.opacity = opacity;
-        card.style.animation = `wave-appear 0.5s ease-out ${delay}s backwards`;
-      }
-    }
-  }, 100); // 目标卡片出现后再处理其他卡片
 }
 
 /**
