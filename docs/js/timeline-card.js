@@ -26,6 +26,113 @@ function initializeTimelineCards() {
   
   // 添加性能优化标记，让浏览器提前做好准备
   document.querySelector('.carousel-container').classList.add('performance-boost');
+  
+  // 获取第一个组的按钮并触发初始发牌效果
+  setTimeout(() => {
+    const firstGroup = document.querySelector('.carousel-group[data-group="0"]');
+    const firstBtn = document.querySelector('.nav-btn[data-group="0"]');
+    
+    if (firstGroup && firstBtn) {
+      const btnRect = firstBtn.getBoundingClientRect();
+      const btnCenterX = btnRect.left + btnRect.width / 2;
+      const btnCenterY = btnRect.top + btnRect.height / 2;
+      
+      const cards = firstGroup.querySelectorAll('.timeline-card');
+      const middleIndex = Math.floor(cards.length / 2) >= cards.length ? 0 : Math.floor(cards.length / 2);
+      firstGroup.dataset.currentIndex = middleIndex;
+      
+      // 设置初始进度条ID
+      const middleCard = cards[middleIndex];
+      if (middleCard && middleCard.dataset.id) {
+        updateProgressIndicator(middleCard.dataset.id);
+      }
+      
+      // 计算并设置初始位置
+      calculateAndAnimateCards(cards, btnCenterX, btnCenterY, middleIndex);
+    }
+  }, 100);
+}
+
+/**
+ * 计算并设置卡片动画
+ */
+function calculateAndAnimateCards(cards, startX, startY, middleIndex) {
+  // 清除之前可能存在的样式
+  cards.forEach(card => {
+    card.style.zIndex = "";
+    card.classList.remove('active');
+    card.style.visibility = 'visible';
+    card.style.pointerEvents = 'auto';
+  });
+  
+  // 先计算出卡片的最终位置
+  const cardPositions = [];
+  cards.forEach((card, index) => {
+    // 计算相对于中间卡片的位置
+    let relativePos = index - middleIndex;
+    
+    // 确保相对位置合理
+    if (relativePos > cards.length / 2) relativePos -= cards.length;
+    if (relativePos < -cards.length / 2) relativePos += cards.length;
+    
+    // 计算卡片角度与位置
+    const angle = relativePos * (VISIBLE_ANGLE / VISIBLE_CARDS);
+    const x = Math.sin(angle) * RADIUS;
+    const y = -40 + Math.abs(relativePos) * 5; // 根据距离中心的远近调整高度，防止堆叠
+    const z = Math.cos(angle) * RADIUS * 0.7;
+    const rotateY = -angle * 0.8;
+    
+    // 根据与中间卡片的距离设置z-index
+    const zIndex = 100 - Math.abs(relativePos) * 10;
+    
+    cardPositions.push({
+      card,
+      index,
+      relativePos,
+      finalTransform: `translate3d(${x}px, ${y}px, ${z}px) rotateY(${rotateY}rad)`,
+      zIndex,
+      finalOpacity: 1 - Math.min(Math.abs(relativePos), 5) * 0.15
+    });
+    
+    // 先将卡片设置在按钮位置
+    card.style.transitionProperty = 'none';
+    card.style.transform = `translate3d(${startX - window.innerWidth/2}px, ${startY - window.innerHeight/2}px, 0) scale(0.1)`;
+    card.style.opacity = '0';
+    card.style.zIndex = '1';
+    
+    // 强制重绘
+    void card.offsetWidth;
+  });
+  
+  // 对位置数组按z-index排序，确保正确的图层顺序
+  cardPositions.sort((a, b) => a.zIndex - b.zIndex);
+  
+  // 然后为每张卡片应用动画
+  setTimeout(() => {
+    cardPositions.forEach((position, i) => {
+      const card = position.card;
+      const delay = 0.05 + Math.abs(position.relativePos) * 0.03;
+      
+      card.style.transitionProperty = 'transform, opacity';
+      card.style.transitionDuration = '0.7s';
+      card.style.transitionTimingFunction = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+      card.style.transitionDelay = `${delay}s`;
+      card.style.transform = position.finalTransform;
+      card.style.opacity = position.finalOpacity.toString();
+      card.style.zIndex = position.zIndex.toString();
+    });
+    
+    // 设置中间卡片为活跃状态
+    setTimeout(() => {
+      const middleCard = cards[middleIndex];
+      if (middleCard) {
+        middleCard.classList.add('active');
+        if (middleCard.dataset.id) {
+          updateProgressIndicator(middleCard.dataset.id);
+        }
+      }
+    }, 500);
+  }, 50);
 }
 
 /**
@@ -162,10 +269,10 @@ function setup3DEffects() {
   // 初始化每个组的卡片位置
   carouselGroups.forEach((group) => {
     const cards = group.querySelectorAll('.timeline-card');
-    group.dataset.currentIndex = 0;
     
-    // 设置初始位置 - 使卡片环绕分布
-    positionCards(cards, 0);
+    // 设置默认的中间卡片索引
+    const middleIndex = Math.floor(cards.length / 2) >= cards.length ? 0 : Math.floor(cards.length / 2);
+    group.dataset.currentIndex = middleIndex;
     
     // 添加卡片点击事件 - 使用事件委托减少事件监听器数量
     group.addEventListener('click', (e) => {
@@ -175,19 +282,15 @@ function setup3DEffects() {
       const index = parseInt(card.dataset.index);
       if (isNaN(index)) return;
       
-      // 取消任何正在进行的动画帧
-      if (lastFrameId) {
-        cancelAnimationFrame(lastFrameId);
-      }
+      // 获取当前激活的索引
+      const currentIndex = parseInt(group.dataset.currentIndex || 0);
+      if (index === currentIndex) return; // 如果点击的是当前活跃卡片，不做处理
       
-      // 获取当前索引
-      let currentIndex = parseInt(group.dataset.currentIndex || 0);
-      
-      // 更新卡片位置
-      rotateCardsTo(cards, index, currentIndex);
-      
-      // 更新当前索引
+      // 更新组的当前索引
       group.dataset.currentIndex = index;
+      
+      // 使用环绕动画效果
+      rotateCardsToTarget(cards, index);
       
       // 获取卡片ID并更新进度指示器
       const cardId = card.dataset.id;
@@ -218,82 +321,53 @@ function setup3DEffects() {
       });
     });
   });
-  
-  // 更新当前卡片ID
-  updateProgressIndicator(1);
 }
 
 /**
- * 定位所有卡片
- * @param {NodeList} cards 卡片元素列表
- * @param {number} centerIndex 中心卡片的索引
+ * 旋转卡片到目标位置 - 使用环绕效果
  */
-function positionCards(cards, centerIndex) {
-  const totalCards = cards.length;
+function rotateCardsToTarget(cards, targetIndex) {
+  // 清除所有卡片的active状态
+  cards.forEach(card => card.classList.remove('active'));
   
-  // 设置所有卡片的位置
+  // 计算每张卡片的位置
   cards.forEach((card, index) => {
-    // 计算每张卡片相对于中心卡片的位置
-    let relativePos = index - centerIndex;
+    // 计算相对位置
+    let relativePos = index - targetIndex;
     
-    // 确保relativePos在-5到4的范围内，实现无限循环效果
-    if (relativePos > totalCards / 2) relativePos -= totalCards;
-    if (relativePos < -totalCards / 2) relativePos += totalCards;
+    // 确保相对位置在合理范围内
+    if (relativePos > cards.length / 2) relativePos -= cards.length;
+    if (relativePos < -cards.length / 2) relativePos += cards.length;
     
-    // 设置卡片可见性
-    const isVisible = Math.abs(relativePos) <= Math.floor(VISIBLE_CARDS / 2);
-    card.style.display = isVisible ? 'flex' : 'none';
+    // 计算角度和位置
+    const angle = relativePos * (VISIBLE_ANGLE / VISIBLE_CARDS);
+    const x = Math.sin(angle) * RADIUS;
+    const y = -40 + Math.abs(relativePos) * 5; // 调整高度避免堆叠
+    const z = Math.cos(angle) * RADIUS * 0.7;
+    const rotateY = -angle * 0.8;
     
-    if (isVisible) {
-      // 调整角度计算，使可见卡片分布在前方视野内
-      const angle = relativePos * (VISIBLE_ANGLE / (VISIBLE_CARDS - 1));
-      
-      // 计算卡片位置 - 向上偏移一些，给底部控件留出空间
-      const x = Math.sin(angle) * RADIUS;
-      const y = -40; // 向上偏移一些，给底部控件留出空间
-      const z = Math.cos(angle) * RADIUS * 0.7;
-      
-      // 卡片旋转角度，使卡片正面朝向用户
-      const rotateY = -angle * 0.8;
-      
-      card.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${rotateY}rad)`;
-      
-      // 根据位置设置不同的层级，使中间卡片位于最上层
-      card.style.zIndex = 20 - Math.abs(relativePos) * 3;
-      
-      // 调整卡片整体的透明度，但保持在较高的可见范围
-      // 这里设置卡片整体的透明度较高，具体内容的透明度由CSS控制
-      const opacityFactor = 1 - Math.abs(relativePos) * 0.08;
-      card.style.opacity = opacityFactor;
-    }
+    // 设置卡片样式
+    card.style.transition = 'all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)';
+    card.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${rotateY}rad)`;
+    card.style.zIndex = 100 - Math.abs(relativePos) * 10;
+    card.style.opacity = 1 - Math.min(Math.abs(relativePos), 5) * 0.15;
   });
   
-  // 设置当前卡片为active
-  if (cards[centerIndex]) {
-    cards.forEach(c => c.classList.remove('active'));
-    cards[centerIndex].classList.add('active');
+  // 设置目标卡片为活跃状态
+  const targetCard = cards[targetIndex];
+  if (targetCard) {
+    targetCard.classList.add('active');
+    // 增加短暂延迟确保过渡效果完成后再添加active类
+    setTimeout(() => {
+      targetCard.classList.add('active');
+    }, 100);
   }
-}
-
-/**
- * 旋转卡片到指定位置
- */
-function rotateCardsTo(cards, newIndex, currentIndex) {
-  // 使用requestAnimationFrame优化性能
-  lastFrameId = requestAnimationFrame(() => {
-    // 更新所有卡片的位置
-    positionCards(cards, newIndex);
-    
-    // 清除动画帧引用
-    lastFrameId = null;
-  });
 }
 
 /**
  * 设置初始状态和全局变量
  */
 function setupInitialState() {
-  window.currentRotation = 0;
   window.currentGroup = 0;
 }
 
@@ -397,31 +471,47 @@ function switchGroup(index) {
   
   const groups = document.querySelectorAll('.carousel-group');
   const navBtns = document.querySelectorAll('.nav-btn');
+  const activeBtn = navBtns[index];
   
-  if (groups[window.currentGroup]) {
-    groups[window.currentGroup].classList.remove('active');
-  }
+  // 保存按钮位置，用于发牌动画
+  const btnRect = activeBtn.getBoundingClientRect();
+  const btnCenterX = btnRect.left + btnRect.width / 2;
+  const btnCenterY = btnRect.top + btnRect.height / 2;
   
-  if (navBtns[window.currentGroup]) {
-    navBtns[window.currentGroup].classList.remove('active');
-  }
+  // 立即隐藏所有组的卡片
+  groups.forEach((g, i) => {
+    if (i === index) return; // 跳过即将显示的组
+    
+    g.classList.remove('active');
+    // 立即隐藏卡片，不做动画过渡
+    const cards = g.querySelectorAll('.timeline-card');
+    cards.forEach(card => {
+      card.style.transition = 'none';
+      card.style.transform = '';
+      card.style.opacity = '0';
+      card.style.visibility = 'hidden';
+      card.style.pointerEvents = 'none';
+      card.classList.remove('active');
+    });
+  });
   
-  if (groups[index]) {
-    groups[index].classList.add('active');
-  }
+  // 更新导航按钮状态
+  navBtns.forEach(btn => btn.classList.remove('active'));
+  activeBtn.classList.add('active');
   
-  if (navBtns[index]) {
-    navBtns[index].classList.add('active');
-  }
+  // 立即准备新组
+  const group = groups[index];
+  group.classList.add('active');
+  const newCards = group.querySelectorAll('.timeline-card');
+  
+  // 计算中间卡片索引
+  const middleIndex = Math.floor(newCards.length / 2) >= newCards.length ? 0 : Math.floor(newCards.length / 2);
+  group.dataset.currentIndex = middleIndex;
+  
+  // 计算并设置动画 - 从按钮位置发牌
+  calculateAndAnimateCards(newCards, btnCenterX, btnCenterY, middleIndex);
   
   window.currentGroup = index;
-  window.currentRotation = 0;
-  
-  // 更新当前组的第一张卡片为默认选中
-  const firstCard = groups[index].querySelector('.timeline-card');
-  if (firstCard && firstCard.dataset.id) {
-    updateProgressIndicator(firstCard.dataset.id);
-  }
 }
 
 /**
