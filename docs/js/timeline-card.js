@@ -112,6 +112,14 @@ function calculateAndAnimateCards(cards, startX, startY, middleIndex) {
   // 对位置数组按z-index排序，确保正确的图层顺序
   cardPositions.sort((a, b) => a.zIndex - b.zIndex);
   
+  // 先隐藏所有非中间卡片
+  cardPositions.forEach(pos => {
+    if (pos.relativePos !== 0) {
+      pos.card.style.opacity = '0';
+      pos.card.style.visibility = 'hidden';
+    }
+  });
+  
   // 先显示中间卡片，再显示两侧卡片
   setTimeout(() => {
     // 先只设置中间卡片动画
@@ -119,13 +127,13 @@ function calculateAndAnimateCards(cards, startX, startY, middleIndex) {
     if (middleCardPosition) {
       const middleCard = middleCardPosition.card;
       
-      // 设置中心卡片最终位置
-      middleCard.style.transform = middleCardPosition.finalTransform;
-      middleCard.style.zIndex = middleCardPosition.zIndex.toString();
+      // 为中间卡片设置最高层级
+      middleCard.style.zIndex = '999';
       
-      // 应用特殊的弹出旋转动画
+      // 将卡片从按钮位置移到最终位置并旋转
+      // 使用独立的动画样式，不设置transform属性以避免与animation冲突
       middleCard.style.opacity = '1';
-      middleCard.style.animation = 'center-card-pop 1s ease-out forwards';
+      middleCard.style.animation = 'center-card-pop 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
       
       // 设置中间卡片为活跃状态
       setTimeout(() => {
@@ -134,52 +142,65 @@ function calculateAndAnimateCards(cards, startX, startY, middleIndex) {
           updateProgressIndicator(middleCard.dataset.id);
         }
         
-        // 等中间卡片旋转动画结束后，再开始波浪式显示两侧卡片
+        // 中间卡片动画接近完成后，移到正确的Z层次
         setTimeout(() => {
-          // 分别处理左侧和右侧卡片，按照与中间卡片的距离排序
-          const leftPositions = cardPositions.filter(pos => pos.relativePos < 0)
-            .sort((a, b) => Math.abs(a.relativePos) - Math.abs(b.relativePos));
+          middleCard.style.zIndex = middleCardPosition.zIndex.toString();
+          middleCard.style.transform = middleCardPosition.finalTransform;
           
-          const rightPositions = cardPositions.filter(pos => pos.relativePos > 0)
-            .sort((a, b) => Math.abs(a.relativePos) - Math.abs(b.relativePos));
-          
-          // 交错显示左右两侧卡片，创建波浪效果
-          const maxSides = Math.max(leftPositions.length, rightPositions.length);
-          
-          for (let i = 0; i < maxSides; i++) {
-            // 左侧卡片
-            if (i < leftPositions.length) {
-              const pos = leftPositions[i];
-              const card = pos.card;
-              // 左侧卡片延迟，第一个最近的卡片延迟短，越远延迟越长
-              const delay = 0.1 + i * 0.08;
-              
-              // 设置最终位置
-              card.style.transform = pos.finalTransform;
-              card.style.zIndex = pos.zIndex.toString();
-              
-              // 应用波浪动画，更长的动画时间
-              card.style.opacity = '1';
-              card.style.animation = `wave-appear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s backwards`;
+          // 显示所有卡片
+          cardPositions.forEach(pos => {
+            if (pos.relativePos !== 0) {
+              pos.card.style.visibility = 'visible';
             }
+          });
+          
+          // 等待中央卡片动画结束后，再开始波浪式显示两侧卡片
+          setTimeout(() => {
+            // 分别处理左侧和右侧卡片，按照与中间卡片的距离排序
+            const leftPositions = cardPositions.filter(pos => pos.relativePos < 0)
+              .sort((a, b) => Math.abs(a.relativePos) - Math.abs(b.relativePos));
             
-            // 右侧卡片
-            if (i < rightPositions.length) {
-              const pos = rightPositions[i];
-              const card = pos.card;
-              // 右侧卡片延迟略微错开，形成交错效果
-              const delay = 0.15 + i * 0.08;
+            const rightPositions = cardPositions.filter(pos => pos.relativePos > 0)
+              .sort((a, b) => Math.abs(a.relativePos) - Math.abs(b.relativePos));
+            
+            // 交错显示左右两侧卡片，创建波浪效果
+            const maxSides = Math.max(leftPositions.length, rightPositions.length);
+            
+            for (let i = 0; i < maxSides; i++) {
+              // 左侧卡片
+              if (i < leftPositions.length) {
+                const pos = leftPositions[i];
+                const card = pos.card;
+                // 左侧卡片延迟，第一个最近的卡片延迟短，越远延迟越长
+                const delay = 0.1 + i * 0.08;
+                
+                // 设置最终位置
+                card.style.transform = pos.finalTransform;
+                card.style.zIndex = pos.zIndex.toString();
+                
+                // 应用波浪动画，更长的动画时间
+                card.style.opacity = '1';
+                card.style.animation = `wave-appear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s backwards`;
+              }
               
-              // 设置最终位置
-              card.style.transform = pos.finalTransform;
-              card.style.zIndex = pos.zIndex.toString();
-              
-              // 应用波浪动画，更长的动画时间
-              card.style.opacity = '1';
-              card.style.animation = `wave-appear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s backwards`;
+              // 右侧卡片
+              if (i < rightPositions.length) {
+                const pos = rightPositions[i];
+                const card = pos.card;
+                // 右侧卡片延迟略微错开，形成交错效果
+                const delay = 0.15 + i * 0.08;
+                
+                // 设置最终位置
+                card.style.transform = pos.finalTransform;
+                card.style.zIndex = pos.zIndex.toString();
+                
+                // 应用波浪动画，更长的动画时间
+                card.style.opacity = '1';
+                card.style.animation = `wave-appear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s backwards`;
+              }
             }
-          }
-        }, 600); // 等待中央卡片动画接近完成
+          }, 100);
+        }, 800); // 等待中间卡片旋转动画接近完成
       }, 300);
     }
   }, 10);
