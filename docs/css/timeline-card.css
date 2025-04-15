@@ -272,7 +272,7 @@ h1 {
   border-radius: 12px; /* 恢复原来的圆角样式 */
   overflow: visible; /* 允许日期标签溢出 */
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   border: 1px solid var(--letter-border-color);
   display: flex;
   flex-direction: column;
@@ -316,17 +316,33 @@ h1 {
   transform: translate3d(0, 0, 0) scale(1);
 }
 
-/* 为各个卡片添加递增延迟 - 取消CSS内部延迟，改为由JS控制 */
-/* .carousel-group.active .timeline-card:nth-child(1) { transition-delay: 0.1s; }
-.carousel-group.active .timeline-card:nth-child(2) { transition-delay: 0.2s; }
-.carousel-group.active .timeline-card:nth-child(3) { transition-delay: 0.3s; }
-.carousel-group.active .timeline-card:nth-child(4) { transition-delay: 0.4s; }
-.carousel-group.active .timeline-card:nth-child(5) { transition-delay: 0.5s; }
-.carousel-group.active .timeline-card:nth-child(6) { transition-delay: 0.6s; }
-.carousel-group.active .timeline-card:nth-child(7) { transition-delay: 0.7s; }
-.carousel-group.active .timeline-card:nth-child(8) { transition-delay: 0.8s; }
-.carousel-group.active .timeline-card:nth-child(9) { transition-delay: 0.9s; }
-.carousel-group.active .timeline-card:nth-child(10) { transition-delay: 1s; } */
+/* 波浪效果关键帧动画 */
+@keyframes wave-appear {
+  0% {
+    transform: translate3d(0, 15px, -50px) scale(0.5);
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.8;
+  }
+  60% {
+    transform: translate3d(0, -8px, 10px) scale(1.03);
+    opacity: 1;
+  }
+  75% {
+    transform: translate3d(0, 4px, -5px) scale(0.98);
+  }
+  85% {
+    transform: translate3d(0, -2px, 2px) scale(1.01);
+  }
+  92% {
+    transform: translate3d(0, 1px, 0) scale(0.99);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
+  }
+}
 
 /* 非激活组的卡片 */
 .carousel-group:not(.active) .timeline-card {
@@ -339,12 +355,14 @@ h1 {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
   border-color: var(--primary-color);
   transform: translateZ(10px) scale(1.05);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .timeline-card.active {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   border-color: var(--primary-color);
   transform: translateZ(20px) scale(1.1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* 只允许激活卡片的内容可选择 */
