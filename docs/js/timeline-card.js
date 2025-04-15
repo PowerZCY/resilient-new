@@ -165,40 +165,47 @@ function calculateAndAnimateCards(cards, startX, startY, middleIndex) {
           
           // 开始显示其他卡片（波浪效果），减少等待时间
           setTimeout(() => {
-            // 分别处理左侧和右侧卡片，按照与中间卡片的距离排序
+            // 分别处理左侧和右侧卡片，按照与中间卡片的距离排序（从近到远）
             const leftPositions = cardPositions.filter(pos => pos.relativePos < 0)
               .sort((a, b) => Math.abs(a.relativePos) - Math.abs(b.relativePos));
             
             const rightPositions = cardPositions.filter(pos => pos.relativePos > 0)
               .sort((a, b) => Math.abs(a.relativePos) - Math.abs(b.relativePos));
             
-            // 交错显示左右两侧卡片，创建波浪效果
+            // 交错显示左右两侧卡片，从中间向两侧依次出现
             const maxSides = Math.max(leftPositions.length, rightPositions.length);
             
+            // 基础延迟和每张卡片的增量延迟 - 增大时间梯度让效果更明显
+            const baseDelay = 0.1;       // 从0.03增加到0.1秒
+            const delayIncrement = 0.15;  // 从0.05增加到0.15秒
+            
+            // 逐一显示每层的左右卡片，而不是全部一起显示
             for (let i = 0; i < maxSides; i++) {
-              // 左侧卡片
+              // 左侧当前层级的卡片
               if (i < leftPositions.length) {
                 const pos = leftPositions[i];
                 const card = pos.card;
-                const delay = 0.07 + i * 0.06; // 减少延迟时间
+                // 越靠近中间卡片越先出现，越远离越后出现
+                const delay = baseDelay + i * delayIncrement;
                 
                 // 应用波浪动画，但不改变位置（卡片已经在正确位置）
-                card.style.transition = `opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s`; // 减少过渡时间
+                card.style.transition = `opacity 0.4s ease-out ${delay}s`;
                 card.style.opacity = pos.finalOpacity.toString();
               }
               
-              // 右侧卡片
+              // 右侧当前层级的卡片，稍微错开时间
               if (i < rightPositions.length) {
                 const pos = rightPositions[i];
                 const card = pos.card;
-                const delay = 0.1 + i * 0.06; // 减少延迟时间
+                // 右侧卡片比左侧同级卡片稍晚出现，形成交错效果
+                const delay = baseDelay + i * delayIncrement + 0.05;  // 从0.02增加到0.05秒
                 
                 // 应用波浪动画，但不改变位置（卡片已经在正确位置）
-                card.style.transition = `opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s`; // 减少过渡时间
+                card.style.transition = `opacity 0.4s ease-out ${delay}s`;
                 card.style.opacity = pos.finalOpacity.toString();
               }
             }
-          }, 100); // 减少后续动画的等待时间，从200ms减少到100ms
+          }, 100);
         }
       );
     }

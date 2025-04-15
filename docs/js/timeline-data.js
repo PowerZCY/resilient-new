@@ -9,8 +9,8 @@
 const timelineData = {
   // 总体进度信息
   progress: {
-    current: 194,
-    total: 194
+    current: 96,
+    total: 192
   },
   
   // 分组导航
@@ -260,21 +260,21 @@ const timelineData = {
       },
       {
         id: 38,
-        date: "ZZZZ年CC月YY日",
+        date: "Z年C月Y日",
         content: "Coming Soon...",
         isPlaceholder: true,
         needFade: false
       },
       {
         id: 39,
-        date: "ZZZZ年CC月YY日",
+        date: "Z年C月Y日",
         content: "Coming Soon...",
         isPlaceholder: true,
         needFade: false
       },
       {
         id: 40,
-        date: "ZZZZ年CC月YY日",
+        date: "Z年C月Y日",
         content: "Coming Soon...",
         isPlaceholder: true,
         needFade: false
