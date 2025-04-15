@@ -110,22 +110,24 @@ function calculateAndAnimateCards(cards, startX, startY, middleIndex) {
   // 对位置数组按z-index排序，确保正确的图层顺序
   cardPositions.sort((a, b) => a.zIndex - b.zIndex);
   
-  // 然后为每张卡片应用动画
+  // 减少延迟，加快整个动画过程
   setTimeout(() => {
     cardPositions.forEach((position, i) => {
       const card = position.card;
-      const delay = 0.05 + Math.abs(position.relativePos) * 0.03;
+      // 减少延迟时间差，加快所有卡片出现
+      const delay = 0.02 + Math.abs(position.relativePos) * 0.01;
       
       card.style.transitionProperty = 'transform, opacity';
-      card.style.transitionDuration = '0.7s';
-      card.style.transitionTimingFunction = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+      // 减少过渡时间，加快动画完成
+      card.style.transitionDuration = '0.5s';
+      card.style.transitionTimingFunction = 'ease-out';
       card.style.transitionDelay = `${delay}s`;
       card.style.transform = position.finalTransform;
       card.style.opacity = position.finalOpacity.toString();
       card.style.zIndex = position.zIndex.toString();
     });
     
-    // 设置中间卡片为活跃状态
+    // 减少设置活跃状态的延时
     setTimeout(() => {
       const middleCard = cards[middleIndex];
       if (middleCard) {
@@ -134,8 +136,8 @@ function calculateAndAnimateCards(cards, startX, startY, middleIndex) {
           updateProgressIndicator(middleCard.dataset.id);
         }
       }
-    }, 500);
-  }, 50);
+    }, 300); // 从500ms减少到300ms
+  }, 10); // 从50ms减少到10ms
 }
 
 /**
@@ -337,22 +339,22 @@ function rotateCardsToTarget(cards, targetIndex) {
     const z = Math.cos(angle) * RADIUS * 0.7;
     const rotateY = -angle * 0.8;
     
-    // 设置卡片样式
-    card.style.transition = 'all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)';
+    // 设置卡片样式 - 加快过渡时间并简化属性变换
+    card.style.transition = 'transform 0.4s ease-out, opacity 0.4s ease-out';
     card.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${rotateY}rad)`;
     card.style.zIndex = 100 - Math.abs(relativePos) * 10;
     card.style.opacity = 1 - Math.min(Math.abs(relativePos), 5) * 0.15;
   });
   
-  // 设置目标卡片为活跃状态
+  // 设置目标卡片为活跃状态 - 减少延迟时间
   const targetCard = cards[targetIndex];
   if (targetCard) {
     targetCard.classList.add('active');
     
-    // 增加短暂延迟确保过渡效果完成后再添加active类
+    // 增加短暂延迟确保过渡效果完成后再添加active类 - 减少延迟
     setTimeout(() => {
       targetCard.classList.add('active');
-    }, 100);
+    }, 50);
   }
 }
 
