@@ -30,30 +30,49 @@ function initializeTimelineCards() {
   // 添加性能优化标记，让浏览器提前做好准备
   document.querySelector('.carousel-container').classList.add('performance-boost');
   
-  // 获取第一个组的按钮并触发初始发牌效果
+  // 获取第一个组的按钮并触发初始发牌效果 - 减少延迟时间提高响应速度
   setTimeout(() => {
     const firstGroup = document.querySelector('.carousel-group[data-group="0"]');
     const firstBtn = document.querySelector('.nav-btn[data-group="0"]');
     
     if (firstGroup && firstBtn) {
+      const cards = firstGroup.querySelectorAll('.timeline-card');
+      const middleIndex = Math.floor(cards.length / 2) >= cards.length ? 0 : Math.floor(cards.length / 2);
+      const middleCard = cards[middleIndex];
+      
+      // 添加预加载效果，让用户感觉到将要出现的卡片 
+      if (middleCard) {
+        middleCard.classList.add('preload');
+        middleCard.style.visibility = 'visible';
+        
+        // 强制重绘，确保快速闪烁效果
+        void middleCard.offsetHeight;
+      }
+      
+      // 现在才添加active类，确保之前卡片不会显示
+      firstGroup.classList.add('active');
+      firstBtn.classList.add('active');
+      
       const btnRect = firstBtn.getBoundingClientRect();
       const btnCenterX = btnRect.left + btnRect.width / 2;
       const btnCenterY = btnRect.top + btnRect.height / 2;
       
-      const cards = firstGroup.querySelectorAll('.timeline-card');
-      const middleIndex = Math.floor(cards.length / 2) >= cards.length ? 0 : Math.floor(cards.length / 2);
       firstGroup.dataset.currentIndex = middleIndex;
       
       // 设置初始进度条ID
-      const middleCard = cards[middleIndex];
       if (middleCard && middleCard.dataset.id) {
         updateProgressIndicator(middleCard.dataset.id);
+      }
+      
+      // 移除预加载类
+      if (middleCard) {
+        middleCard.classList.remove('preload');
       }
       
       // 计算并设置初始位置
       calculateAndAnimateCards(cards, btnCenterX, btnCenterY, middleIndex);
     }
-  }, 100);
+  }, 100); // 从30ms减少到10ms，几乎立即开始动画
 }
 
 /**
@@ -121,95 +140,93 @@ function calculateAndAnimateCards(cards, startX, startY, middleIndex) {
   // 强制重绘
   void document.body.offsetHeight;
   
-  // 然后，只对中间卡片执行特殊动画
-  setTimeout(() => {
-    const middleCardPosition = cardPositions.find(pos => pos.relativePos === 0);
-    if (middleCardPosition) {
-      const middleCard = middleCardPosition.card;
-      
-      // 设置中间卡片初始位置（从按钮位置开始）
-      middleCard.style.transition = 'none';
-      middleCard.style.transform = `translate3d(${startX - window.innerWidth/2}px, ${startY - window.innerHeight/2}px, -100px) scale(0.1) rotateY(0deg)`;
-      middleCard.style.opacity = '0';
-      middleCard.style.zIndex = '999'; // 确保在最上层
-      
-      // 强制重绘
-      void middleCard.offsetHeight;
-      
-      // 使用更流畅的动画函数，将720度旋转分为15个小步骤，总时间缩短为1.2秒
-      animateCardWithSmallSteps(
-        middleCard,
-        middleCardPosition.finalX,
-        middleCardPosition.finalY,
-        middleCardPosition.finalZ,
-        0.1, // 起始缩放
-        1.0, // 最终缩放
-        0,   // 起始角度
-        720, // 最终角度(两圈)
-        0,   // 起始透明度
-        1,   // 最终透明度
-        1.2, // 总持续时间(秒)，从2.0秒缩短到1.2秒
-        0.1, // 延迟开始时间(秒)
-        15,  // 步骤数量，从20减少到15，每步时间更短
-        () => {
-          // 动画完成后的回调
-          // 设置为活跃状态
-          middleCard.classList.add('active');
-          if (middleCard.dataset.id) {
-            updateProgressIndicator(middleCard.dataset.id);
-          }
-          
-          // 恢复正常z-index和最终位置
-          middleCard.style.zIndex = middleCardPosition.zIndex.toString();
-          middleCard.style.transform = middleCardPosition.finalTransform;
-          
-          // 开始显示其他卡片（波浪效果），减少等待时间
-          setTimeout(() => {
-            // 分别处理左侧和右侧卡片，按照与中间卡片的距离排序（从近到远）
-            const leftPositions = cardPositions.filter(pos => pos.relativePos < 0)
-              .sort((a, b) => Math.abs(a.relativePos) - Math.abs(b.relativePos));
-            
-            const rightPositions = cardPositions.filter(pos => pos.relativePos > 0)
-              .sort((a, b) => Math.abs(a.relativePos) - Math.abs(b.relativePos));
-            
-            // 交错显示左右两侧卡片，从中间向两侧依次出现
-            const maxSides = Math.max(leftPositions.length, rightPositions.length);
-            
-            // 基础延迟和每张卡片的增量延迟 - 增大时间梯度让效果更明显
-            const baseDelay = 0.1;       // 从0.03增加到0.1秒
-            const delayIncrement = 0.15;  // 从0.05增加到0.15秒
-            
-            // 逐一显示每层的左右卡片，而不是全部一起显示
-            for (let i = 0; i < maxSides; i++) {
-              // 左侧当前层级的卡片
-              if (i < leftPositions.length) {
-                const pos = leftPositions[i];
-                const card = pos.card;
-                // 越靠近中间卡片越先出现，越远离越后出现
-                const delay = baseDelay + i * delayIncrement;
-                
-                // 应用波浪动画，但不改变位置（卡片已经在正确位置）
-                card.style.transition = `opacity 0.4s ease-out ${delay}s`;
-                card.style.opacity = pos.finalOpacity.toString();
-              }
-              
-              // 右侧当前层级的卡片，稍微错开时间
-              if (i < rightPositions.length) {
-                const pos = rightPositions[i];
-                const card = pos.card;
-                // 右侧卡片比左侧同级卡片稍晚出现，形成交错效果
-                const delay = baseDelay + i * delayIncrement + 0.05;  // 从0.02增加到0.05秒
-                
-                // 应用波浪动画，但不改变位置（卡片已经在正确位置）
-                card.style.transition = `opacity 0.4s ease-out ${delay}s`;
-                card.style.opacity = pos.finalOpacity.toString();
-              }
-            }
-          }, 100);
+  // 然后，立即对中间卡片执行特殊动画（不再延迟10ms）
+  const middleCardPosition = cardPositions.find(pos => pos.relativePos === 0);
+  if (middleCardPosition) {
+    const middleCard = middleCardPosition.card;
+    
+    // 设置中间卡片初始位置（从按钮位置开始）
+    middleCard.style.transition = 'none';
+    middleCard.style.transform = `translate3d(${startX - window.innerWidth/2}px, ${startY - window.innerHeight/2}px, -100px) scale(0.1) rotateY(0deg)`;
+    middleCard.style.opacity = '0';
+    middleCard.style.zIndex = '999'; // 确保在最上层
+    
+    // 强制重绘
+    void middleCard.offsetHeight;
+    
+    // 使用更流畅的动画函数，将720度旋转分为15个小步骤，总时间缩短为1.2秒
+    animateCardWithSmallSteps(
+      middleCard,
+      middleCardPosition.finalX,
+      middleCardPosition.finalY,
+      middleCardPosition.finalZ,
+      0.1, // 起始缩放
+      1.0, // 最终缩放
+      0,   // 起始角度
+      720, // 最终角度(两圈)
+      0,   // 起始透明度
+      1,   // 最终透明度
+      2.5, // 总持续时间(秒)，从1.2秒增加到2.5秒
+      0.1, // 延迟开始时间(秒)
+      30,  // 步骤数量，从15增加到30，动画更平滑
+      () => {
+        // 动画完成后的回调
+        // 设置为活跃状态
+        middleCard.classList.add('active');
+        if (middleCard.dataset.id) {
+          updateProgressIndicator(middleCard.dataset.id);
         }
-      );
-    }
-  }, 10);
+        
+        // 恢复正常z-index和最终位置
+        middleCard.style.zIndex = middleCardPosition.zIndex.toString();
+        middleCard.style.transform = middleCardPosition.finalTransform;
+        
+        // 开始显示其他卡片（波浪效果），减少等待时间
+        setTimeout(() => {
+          // 分别处理左侧和右侧卡片，按照与中间卡片的距离排序（从近到远）
+          const leftPositions = cardPositions.filter(pos => pos.relativePos < 0)
+            .sort((a, b) => Math.abs(a.relativePos) - Math.abs(b.relativePos));
+          
+          const rightPositions = cardPositions.filter(pos => pos.relativePos > 0)
+            .sort((a, b) => Math.abs(a.relativePos) - Math.abs(b.relativePos));
+          
+          // 交错显示左右两侧卡片，从中间向两侧依次出现
+          const maxSides = Math.max(leftPositions.length, rightPositions.length);
+          
+          // 基础延迟和每张卡片的增量延迟 - 增大时间梯度让效果更明显
+          const baseDelay = 0.2;       // 从0.1增加到0.2秒
+          const delayIncrement = 0.25;  // 从0.15增加到0.25秒
+          
+          // 逐一显示每层的左右卡片，而不是全部一起显示
+          for (let i = 0; i < maxSides; i++) {
+            // 左侧当前层级的卡片
+            if (i < leftPositions.length) {
+              const pos = leftPositions[i];
+              const card = pos.card;
+              // 越靠近中间卡片越先出现，越远离越后出现
+              const delay = baseDelay + i * delayIncrement;
+              
+              // 应用波浪动画，但不改变位置（卡片已经在正确位置）
+              card.style.transition = `opacity 0.4s ease-out ${delay}s`;
+              card.style.opacity = pos.finalOpacity.toString();
+            }
+            
+            // 右侧当前层级的卡片，稍微错开时间
+            if (i < rightPositions.length) {
+              const pos = rightPositions[i];
+              const card = pos.card;
+              // 右侧卡片比左侧同级卡片稍晚出现，形成交错效果
+              const delay = baseDelay + i * delayIncrement + 0.05;  // 从0.02增加到0.05秒
+              
+              // 应用波浪动画，但不改变位置（卡片已经在正确位置）
+              card.style.transition = `opacity 0.4s ease-out ${delay}s`;
+              card.style.opacity = pos.finalOpacity.toString();
+            }
+          }
+        }, 300); // 从100ms增加到300ms，给中央卡片更多完成动画的时间
+      }
+    );
+  }
 }
 
 /**
@@ -254,10 +271,6 @@ function renderGroup(cards, groupIndex) {
   const groupElement = document.createElement('div');
   groupElement.className = 'carousel-group';
   groupElement.dataset.group = groupIndex;
-  
-  if (groupIndex === 0) {
-    groupElement.classList.add('active');
-  }
   
   // 创建时间轴容器
   const timeline = document.createElement('div');
@@ -544,6 +557,38 @@ function switchGroup(index) {
   const btnCenterX = btnRect.left + btnRect.width / 2;
   const btnCenterY = btnRect.top + btnRect.height / 2;
   
+  // 获取目标组及其卡片
+  const group = groups[index];
+  const newCards = group.querySelectorAll('.timeline-card');
+  const middleIndex = Math.floor(newCards.length / 2) >= newCards.length ? 0 : Math.floor(newCards.length / 2);
+  group.dataset.currentIndex = middleIndex;
+  
+  // 在显示新组前，预先准备中间卡片的初始状态
+  const middleCard = newCards[middleIndex];
+  if (middleCard) {
+    // 添加预加载类，创造快速闪烁的预期感
+    middleCard.classList.add('preload');
+    
+    // 先让中间卡片可见但透明，并放置在按钮位置准备动画
+    middleCard.style.transition = 'none';
+    middleCard.style.visibility = 'visible';
+    middleCard.style.opacity = '0';
+    middleCard.style.transform = `translate3d(${btnCenterX - window.innerWidth/2}px, ${btnCenterY - window.innerHeight/2}px, -100px) scale(0.1) rotateY(0deg)`;
+    middleCard.style.zIndex = '999';
+    
+    // 强制重绘，确保浏览器应用上述样式
+    void middleCard.offsetHeight;
+    
+    // 很短的延迟后移除预加载状态
+    setTimeout(() => {
+      middleCard.classList.remove('preload');
+    }, 100);
+  }
+  
+  // 更新导航按钮状态
+  navBtns.forEach(btn => btn.classList.remove('active'));
+  activeBtn.classList.add('active');
+  
   // 立即隐藏所有组的卡片
   groups.forEach((g, i) => {
     if (i === index) return; // 跳过即将显示的组
@@ -561,21 +606,27 @@ function switchGroup(index) {
     });
   });
   
-  // 更新导航按钮状态
-  navBtns.forEach(btn => btn.classList.remove('active'));
-  activeBtn.classList.add('active');
+  // 准备好其他卡片，但先隐藏它们
+  newCards.forEach((card, idx) => {
+    if (idx !== middleIndex) { // 跳过中间卡片，它已经设置好了
+      card.style.visibility = 'hidden';
+      card.style.opacity = '0';
+    }
+  });
   
-  // 立即准备新组
-  const group = groups[index];
+  // 添加active类使组可见
   group.classList.add('active');
-  const newCards = group.querySelectorAll('.timeline-card');
   
-  // 计算中间卡片索引
-  const middleIndex = Math.floor(newCards.length / 2) >= newCards.length ? 0 : Math.floor(newCards.length / 2);
-  group.dataset.currentIndex = middleIndex;
-  
-  // 计算并设置动画 - 从按钮位置发牌
-  calculateAndAnimateCards(newCards, btnCenterX, btnCenterY, middleIndex);
+  // 一旦DOM更新完成，立即开始动画（使用requestAnimationFrame确保在下一帧开始）
+  requestAnimationFrame(() => {
+    // 计算并设置动画 - 从按钮位置发牌
+    calculateAndAnimateCards(newCards, btnCenterX, btnCenterY, middleIndex);
+    
+    // 如果有中间卡片ID，更新进度指示器
+    if (middleCard && middleCard.dataset.id) {
+      updateProgressIndicator(middleCard.dataset.id);
+    }
+  });
   
   window.currentGroup = index;
 }
@@ -668,26 +719,24 @@ function setupDraggableProgress() {
   
   let isDragging = false;
   
-  // 直接定位悬浮球到鼠标位置
-  function positionUnderCursor(x, y) {
-    const rect = progressIndicator.getBoundingClientRect();
-    const halfWidth = rect.width / 2;
-    const halfHeight = rect.height / 2;
+  // 移动进度指示器到指定位置
+  const moveToPosition = (x, y) => {
+    const size = progressIndicator.offsetWidth;
+    const halfSize = size / 2;
     
-    // 确保不超出窗口边界
-    const maxLeft = window.innerWidth - rect.width;
-    const maxTop = window.innerHeight - rect.height;
+    // 确保不超出视口边界
+    const maxX = window.innerWidth - halfSize;
+    const maxY = window.innerHeight - halfSize;
     
-    const left = Math.max(0, Math.min(x - halfWidth, maxLeft));
-    const top = Math.max(0, Math.min(y - halfHeight, maxTop));
+    const boundedX = Math.max(halfSize, Math.min(x, maxX));
+    const boundedY = Math.max(halfSize, Math.min(y, maxY));
     
-    // 直接设置位置
-    progressIndicator.style.left = `${left}px`;
-    progressIndicator.style.top = `${top}px`;
-    progressIndicator.style.right = 'auto';
-    progressIndicator.style.bottom = 'auto';
-    progressIndicator.style.transform = 'none';
-  }
+    // 让球体中心精确位于鼠标指针下方
+    progressIndicator.style.left = `${boundedX - halfSize}px`;
+    progressIndicator.style.top = `${boundedY - halfSize}px`;
+    progressIndicator.style.right = '';
+    progressIndicator.style.bottom = '';
+  };
   
   // 鼠标按下事件
   function startDrag(e) {
@@ -815,6 +864,7 @@ const animateCardWithSmallSteps = (card, finalX, finalY, finalZ, startScale, end
   let currentOpacity = startOpacity;
   let currentZ = 20;
   
+  // 立即开始动画，将delay设为0或最小值(对初始动画)
   setTimeout(() => {
     const runStep = () => {
       if (currentStep >= steps) {
@@ -832,11 +882,13 @@ const animateCardWithSmallSteps = (card, finalX, finalY, finalZ, startScale, end
       card.style.transform = `translate3d(${finalX}px, ${finalY}px, ${currentZ}px) scale(${currentScale}) rotateY(${currentDegree}deg)`;
       card.style.opacity = String(currentOpacity);
       
-      setTimeout(runStep, stepDuration * 1000);
+      // 使用requestAnimationFrame代替setTimeout，更接近显示器刷新率
+      requestAnimationFrame(runStep);
     };
     
-    runStep();
-  }, delay * 1000);
+    // 立即启动第一帧
+    requestAnimationFrame(runStep);
+  }, Math.max(0, delay * 1000)); // 确保delay最小为0
 };
 
 // 初始化进度指示器的拖拽功能
