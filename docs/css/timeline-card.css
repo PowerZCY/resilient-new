@@ -1,0 +1,595 @@
+:root {
+  --primary-color: #8B5CF6;
+  --primary-light: rgba(139, 92, 246, 0.2);
+  --primary-glow: rgba(139, 92, 246, 0.6);
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --line-height: 1.5;
+  --lines-to-show: 6; /* 减少显示行数以适应新高度 */
+  --jetbrains-green: #4CAF50;
+  --jetbrains-green-light: rgba(76, 175, 80, 0.2);
+  --jetbrains-green-glow: rgba(76, 175, 80, 0.6);
+  --card-bg-color: #ffffff; /* 改为白色背景 */
+  --card-ornament-color: #fff; /* 花纹颜色 */
+  --card-glow-color: rgba(139, 92, 246, 0.5); /* 紫色光晕色 */
+}
+
+/* 自定义虚线边框样式 */
+.sparse-dashed-border {
+  background-image: linear-gradient(to right, var(--jetbrains-green) 40%, transparent 60%);
+  background-position: top;
+  background-size: 20px 3px;
+  background-repeat: repeat-x;
+  padding-top: 3px;
+  border-top: none !important;
+}
+
+/* 占位卡片样式 */
+.placeholder-card {
+  border: none !important;
+  position: relative;
+  background-color: var(--gray-100) !important; /* 修改占位卡片颜色 */
+  opacity: 0.8 !important;
+  border-radius: 12px;
+}
+
+/* 添加占位卡片内容居中样式 */
+.placeholder-card .card-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding-top: 0;
+}
+
+.placeholder-card .content-text {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  height: 100% !important;
+  font-size: 1.2rem !important;
+  color: var(--gray-500) !important;
+  text-align: center !important;
+  -webkit-line-clamp: unset !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* 隐藏占位卡片底部图标 */
+.placeholder-card .card-footer {
+  display: none !important;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #f9fafb;
+  padding: 1.5rem;
+  color: var(--gray-700);
+  line-height: 1.5;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--gray-800);
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  position: relative;
+}
+
+/* 修改导航栏样式为现代居中设计 */
+.group-nav {
+  position: absolute;
+  left: 50%;
+  bottom: 2rem;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  z-index: 200;
+}
+
+.nav-btn {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  border: 2px solid var(--primary-color);
+  background: white;
+  color: var(--primary-color);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(139, 92, 246, 0.15);
+  font-size: 1.1rem;
+}
+
+.nav-btn.active {
+  background: var(--primary-color);
+  color: white;
+  box-shadow: 0 0 15px var(--primary-glow);
+}
+
+/* 添加悬停效果 */
+.nav-btn:hover:not(.active) {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px var(--primary-glow);
+}
+
+/* 为按钮添加背景，防止被卡片内容遮挡 */
+.nav-btn::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: -1;
+}
+
+/* 3D环绕轮播样式 */
+.carousel-container {
+  perspective: 1200px;
+  margin: 2rem auto;
+  position: relative;
+  width: 100%;
+  height: 650px; /* 增加高度，为底部控件留出空间 */
+  /* 性能优化类 */
+  &.performance-boost {
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+}
+
+.carousel-group {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.8s ease;
+  display: none;
+  backface-visibility: hidden; /* 提高性能 */
+  will-change: transform, opacity; /* 提示浏览器优化这两个属性的变化 */
+  perspective: 1200px; /* 增强群组内卡片的透视效果 */
+}
+
+.carousel-group.active {
+  display: block;
+}
+
+/* 时间轴卡片样式 */
+.timeline {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  will-change: transform; /* 提高性能 */
+  transform: translateZ(0); /* 启用GPU加速 */
+  transform-origin: center center 0px; /* 设置变换原点在中心 */
+}
+
+/* 移除花纹装饰相关代码 */
+
+.timeline-card {
+  background-color: var(--card-bg-color);
+  border-radius: 12px;
+  overflow: visible; /* 允许日期标签溢出 */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.5s ease;
+  border: 1px solid var(--gray-200);
+  display: flex;
+  flex-direction: column;
+  /* 减小卡片尺寸 */
+  width: 180px;
+  height: 280px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -90px; /* width/2 */
+  margin-top: -140px; /* height/2 */
+  backface-visibility: hidden;
+  transform-origin: center center;
+  cursor: pointer;
+  will-change: transform;
+  transform: translateZ(0);
+  color: var(--gray-700);
+  user-select: none; /* 禁止文本选择 */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.timeline-card:hover {
+  box-shadow: 0 0 10px var(--card-glow-color);
+  border-color: var(--primary-color);
+  transform: translateZ(0) scale(1);
+}
+
+.timeline-card.active {
+  box-shadow: 0 0 10px var(--card-glow-color);
+  border-color: var(--primary-color);
+  transform: translateZ(0) scale(1);
+}
+
+/* 只允许激活卡片的内容可选择 */
+.timeline-card.active .content-text {
+  user-select: text; /* 允许文本选择 */
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  cursor: auto; /* 在文本上显示文本选择光标 */
+}
+
+/* 简化光晕效果 */
+@keyframes glow-pulse {
+  0% {
+    box-shadow: 0 0 5px var(--card-glow-color);
+    border-color: var(--primary-color);
+  }
+  50% {
+    box-shadow: 0 0 15px var(--card-glow-color);
+    border-color: var(--primary-color);
+  }
+  100% {
+    box-shadow: 0 0 5px var(--card-glow-color);
+    border-color: var(--primary-color);
+  }
+}
+
+.hover-scale {
+  animation: glow-pulse 2s infinite;
+  transform: translateZ(0) scale(1);
+}
+
+/* 移除过度的阴影效果 */
+.timeline-card::after {
+  display: none;
+}
+
+.card-date {
+  position: absolute;
+  top: -0.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #8B5CF6;
+  color: white;
+  font-weight: bold;
+  padding: 0.3rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  box-shadow: 0 2px 5px rgba(139, 92, 246, 0.3);
+  z-index: 10;
+  white-space: nowrap;
+}
+
+.timeline-card:hover .card-date,
+.timeline-card.active .card-date {
+  background-color: #7c3aed;
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.5);
+  transform: translateX(-50%);
+}
+
+.card-content {
+  padding: 1.75rem 1.25rem 1rem; /* 调整上部padding，为日期留出更合适的空间 */
+  flex-grow: 1;
+  overflow: hidden;
+  position: relative;
+  border-radius: 16px 16px 0 0;
+}
+
+/* 现代CSS截断多行文本的方法 */
+@supports (display: -webkit-box) {
+  .content-text {
+    display: -webkit-box;
+    -webkit-line-clamp: var(--lines-to-show);
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-clamp: var(--lines-to-show);
+  }
+}
+
+/* Firefox和其他浏览器的回退方案 */
+@supports not (display: -webkit-box) {
+  .content-text {
+    position: relative;
+    max-height: calc(var(--line-height) * var(--lines-to-show) * 1em);
+    overflow: hidden;
+    padding-right: 1rem;
+  }
+  .content-text::before {
+    content: '...';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+  }
+}
+
+.content-text {
+  line-height: var(--line-height);
+  text-overflow: ellipsis;
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.content-text.expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  -moz-line-clamp: unset;
+  line-clamp: unset;
+  max-height: none;
+  position: absolute;
+  top: 2rem;
+  left: 1.25rem;
+  right: 1.25rem;
+  background-color: #fff;
+  z-index: 20;
+  padding: 1rem;
+  padding-bottom: 1.25rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 0 0 2px var(--primary-light);
+  cursor: auto;
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+.content-text.expanded::before {
+  display: none;
+}
+
+.content-text.expanded::after {
+  content: '点击空白处关闭';
+  display: block;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  margin-top: 1rem;
+  font-style: italic;
+}
+
+.content-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+  pointer-events: none; /* 确保点击事件可以穿透到内容 */
+}
+
+.card-footer {
+  padding: 0.6rem 1.25rem;
+  border-top: 1px solid var(--gray-200);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.icon-holder {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--gray-500);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.icon-holder:hover {
+  background-color: var(--gray-200);
+  color: var(--primary-color);
+}
+
+/* 进度指示器样式 - 移到右侧并放大 */
+.progress-indicator {
+  position: absolute;
+  right: 3rem;
+  bottom: 3rem;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+/* 现代化进度指示器设计 */
+.progress-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(8, 124, 250, 0.3) 0%, rgba(13, 94, 175, 0.2) 100%);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-circle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: conic-gradient(#9c65f5 0%, #7c3aed var(--progress-percent, 38%), rgba(13, 94, 175, 0.15) var(--progress-percent, 38%));
+  mask: radial-gradient(transparent 55%, black 56%);
+  -webkit-mask: radial-gradient(transparent 55%, black 56%);
+}
+
+.progress-inner {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(8, 124, 250, 0.1) 0%, rgba(8, 124, 250, 0.2) 100%);
+  box-shadow: 0 4px 20px rgba(8, 124, 250, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  position: relative;
+  z-index: 2;
+  padding-bottom: 0;
+}
+
+.progress-count {
+  font-weight: bold;
+  font-size: 1.4rem;
+  color: white;
+  margin-top: 8px;
+}
+
+.progress-percent {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+/* 将ID标签放置在球底部 */
+.progress-active {
+  position: absolute;
+  bottom: 0;
+  font-size: 0.9rem;
+  background-color: #facc15;
+  color: #78350f;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px 12px 0 0;
+  font-weight: 600;
+  margin-bottom: 0;
+  transform: translateY(50%);
+}
+
+.progress-highlight {
+  color: #78350f;
+  font-weight: 700;
+}
+
+/* 添加模态框和遮罩层样式 */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.content-modal {
+  background-color: white;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow-y: auto;
+  border: 2px solid var(--primary-color);
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  background-color: var(--gray-200);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--gray-700);
+  border: none;
+}
+
+.modal-close:hover {
+  background-color: var(--gray-300);
+}
+
+.modal-date {
+  color: var(--primary-color);
+  font-weight: bold;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  border-bottom: 1px solid var(--gray-200);
+  padding-bottom: 10px;
+}
+
+.modal-content {
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+/* 非激活卡片的内容淡隐效果 */
+.timeline-card .content-text {
+  opacity: 0.4; /* 默认文本不太清晰 */
+  transition: opacity 0.3s ease;
+}
+
+/* 激活卡片的内容完全显示 */
+.timeline-card.active .content-text {
+  opacity: 1; /* 激活卡片内容完全显示 */
+}
+
+/* 鼠标悬停时卡片内容完全显示 */
+.timeline-card:hover .content-text {
+  opacity: 1; /* 悬停时文本完全显示，与激活卡片相同 */
+}
+
+/* 非激活卡片的日期标签也淡化 */
+.timeline-card .card-date {
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.timeline-card.active .card-date,
+.timeline-card:hover .card-date {
+  opacity: 1;
+}
+
+/* 非激活卡片的底部图标淡化 */
+.timeline-card .card-footer {
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.timeline-card.active .card-footer,
+.timeline-card:hover .card-footer {
+  opacity: 1;
+} 
