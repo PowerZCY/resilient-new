@@ -136,7 +136,7 @@ function calculateAndAnimateCards(cards, startX, startY, middleIndex) {
       // 强制重绘
       void middleCard.offsetHeight;
       
-      // 使用更流畅的动画函数，将720度旋转分为20个小步骤
+      // 使用更流畅的动画函数，将720度旋转分为15个小步骤，总时间缩短为1.2秒
       animateCardWithSmallSteps(
         middleCard,
         middleCardPosition.finalX,
@@ -148,9 +148,9 @@ function calculateAndAnimateCards(cards, startX, startY, middleIndex) {
         720, // 最终角度(两圈)
         0,   // 起始透明度
         1,   // 最终透明度
-        2.0, // 总持续时间(秒)
+        1.2, // 总持续时间(秒)，从2.0秒缩短到1.2秒
         0.1, // 延迟开始时间(秒)
-        20,  // 步骤数量
+        15,  // 步骤数量，从20减少到15，每步时间更短
         () => {
           // 动画完成后的回调
           // 设置为活跃状态
@@ -163,7 +163,7 @@ function calculateAndAnimateCards(cards, startX, startY, middleIndex) {
           middleCard.style.zIndex = middleCardPosition.zIndex.toString();
           middleCard.style.transform = middleCardPosition.finalTransform;
           
-          // 开始显示其他卡片（波浪效果）
+          // 开始显示其他卡片（波浪效果），减少等待时间
           setTimeout(() => {
             // 分别处理左侧和右侧卡片，按照与中间卡片的距离排序
             const leftPositions = cardPositions.filter(pos => pos.relativePos < 0)
@@ -180,10 +180,10 @@ function calculateAndAnimateCards(cards, startX, startY, middleIndex) {
               if (i < leftPositions.length) {
                 const pos = leftPositions[i];
                 const card = pos.card;
-                const delay = 0.1 + i * 0.08;
+                const delay = 0.07 + i * 0.06; // 减少延迟时间
                 
                 // 应用波浪动画，但不改变位置（卡片已经在正确位置）
-                card.style.transition = `opacity 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s`;
+                card.style.transition = `opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s`; // 减少过渡时间
                 card.style.opacity = pos.finalOpacity.toString();
               }
               
@@ -191,14 +191,14 @@ function calculateAndAnimateCards(cards, startX, startY, middleIndex) {
               if (i < rightPositions.length) {
                 const pos = rightPositions[i];
                 const card = pos.card;
-                const delay = 0.15 + i * 0.08;
+                const delay = 0.1 + i * 0.06; // 减少延迟时间
                 
                 // 应用波浪动画，但不改变位置（卡片已经在正确位置）
-                card.style.transition = `opacity 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s`;
+                card.style.transition = `opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s`; // 减少过渡时间
                 card.style.opacity = pos.finalOpacity.toString();
               }
             }
-          }, 200);
+          }, 100); // 减少后续动画的等待时间，从200ms减少到100ms
         }
       );
     }
