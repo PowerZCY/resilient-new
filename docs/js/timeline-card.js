@@ -129,67 +129,82 @@ function calculateAndAnimateCards(cards, startX, startY, middleIndex) {
       
       // 设置中间卡片初始位置（从按钮位置开始）
       middleCard.style.transition = 'none';
-      middleCard.style.transform = `translate3d(${startX - window.innerWidth/2}px, ${startY - window.innerHeight/2}px, -200px) scale(0.1)`;
+      middleCard.style.transform = `translate3d(${startX - window.innerWidth/2}px, ${startY - window.innerHeight/2}px, -100px) scale(0.1)`;
       middleCard.style.opacity = '0';
       middleCard.style.zIndex = '999'; // 确保在最上层
       
       // 强制重绘
       void middleCard.offsetHeight;
       
-      // 应用动画
-      middleCard.style.transition = 'all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)';
-      middleCard.style.transform = `translate3d(${middleCardPosition.finalX}px, ${middleCardPosition.finalY}px, ${middleCardPosition.finalZ + 100}px) rotateY(${middleCardPosition.finalRotateY + 2 * Math.PI}rad)`;
-      middleCard.style.opacity = '1';
-      
-      // 中间卡片旋转动画完成后
+      // 创建多步动画，确保垂直轴旋转可见
+      // 步骤1：移动到中心位置并开始逐渐放大
       setTimeout(() => {
-        // 设置为活跃状态
-        middleCard.classList.add('active');
-        if (middleCard.dataset.id) {
-          updateProgressIndicator(middleCard.dataset.id);
-        }
+        middleCard.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        middleCard.style.transform = `translate3d(${middleCardPosition.finalX}px, ${middleCardPosition.finalY}px, 50px) scale(0.8) rotateY(0deg)`;
+        middleCard.style.opacity = '1';
         
-        // 恢复正常z-index和最终位置
-        middleCard.style.zIndex = middleCardPosition.zIndex.toString();
-        middleCard.style.transform = middleCardPosition.finalTransform;
-        
-        // 开始显示其他卡片（波浪效果）
+        // 步骤2：开始第一圈旋转
         setTimeout(() => {
-          // 分别处理左侧和右侧卡片，按照与中间卡片的距离排序
-          const leftPositions = cardPositions.filter(pos => pos.relativePos < 0)
-            .sort((a, b) => Math.abs(a.relativePos) - Math.abs(b.relativePos));
+          middleCard.style.transition = 'all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          middleCard.style.transform = `translate3d(${middleCardPosition.finalX}px, ${middleCardPosition.finalY}px, 50px) scale(0.9) rotateY(360deg)`;
           
-          const rightPositions = cardPositions.filter(pos => pos.relativePos > 0)
-            .sort((a, b) => Math.abs(a.relativePos) - Math.abs(b.relativePos));
-          
-          // 交错显示左右两侧卡片，创建波浪效果
-          const maxSides = Math.max(leftPositions.length, rightPositions.length);
-          
-          for (let i = 0; i < maxSides; i++) {
-            // 左侧卡片
-            if (i < leftPositions.length) {
-              const pos = leftPositions[i];
-              const card = pos.card;
-              const delay = 0.1 + i * 0.08;
-              
-              // 应用波浪动画，但不改变位置（卡片已经在正确位置）
-              card.style.transition = `opacity 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s`;
-              card.style.opacity = pos.finalOpacity.toString();
-            }
+          // 步骤3：继续第二圈旋转并恢复正常大小
+          setTimeout(() => {
+            middleCard.style.transition = 'all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            middleCard.style.transform = `translate3d(${middleCardPosition.finalX}px, ${middleCardPosition.finalY}px, ${middleCardPosition.finalZ}px) scale(1) rotateY(720deg)`;
             
-            // 右侧卡片
-            if (i < rightPositions.length) {
-              const pos = rightPositions[i];
-              const card = pos.card;
-              const delay = 0.15 + i * 0.08;
+            // 中间卡片旋转动画完成后
+            setTimeout(() => {
+              // 设置为活跃状态
+              middleCard.classList.add('active');
+              if (middleCard.dataset.id) {
+                updateProgressIndicator(middleCard.dataset.id);
+              }
               
-              // 应用波浪动画，但不改变位置（卡片已经在正确位置）
-              card.style.transition = `opacity 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s`;
-              card.style.opacity = pos.finalOpacity.toString();
-            }
-          }
-        }, 200);
-      }, 1200); // 中间卡片动画完成时间
+              // 恢复正常z-index和最终位置
+              middleCard.style.zIndex = middleCardPosition.zIndex.toString();
+              middleCard.style.transform = middleCardPosition.finalTransform;
+              
+              // 开始显示其他卡片（波浪效果）
+              setTimeout(() => {
+                // 分别处理左侧和右侧卡片，按照与中间卡片的距离排序
+                const leftPositions = cardPositions.filter(pos => pos.relativePos < 0)
+                  .sort((a, b) => Math.abs(a.relativePos) - Math.abs(b.relativePos));
+                
+                const rightPositions = cardPositions.filter(pos => pos.relativePos > 0)
+                  .sort((a, b) => Math.abs(a.relativePos) - Math.abs(b.relativePos));
+                
+                // 交错显示左右两侧卡片，创建波浪效果
+                const maxSides = Math.max(leftPositions.length, rightPositions.length);
+                
+                for (let i = 0; i < maxSides; i++) {
+                  // 左侧卡片
+                  if (i < leftPositions.length) {
+                    const pos = leftPositions[i];
+                    const card = pos.card;
+                    const delay = 0.1 + i * 0.08;
+                    
+                    // 应用波浪动画，但不改变位置（卡片已经在正确位置）
+                    card.style.transition = `opacity 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s`;
+                    card.style.opacity = pos.finalOpacity.toString();
+                  }
+                  
+                  // 右侧卡片
+                  if (i < rightPositions.length) {
+                    const pos = rightPositions[i];
+                    const card = pos.card;
+                    const delay = 0.15 + i * 0.08;
+                    
+                    // 应用波浪动画，但不改变位置（卡片已经在正确位置）
+                    card.style.transition = `opacity 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s`;
+                    card.style.opacity = pos.finalOpacity.toString();
+                  }
+                }
+              }, 200);
+            }, 200); // 等待最后一步动画完成
+          }, 700); // 第一圈旋转时间
+        }, 500); // 移动到中心位置时间
+      }, 100); // 短暂延迟开始动画
     }
   }, 10);
 }
