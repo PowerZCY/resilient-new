@@ -370,11 +370,10 @@ export default function Timeline(): JSX.Element {
     }
 
     const cardsInGroup = activeGroupData.entries;
-    const currentTargetIndex = activeCardIndex; // The card that should be in the center
+    const currentTargetIndex = activeCardIndex; // The card that should be in the center (should be 0 after page nav)
 
     // --- Apply Transforms with Delay ---
     const animationFrameId = requestAnimationFrame(() => {
-      // const pageChanged = activePage !== prevActivePageRef.current; // Use navigation flag instead
       const playEntryAnimation = isPageNavigatingRef.current;
       console.log(`Carousel Effect (apply): Play entry animation: ${playEntryAnimation}`);
 
@@ -395,28 +394,58 @@ export default function Timeline(): JSX.Element {
         const angleDivisor = Math.min(VISIBLE_CARDS, groupSize) || 1;
         const angle = relativePos * (VISIBLE_ANGLE / angleDivisor);
         const finalX = Math.sin(angle) * RADIUS;
-        const finalY = -40 + Math.abs(relativePos) * 15;
+        const finalY = -40 + Math.abs(relativePos) * 15; // Adjusted Y to prevent overlap based on distance
         const finalZ = Math.cos(angle) * RADIUS * 0.6;
         const finalRotateY = -angle * 0.8;
         const finalTransform = `translate3d(${finalX}px, ${finalY}px, ${finalZ}px) rotateY(${finalRotateY}rad)`;
         const finalZIndex = 100 - Math.abs(relativePos) * 10;
-        const finalOpacity = Math.max(0.1, 1 - Math.min(Math.abs(relativePos), 5) * 0.18);
+        const finalOpacity = Math.max(0.1, 1 - Math.min(Math.abs(relativePos), 5) * 0.18); // Adjusted opacity fade-off
 
         // Apply styles based on whether navigation triggered this
         if (playEntryAnimation) {
-          // Page changed via nav: Apply entry animation
-          cardElement.style.transition = 'none';
-          cardElement.style.opacity = '0';
-          cardElement.style.transform = `translate3d(${finalX}px, ${finalY + 30}px, ${finalZ - 50}px) scale(0.8) rotateY(${finalRotateY}rad)`;
-          cardElement.style.zIndex = finalZIndex.toString(); 
-          void cardElement.offsetHeight;
-          const delay = Math.abs(relativePos) * 0.05;
-          cardElement.style.transition = `transform 0.5s ${delay}s ease-out, opacity 0.4s ${delay}s ease-out`;
-          cardElement.style.opacity = finalOpacity.toString();
-          cardElement.style.transform = finalTransform;
-          cardElement.style.pointerEvents = Math.abs(relativePos) > Math.floor(VISIBLE_CARDS / 2) ? 'none' : 'auto';
+            // *** PAGE NAVIGATION ANIMATION ***
+            cardElement.style.transition = 'none'; // Reset transitions first
+
+            if (index === currentTargetIndex) {
+                // ** Middle Card Entry Animation **
+                // Initial state (from bottom-center, scaled down, rotated)
+                cardElement.style.opacity = '0';
+                // Translate relative to its final position for a smoother effect
+                cardElement.style.transform = `translate3d(${finalX}px, ${finalY + 150}px, ${finalZ - 300}px) scale(0.3) rotateY(45deg)`;
+                cardElement.style.zIndex = '200'; // Highest z-index during animation
+            } else {
+                // ** Other Cards Initial State (for wave) **
+                // Initial state (slightly below final, scaled down)
+                cardElement.style.opacity = '0';
+                // Translate relative to its final position
+                cardElement.style.transform = `translate3d(${finalX}px, ${finalY + 50}px, ${finalZ - 80}px) scale(0.7) rotateY(${finalRotateY}rad)`;
+                cardElement.style.zIndex = finalZIndex.toString(); // Use calculated final zIndex
+            }
+
+            // Force reflow to apply initial state before transition
+            void cardElement.offsetHeight;
+
+            // Apply transitions to final state
+            if (index === currentTargetIndex) {
+                // Middle Card Transition (longer duration, bouncy easing)
+                cardElement.style.transition = `transform 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.6s ease-out`;
+                cardElement.style.opacity = finalOpacity.toString();
+                cardElement.style.transform = finalTransform;
+                // Let zIndex transition quickly back to normal after transform animation starts
+                 cardElement.style.zIndex = finalZIndex.toString();
+            } else {
+                // Other Cards Transition (wave effect with delay)
+                // Delay starts after middle card animation begins (e.g., 0.3s)
+                const delay = Math.abs(relativePos) * 0.12 + 0.3; // Increased delay difference
+                cardElement.style.transition = `transform 0.6s ${delay}s ease-out, opacity 0.5s ${delay}s ease-out`;
+                cardElement.style.opacity = finalOpacity.toString();
+                cardElement.style.transform = finalTransform;
+                // zIndex is already set
+            }
+             cardElement.style.pointerEvents = Math.abs(relativePos) > Math.floor(VISIBLE_CARDS / 2) ? 'none' : 'auto';
+
         } else {
-          // Just focus shift: Apply final state directly with transition
+          // *** FOCUS SHIFT ANIMATION (Existing Logic) ***
           cardElement.style.transition = 'transform 0.6s ease-out, opacity 0.6s ease-out';
           cardElement.style.opacity = finalOpacity.toString();
           cardElement.style.transform = finalTransform;
@@ -426,22 +455,17 @@ export default function Timeline(): JSX.Element {
 
         // Update active class (applies regardless of animation)
         if (index === currentTargetIndex && !entry.isPlaceholder) {
-          if (!cardElement.classList.contains('active')) {
-              cardElement.classList.add('active');
-          }
-            } else {
-          cardElement.classList.remove('active');
+            cardElement.classList.add('active');
+        } else {
+            cardElement.classList.remove('active');
         }
-      });
+      }); // End forEach card
 
       // Reset the navigation flag after applying styles for this run
       if (playEntryAnimation) {
           isPageNavigatingRef.current = false;
       }
-    }); // End of requestAnimationFrame
-
-    // Update the previous page ref *after* the effect logic has run - REMOVED
-    // prevActivePageRef.current = activePage;
+    }); // End requestAnimationFrame
 
     // Cleanup function to cancel the animation frame if the effect re-runs
     return () => cancelAnimationFrame(animationFrameId);
