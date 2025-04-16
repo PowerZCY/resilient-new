@@ -8,749 +8,954 @@
  */
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import React from 'react';
-import { useInView } from 'react-intersection-observer';
+import { motion, AnimatePresence } from 'framer-motion'; // Keep for modal/progress indicator animations
+import { Heart, Star } from 'lucide-react'; // Import icons
+import '../styles/timeline-card.css'; // Import the new CSS
 
 interface Entry {
   id: string;
   date: string;
   content: string;
+  page: number;
+  isPlaceholder?: boolean;
+  globalIndex?: number;
 }
 
 interface ApiResponse {
-  entries: Entry[];
+  entries: { id: string; date: string; content: string }[];
   total: number;
 }
 
-// 首先添加骨架组件
-// 骨架组件优化
-const TimelineSkeleton = () => {
-  return (
-    <div className="animate-pulse space-y-8">
-      {[1, 2, 3].map((item) => (
-        <div key={item} className="relative pl-8 pb-8">
-          {/* 骨架圆点 - 增加大小和发光效果 */}
-          <div className="absolute left-0 top-2 w-5 h-5 rounded-full bg-violet-200 dark:bg-violet-700 shadow-[0_0_12px_rgba(139,92,246,0.3)]"></div>
+// --- Constants from prototype ---
+const RADIUS = 550; // 环绕半径
+const VISIBLE_CARDS = 10; // 可见卡片数量 (调整此值影响角度)
+const VISIBLE_ANGLE = Math.PI * 0.8; // 可见角度范围 (调整此值影响卡片间距)
+const CARD_WIDTH = 180;
+const CARD_HEIGHT = 280;
+const LINES_TO_SHOW = 6; // For content truncation CSS variable `--lines-to-show`
+const LINE_HEIGHT = 1.6; // For content truncation calculation
+const PAGE_SIZE = 10; // Define page size consistent with prototype
 
-          {/* 骨架连接线 - 渐变效果 */}
-          <div className="absolute left-[10px] top-[40px] w-[2px] h-[calc(100%-48px)] bg-gradient-to-b from-violet-200 via-violet-300 to-violet-200 dark:from-violet-700 dark:via-violet-600 dark:to-violet-700"></div>
+// --- Helper Functions ---
 
-          {/* 骨架日期 - 更窄的宽度 */}
-          <div className="mb-2 h-4 w-32 bg-violet-100 dark:bg-violet-800 rounded-full"></div>
-
-          {/* 骨架内容卡片 - 增加层次感 */}
-          <div className="p-6 rounded-lg bg-white dark:bg-slate-800 shadow-sm border border-violet-100 dark:border-violet-800">
-            <div className="space-y-4">
-              <div className="h-4 bg-violet-50 dark:bg-violet-900/50 rounded-full w-full"></div>
-              <div className="h-4 bg-violet-50 dark:bg-violet-900/50 rounded-full w-4/5"></div>
-              <div className="h-4 bg-violet-50 dark:bg-violet-900/50 rounded-full w-2/3"></div>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-// 格式化日期函数
+// Format date (keep existing, maybe adjust format if needed)
 const formatDate = (dateString: string): string => {
-  const date: Date = new Date(dateString);
-  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
-};
-
-// 格式化内容函数
-const formatContent = (content: string): JSX.Element => {
-  return (
-    <div className="whitespace-pre-wrap break-words text-gray-700">
-      {content.split(/\r\n|\n|\r/).map((line: string, index: number) => (
-        <span key={index}>
-          {line}
-          {index < content.split(/\r\n|\n|\r/).length - 1 && <br />}
-        </span>
-      ))}
-    </div>
-  );
-};
-
-// 动画变体定义
-const timelineVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      // 限制最大延迟为0.3秒，避免延迟累加问题
-      delay: Math.min(i, 3) * 0.1,
-      duration: 0.4, // 稍微缩短动画时间
-      ease: "easeOut"
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return dateString; // Return original string if invalid
     }
-  })
-};
-
-// 圆点动画变体
-const circleVariants = {
-  initial: {
-    scale: 1,
-    backgroundColor: "#509863",
-    boxShadow: "0 0 0 4px rgba(80, 152, 99, 0.2)"
-  },
-  hover: {
-    scale: 1.2,
-    backgroundColor: "#8B5CF6",
-    boxShadow: "0 0 0 8px rgba(139, 92, 246, 0.3), 0 0 20px rgba(139, 92, 246, 0.5)",
-    transition: {
-      duration: 0.4,
-      ease: "easeOut"
-    }
+    // Use prototype format "YYYY年M月D日"
+    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+  } catch (e) {
+    console.error("Error formatting date:", dateString, e);
+    return dateString; // Return original on error
   }
 };
 
-// 内容卡片动画变体
-const cardVariants = {
-  initial: {
-    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-    backgroundColor: "rgba(255, 255, 255, 1)"
-  },
-  hover: {
-    boxShadow: "0 10px 25px -5px rgba(59, 130, 246, 0.1), 0 8px 10px -6px rgba(59, 130, 246, 0.1)",
-    backgroundColor: "rgba(249, 250, 251, 1)",
-    transition: {
-      duration: 0.3
-    }
-  }
+// Check if content needs fade effect (based on line count)
+const checkNeedFade = (content: string): boolean => {
+  const lines = content.split(/\r\n|\n|\r/).length;
+  // Simple check, might need refinement based on actual rendering height
+  // Or better, rely purely on CSS overflow and gradient if possible
+  // For now, let's estimate based on line count vs LINES_TO_SHOW
+  return lines > LINES_TO_SHOW;
 };
 
-// 日期动画变体
-const dateVariants = {
-  initial: {
-    color: "#6b7280"
-  },
-  hover: {
-    color: "#8B5CF6",
-    transition: {
-      duration: 0.3
-    }
-  }
-};
+// --- Smart Pagination Component ---
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  loadingPage: number | null;
+  loadedPages: Set<number>; // Pass loadedPages to style buttons differently (optional)
+  maxVisibleButtons?: number;
+}
 
-// 气泡动画变体
-const bubbleVariants = {
-  initial: {
-    scale: 0,
-    opacity: 0
-  },
-  animate: (custom: number) => ({
-    scale: [0, 1.2, 1],
-    opacity: [0, 0.7, 1],
-    transition: {
-      // 限制最大延迟
-      delay: Math.min(custom, 3) * 0.05,
-      duration: 0.4,
-      ease: "easeOut"
-    }
-  })
-};
-
-// 气泡浮动动画 - 修改为有限次数的动画，不再使用Infinity
-const floatingBubbleVariants = {
-  initial: { y: 0 },
-  animate: (custom: number) => ({
-    y: [0, -3, 0, 3, 0],
-    transition: {
-      // 限制最大延迟
-      delay: Math.min(custom, 3) * 0.1,
-      duration: 2,
-      // 将无限循环改为有限次数，最多重复3次
-      repeat: 3,
-      repeatType: "mirror" as const,
-      ease: "easeInOut"
-    }
-  })
-};
-
-// 进度指示器组件
-const ProgressIndicator = React.memo(({ 
-  loadedCount, 
-  totalCount,
-  activeEntryIndex // 添加当前选中条目的索引参数
-}: { 
-  loadedCount: number, 
-  totalCount: number,
-  activeEntryIndex: number | null // 当前选中条目的索引，如果没有选中则为null
+const Pagination: React.FC<PaginationProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+  loadingPage,
+  loadedPages,
+  maxVisibleButtons = 11, // Default to 11 visible buttons
 }) => {
-  // 计算加载百分比
-  const percentage = Math.min(100, Math.round((loadedCount / totalCount) * 100)) || 0;
+  const renderPageButtons = () => {
+    if (totalPages <= 0) return null;
+
+    const buttons: (number | string)[] = [];
+    const halfVisible = Math.floor((maxVisibleButtons - 2) / 2); // Subtract 1 and totalPages, then halve
+
+    if (totalPages <= maxVisibleButtons) {
+      // Show all pages
+      for (let i = 1; i <= totalPages; i++) {
+        buttons.push(i);
+      }
+    } else {
+      // Show first page
+      buttons.push(1);
+
+      // Ellipsis after first page?
+      let startPage = Math.max(2, currentPage - halfVisible);
+      let endPage = Math.min(totalPages - 1, currentPage + halfVisible);
+
+      // Adjust range if currentPage is near the beginning
+      if (currentPage - halfVisible <= 2) {
+          endPage = Math.min(totalPages - 1, maxVisibleButtons - 2); // Show 1, then max-2 buttons
+      }
+      // Adjust range if currentPage is near the end
+      if (currentPage + halfVisible >= totalPages - 1) {
+          startPage = Math.max(2, totalPages - (maxVisibleButtons - 3)); // Show totalPages, then max-3 before it
+      }
+
+       // Add start ellipsis if needed
+       if (startPage > 2) {
+           buttons.push('...');
+       }
+
+      // Add middle page numbers
+      for (let i = startPage; i <= endPage; i++) {
+        buttons.push(i);
+      }
+
+       // Add end ellipsis if needed
+       if (endPage < totalPages - 1) {
+           buttons.push('...');
+       }
+
+      // Show last page
+      buttons.push(totalPages);
+    }
+
+    return buttons.map((page, index) => {
+      const isEllipsis = typeof page === 'string';
+      const pageNum = page as number; // Cast for use, check isEllipsis first
+      const isLoading = loadingPage === pageNum;
   
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="fixed right-8 top-1/2 transform -translate-y-1/2 z-50"
-    >
-      <div className="relative flex items-center justify-center">
-        {/* 外圆 */}
-        <motion.div 
-          className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500/20 to-violet-500/20 backdrop-blur-sm border border-white/20 shadow-lg flex items-center justify-center"
-          animate={{
-            boxShadow: [
-              "0 0 0 rgba(139, 92, 246, 0.2)",
-              "0 0 20px rgba(139, 92, 246, 0.4)",
-              "0 0 0 rgba(139, 92, 246, 0.2)"
-            ]
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            repeatType: "mirror"
-          }}
+        <button
+          key={isEllipsis ? `ellipsis-${index}` : `page-${page}`}
+          className={`nav-btn ${currentPage === pageNum && !isEllipsis ? 'active' : ''} ${isEllipsis ? 'ellipsis' : ''}`}
+          onClick={() => !isEllipsis && onPageChange(pageNum)}
+          disabled={isEllipsis || isLoading}
+          style={isEllipsis ? { cursor: 'default', opacity: 0.5, border: 'none' } : {}}
         >
-          {/* 内圆 - 进度指示 */}
-          <motion.div 
-            className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center text-white font-medium"
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="text-center">
-              <div className="text-lg font-bold">{loadedCount}/{totalCount}</div>
-              <div className="text-sm opacity-90">{percentage}%</div>
-              
-              {/* 当前选中条目指示器 */}
-              {activeEntryIndex !== null && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -5 }}
-                  className="mt-1 text-xs bg-white/20 px-2 py-0.5 rounded-full"
-                >
-                  <span className="font-bold text-yellow-300">#{activeEntryIndex + 1}</span>
-                </motion.div>
-              )}
-            </div>
-          </motion.div>
-        </motion.div>
-        
-        {/* 提示文本 - 悬停时显示 */}
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          whileHover={{ opacity: 1, x: 0 }}
-          className="absolute right-full mr-4 bg-white dark:bg-slate-800 px-4 py-2 rounded-lg shadow-md text-sm whitespace-nowrap"
-        >
-          <div>已加载 {loadedCount} / 共 {totalCount} 条</div>
-          {activeEntryIndex !== null && (
-            <div className="mt-1 text-yellow-500 dark:text-yellow-400">
-              当前查看: 第 {activeEntryIndex + 1} 条
-            </div>
-          )}
-        </motion.div>
-        
-        {/* 当前位置指示线 - 只在有选中条目时显示 */}
-        {activeEntryIndex !== null && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ 
-              opacity: 1, 
-              height: `${Math.min(100, (activeEntryIndex + 1) / totalCount * 100)}%` 
-            }}
-            transition={{ duration: 0.5 }}
-            className="absolute left-[-30px] bottom-0 w-1 bg-gradient-to-t from-yellow-500 to-yellow-300 rounded-full"
-            style={{ 
-              transformOrigin: 'bottom',
-              boxShadow: '0 0 8px rgba(234, 179, 8, 0.5)'
-            }}
-          />
-        )}
-      </div>
-    </motion.div>
+          {isLoading ? (
+             // Simple loading indicator
+             <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
+          ) : ( page )}
+        </button>
   );
 });
+  };
 
-ProgressIndicator.displayName = 'ProgressIndicator';
+  return <>{renderPageButtons()}</>;
+};
 
-// 使用React.memo创建记忆化的TimelineItem组件
-const TimelineItem = React.memo(({ 
-  entry, 
-  index, 
-  isActive, 
-  totalEntries,
-  onHoverStart, 
-  onHoverEnd 
-}: { 
-  entry: Entry, 
-  index: number, 
-  isActive: boolean, 
-  totalEntries: number,
-  onHoverStart: () => void, 
-  onHoverEnd: () => void 
-}) => {
-  // 使用useInView检测条目是否在视口中
-  const [ref, inView] = useInView({
-    triggerOnce: false,
-    threshold: 0.1,
-    rootMargin: '100px 0px'
-  });
-
-  // 计算相对索引，用于动画延迟
-  const relativeIndex = index % 10;
-  
-  // 简化渲染 - 只有在视口中的条目才应用完整动画
-  const shouldAnimate = inView;
-  
-  return (
-    <motion.div
-      ref={ref}
-      className="relative pl-8 pb-8"
-      initial="hidden"
-      animate={inView ? "visible" : "hidden"}
-      custom={relativeIndex}
-      variants={timelineVariants}
-      onHoverStart={onHoverStart}
-      onHoverEnd={onHoverEnd}
-    >
-      {/* 主圆点 */}
-      <motion.div
-        className="absolute left-0 top-2 w-5 h-5 rounded-full z-10"
-        initial="initial"
-        animate={isActive && inView ? "hover" : "initial"}
-        variants={circleVariants}
-        whileHover={{ scale: 1.3 }}
-      ></motion.div>
-
-      {/* 连接前一个条目的气泡链 - 简化渲染逻辑 */}
-      {index > 0 && shouldAnimate && (
-        <div className="absolute left-[10px] top-[-30px] h-[40px] flex flex-col justify-between items-center">
-          {/* 限制气泡数量为最多3个 */}
-          {[...Array(3)].map((_, i) => (
-            <motion.div
-              key={`bubble-up-${i}`}
-              className="w-[6px] h-[6px] rounded-full"
-              initial="initial"
-              animate={isActive ? "animate" : "initial"}
-              variants={{
-                initial: bubbleVariants.initial,
-                animate: bubbleVariants.animate(3 - i)
-              }}
-              style={{
-                opacity: isActive ? 1 : 0.5,
-                backgroundColor: isActive ? "#8B5CF6" : "#94a3b8",
-                boxShadow: isActive ? "0 0 4px rgba(139, 92, 246, 0.5)" : "none"
-              }}
-            >
-              {/* 气泡内部发光效果 - 只在激活状态显示 */}
-              {isActive && (
-                <motion.div
-                  className="absolute inset-0 rounded-full"
-                  animate={{
-                    boxShadow: ["0 0 0px rgba(139, 92, 246, 0.3)", "0 0 8px rgba(139, 92, 246, 0.6)", "0 0 0px rgba(139, 92, 246, 0.3)"]
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: 2,
-                    repeatType: "mirror",
-                    ease: "easeInOut"
-                  }}
-                />
-              )}
-            </motion.div>
-          ))}
-        </div>
-      )}
-
-      {/* 连接下一个条目的气泡链 - 简化渲染逻辑 */}
-      {index < totalEntries - 1 && shouldAnimate && (
-        <div className="absolute left-[10px] top-[40px] h-[calc(100%-48px)] flex flex-col justify-between items-center">
-          {/* 限制气泡数量为固定的5个 */}
-          {[...Array(5)].map((_, i) => (
-            <motion.div
-              key={`bubble-down-${i}`}
-              className="w-[6px] h-[6px] rounded-full"
-              initial="initial"
-              animate={isActive ? ["animate", "floating"] : "initial"}
-              variants={{
-                initial: bubbleVariants.initial,
-                animate: bubbleVariants.animate(i),
-                floating: floatingBubbleVariants.animate(i)
-              }}
-              style={{
-                opacity: isActive ? 1 : 0.5,
-                backgroundColor: isActive ? "#8B5CF6" : "#94a3b8",
-                boxShadow: isActive ? "0 0 4px rgba(139, 92, 246, 0.5)" : "none"
-              }}
-            >
-              {/* 气泡内部发光效果 - 只在激活状态显示 */}
-              {isActive && (
-                <motion.div
-                  className="absolute inset-0 rounded-full"
-                  animate={{
-                    boxShadow: ["0 0 0px rgba(139, 92, 246, 0.3)", "0 0 8px rgba(139, 92, 246, 0.6)", "0 0 0px rgba(139, 92, 246, 0.3)"]
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: 2,
-                    repeatType: "mirror",
-                    ease: "easeInOut",
-                    delay: i * 0.2
-                  }}
-                />
-              )}
-            </motion.div>
-          ))}
-        </div>
-      )}
-
-      {/* 日期 */}
-      <motion.div
-        className="mb-2 text-sm font-semibold text-gray-500"
-        initial="initial"
-        animate={isActive && inView ? "hover" : "initial"}
-        variants={dateVariants}
-      >
-        {formatDate(entry.date)}
-      </motion.div>
-
-      {/* 内容卡片 */}
-      <motion.div
-        className="p-4 rounded-lg shadow"
-        initial="initial"
-        animate={isActive && inView ? "hover" : "initial"}
-        variants={cardVariants}
-        whileHover={{
-          y: -5,
-          transition: { duration: 0.3 }
-        }}
-      >
-        {formatContent(entry.content)}
-      </motion.div>
-    </motion.div>
-  );
-});
-
-// 确保组件名称在React DevTools中显示
-TimelineItem.displayName = 'TimelineItem';
-
-// 创建一个虚拟化的时间轴容器组件
-const VirtualizedTimeline = React.memo(({ 
-  entries, 
-  activeEntryId, 
-  setActiveEntryId,
-  clearActiveEntry
-}: { 
-  entries: Entry[], 
-  activeEntryId: string | null, 
-  setActiveEntryId: (id: string, index: number) => void,
-  clearActiveEntry: () => void
-}) => {
-  // 使用分段渲染的方式实现虚拟化
-  const [visibleRange, setVisibleRange] = useState({ start: 0, end: 10 });
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  // 监听滚动事件，更新可见范围
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!containerRef.current) return;
-      
-      const scrollTop = window.scrollY;
-      const viewportHeight = window.innerHeight;
-      
-      // 估算每个条目的平均高度
-      const estimatedItemHeight = 250; // 像素
-      
-      // 计算可见范围内的条目索引
-      const visibleItemsCount = Math.ceil(viewportHeight / estimatedItemHeight) + 4; // 额外缓冲
-      const startIndex = Math.max(0, Math.floor(scrollTop / estimatedItemHeight) - 2); // 提前2个
-      const endIndex = Math.min(entries.length, startIndex + visibleItemsCount);
-      
-      setVisibleRange({ start: startIndex, end: endIndex });
-    };
-    
-    // 初始计算
-    handleScroll();
-    
-    // 添加滚动监听
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('resize', handleScroll);
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
-    };
-  }, [entries.length]);
-  
-  // 渲染占位符，保持滚动高度
-  const totalHeight = entries.length * 250; // 估算总高度
-  const visibleItems = entries.slice(visibleRange.start, visibleRange.end);
-  
-  return (
-    <div ref={containerRef} style={{ position: 'relative', height: totalHeight }}>
-      <div style={{ position: 'absolute', top: visibleRange.start * 250, width: '100%' }}>
-        {visibleItems.map((entry, localIndex) => {
-          const globalIndex = visibleRange.start + localIndex;
-          return (
-            <TimelineItem
-              key={entry.id}
-              entry={entry}
-              index={globalIndex}
-              isActive={activeEntryId === entry.id}
-              totalEntries={entries.length}
-              onHoverStart={() => setActiveEntryId(entry.id, globalIndex)}
-              onHoverEnd={clearActiveEntry}
-            />
-          );
-        })}
-      </div>
-    </div>
-  );
-});
-
-VirtualizedTimeline.displayName = 'VirtualizedTimeline';
-
+// --- Main Timeline Component ---
 export default function Timeline(): JSX.Element {
-  const [entries, setEntries] = useState<Entry[]>([]);
-  const [page, setPage] = useState<number>(1);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [hasMore, setHasMore] = useState<boolean>(true);
-  const [activeEntryId, setActiveEntryId] = useState<string | null>(null);
-  const [activeEntryIndex, setActiveEntryIndex] = useState<number | null>(null);
-  const observerRef = useRef<HTMLDivElement | null>(null);
+  // --- State ---
+  const [entries, setEntries] = useState<Entry[]>([]); // All loaded entries
+  const [page, setPage] = useState<number>(1); // Current page being loaded (for fetching)
+  const [loading, setLoading] = useState<boolean>(false); // Loading state for API calls
+  const [hasMore, setHasMore] = useState<boolean>(true); // More data available?
+  const [totalCount, setTotalCount] = useState<number>(0); // Total entries from API
+  const [activePage, setActivePage] = useState<number>(1); // Currently displayed page/group in carousel
+  const [activeCardIndex, setActiveCardIndex] = useState<number>(0); // Index of the focused card *within the active page*
+  const [activeCardId, setActiveCardId] = useState<string | null>(null); // ID of the globally active card
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // Modal state
+  const [modalContent, setModalContent] = useState<{ date: string; content: string } | null>(null);
+  const [progressPosition, setProgressPosition] = useState<{ x: number; y: number } | null>(null);
+  const [isDraggingProgress, setIsDraggingProgress] = useState<boolean>(false);
+  const [loadingPage, setLoadingPage] = useState<number | null>(null); // Track page being loaded via button click
+
+  // --- Refs ---
+  const loadedPages = useRef<Set<number>>(new Set()); // Keep track of loaded pages
+  const isLoadingRef = useRef<boolean>(false); // Prevent concurrent fetches
+  const initialLoadDone = useRef<boolean>(false); // Track initial load completion
+  const carouselGroupRefs = useRef<(HTMLDivElement | null)[]>([]); // Refs for each page group
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({}); // Refs for individual cards (keyed by entry.id)
+  const progressIndicatorRef = useRef<HTMLDivElement | null>(null); // Ref for progress indicator
+  const dragOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 }); // For progress drag offset
+  const dragOverlayRef = useRef<HTMLDivElement | null>(null); // Ref for drag overlay
+  // const prevActivePageRef = useRef<number>(activePage); // Ref to store previous active page - REMOVED
+  const isPageNavigatingRef = useRef<boolean>(false); // Ref to track if navigation triggered the effect
+
+  // --- Hooks ---
   const searchParams = useSearchParams();
   const nickname: string | null = searchParams.get('nickname');
-  const limit: number = 20;
-  const observerInstance = useRef<IntersectionObserver | null>(null);
-  const loadedPages = useRef<Set<number>>(new Set([1]));
-  const isLoadingRef = useRef<boolean>(false);
-  const initialLoadDone = useRef<boolean>(false);
-  const currentPageRef = useRef<number>(1);
-  const [totalCount, setTotalCount] = useState<number>(0);
-  const [showProgress, setShowProgress] = useState<boolean>(false);
+  const limit: number = PAGE_SIZE; // Use PAGE_SIZE constant
 
+  // --- Data Fetching (Adapted from original) ---
   const fetchEntries = useCallback(
     async (pageNum: number): Promise<void> => {
       if (!nickname || isLoadingRef.current || loadedPages.current.has(pageNum)) {
-        console.log(`跳过请求: page=${pageNum}, nickname=${nickname}, 原因: ${!nickname ? '无昵称' : isLoadingRef.current ? '正在加载中' : '页面已加载'}`);
+        console.log(`Skipping fetch: page=${pageNum}, nickname=${nickname}, loading=${isLoadingRef.current}, loaded=${loadedPages.current.has(pageNum)}`);
+        if (!isLoadingRef.current && pageNum === 1 && !initialLoadDone.current) {
+           // Ensure initial setup happens even if page 1 is already "loaded" (e.g., on fast refresh)
+           initialLoadDone.current = true;
+           setActivePage(1); // Activate first page
+           setActiveCardIndex(0); // Default to first card
+        }
         return;
       }
 
-      console.log(`获取数据: page=${pageNum}, nickname=${nickname}`);
+      console.log(`Fetching data: page=${pageNum}, nickname=${nickname}`);
       isLoadingRef.current = true;
-      setLoading(true);
+      setLoading(true); // Keep original loading state for skeleton/indicator
 
       try {
-        const res: Response = await fetch(
+        const res = await fetch(
           `/api/entries?nickname=${encodeURIComponent(nickname)}&page=${pageNum}&limit=${limit}`
         );
 
         if (!res.ok) {
-          throw new Error(`请求失败: ${res.status}`);
+          throw new Error(`API request failed: ${res.status}`);
         }
 
         const data: ApiResponse = await res.json();
-        console.log(`获取到数据: page=${pageNum}, 条目数=${data.entries.length}, 总数=${data.total}`);
-
-        const newEntries: Entry[] = data.entries || [];
         const total: number = data.total || 0;
-        
-        // 更新总条数
+        // Ensure totalCount is always set after a successful API call metadata retrieval,
+        // even if entry fetching part is skipped later.
         setTotalCount(total);
-        
-        // 显示进度指示器
-        setShowProgress(true);
+        console.log(`Data received: page=${pageNum}, count=${data.entries.length}, total=${total}`);
 
-        setEntries((prev: Entry[]): Entry[] => {
-          const combined: Entry[] = [...prev, ...newEntries];
-          const uniqueEntries: Entry[] = [
-            ...new Map(combined.map((entry: Entry) => [entry.id, entry] as const)).values(),
-          ];
+        // Now check if we actually need to process entries (if page wasn't loaded before)
+        if (loadedPages.current.has(pageNum)) {
+            console.log(`Page ${pageNum} already loaded, skipping entry processing but ensuring totalCount is set.`);
+            isLoadingRef.current = false; // Ensure loading state is reset
+            setLoading(false);
+            // Check hasMore status based on potentially updated totalCount
+            const currentTotalEntries = entries.length; // Use current length before potential additions
+            const hasMoreData = currentTotalEntries < total;
+            setHasMore(hasMoreData);
+            if (pageNum === 1) initialLoadDone.current = true; // Ensure initial load flag is set
+            return; // Skip the rest if page data already exists
+        }
+
+        // --- Process new entries only if page is new ---
+        const newEntries: Entry[] = (data.entries || []).map(entry => ({
+          ...entry,
+          page: pageNum, // Tag entries with their page number
+        }));
+
+        setEntries((prev) => {
+          const combined = [...prev, ...newEntries];
+          // Use a Map to ensure uniqueness based on ID
+          const uniqueMap = new Map(combined.map(e => [e.id, e]));
+          // Calculate globalIndex after deduplication
+          const uniqueEntries = Array.from(uniqueMap.values()).map((entry, index) => ({
+            ...entry,
+            globalIndex: index + 1, // Assign 1-based global index
+          }));
           return uniqueEntries;
         });
 
         loadedPages.current.add(pageNum);
-        const hasMoreData = pageNum * limit < total;
+        const hasMoreData = (entries.length + newEntries.length) < total; // Calculate based on combined length
         setHasMore(hasMoreData);
 
         if (pageNum === 1) {
           initialLoadDone.current = true;
+          setActivePage(1); // Ensure first page is active after fetch
+           // Calculate middle index for the first page's cards
+           const firstPageEntries = newEntries;
+           // Pad with placeholders if needed for initial middle index calculation
+           const paddedFirstPage = padWithPlaceholders(firstPageEntries, 1, limit);
+           const middleIndex = paddedFirstPage.length > 0 ? Math.floor(paddedFirstPage.length / 2) : 0;
+           setActiveCardIndex(middleIndex);
+           if(paddedFirstPage[middleIndex]) {
+               setActiveCardId(paddedFirstPage[middleIndex].id);
+           }
+           console.log(`Initial load done. Active page: 1, Active card index: ${middleIndex}`);
         }
 
-        if (!hasMoreData && observerInstance.current) {
-          console.log('没有更多数据，断开观察器');
-          observerInstance.current.disconnect();
-        }
+        // No need to disconnect observer here, let the `hasMore` state handle it in the observer effect
+
       } catch (error: unknown) {
-        console.error('获取数据出错:', error);
+        console.error('Error fetching entries:', error);
+        // Optionally handle fetch errors (e.g., show error message)
       } finally {
         isLoadingRef.current = false;
         setLoading(false);
       }
     },
-    [nickname, limit]
+    [nickname, limit, entries.length] // Add entries.length dependency for hasMore calculation
   );
 
+  // --- Initial Load & Nickname Change ---
   useEffect(() => {
-    console.log('昵称变化，重新加载:', nickname);
-
+    console.log('Nickname changed or initial mount:', nickname);
+    // Reset state on nickname change
     setEntries([]);
     setPage(1);
-    currentPageRef.current = 1;
-    setLoading(false);
+    setActivePage(1);
+    setActiveCardIndex(0);
+    setActiveCardId(null);
+    // Don't reset totalCount here immediately, let fetch handle it
+    // setTotalCount(0);
+    setLoading(false); // Set loading false initially
     setHasMore(true);
     initialLoadDone.current = false;
-
     loadedPages.current.clear();
     isLoadingRef.current = false;
+    cardRefs.current = {}; // Clear card refs
 
-    if (observerInstance.current) {
-      observerInstance.current.disconnect();
-      observerInstance.current = null;
+    // Fetch initial data if nickname exists
+    if (nickname) {
+       // Set loading true before fetch
+       setLoading(true);
+      fetchEntries(1);
     }
+  }, [nickname]);
 
-    fetchEntries(1);
-  }, [nickname, fetchEntries]);
-
-  useEffect(() => {
-    currentPageRef.current = page;
-
-    if (page > 1 && !loadedPages.current.has(page)) {
-      console.log(`页码变化，加载新页面: ${page}`);
-      fetchEntries(page);
+  // --- Placeholder Padding Function ---
+  const padWithPlaceholders = (entriesInGroup: Entry[], pageNum: number, targetSize: number): Entry[] => {
+    const placeholdersNeeded = targetSize - entriesInGroup.length;
+    if (placeholdersNeeded <= 0) {
+      return entriesInGroup;
     }
-  }, [page, fetchEntries]);
+    const placeholders: Entry[] = Array.from({ length: placeholdersNeeded }, (_, i) => ({
+      id: `placeholder-${pageNum}-${entriesInGroup.length + i}`,
+      date: "Z年C月Y日", // Placeholder date
+      content: "Coming Soon...", // Placeholder content
+      page: pageNum,
+      isPlaceholder: true,
+    }));
+    return [...entriesInGroup, ...placeholders];
+  };
 
-  useEffect(() => {
-    // 保持清理逻辑
-    if (observerInstance.current) {
-      observerInstance.current.disconnect();
-      observerInstance.current = null;
-    }
-
-    // 使用函数来封装观察器的设置逻辑
-    const setupObserver = () => {
-      if (!nickname || !hasMore || !initialLoadDone.current) {
-        return;
+  // --- Grouped Entries for Carousel ---
+  const groupedEntries = useMemo(() => {
+    const groups: Record<number, Entry[]> = {};
+    entries.forEach(entry => {
+      if (!groups[entry.page]) {
+        groups[entry.page] = [];
       }
+      groups[entry.page].push(entry);
+    });
 
-      console.log('设置无限滚动观察器, 当前页码:', currentPageRef.current);
+    // Ensure all loaded pages are present, even if empty initially before padding
+    const allLoadedPageNumbers = Array.from(loadedPages.current);
+    allLoadedPageNumbers.forEach(pageNum => {
+        if (!groups[pageNum]) {
+            groups[pageNum] = []; // Ensure group exists even if API returned no entries for it yet
+        }
+    }); // Correctly close forEach
 
-      observerInstance.current = new IntersectionObserver(
-        (entries: IntersectionObserverEntry[]): void => {
-          if (entries[0].isIntersecting && !isLoadingRef.current && hasMore) {
-            const nextPage = currentPageRef.current + 1;
-            console.log('触发观察器，准备加载页面:', nextPage);
+    // Sort groups by page number and pad with placeholders
+    return Object.entries(groups)
+                 .sort(([pageNumA], [pageNumB]) => parseInt(pageNumA) - parseInt(pageNumB))
+                 .map(([pageNumStr, entriesInGroup]) => {
+                     const pageNum = parseInt(pageNumStr);
+                     // Pad each group to PAGE_SIZE
+                     const paddedEntries = padWithPlaceholders(entriesInGroup, pageNum, PAGE_SIZE); // Use PAGE_SIZE
+                     return {
+                         page: pageNum,
+                         entries: paddedEntries // Use padded entries
+                     };
+                 });
+  }, [entries, PAGE_SIZE]); // Depend on entries and PAGE_SIZE
 
-            if (!loadedPages.current.has(nextPage)) {
-              console.log('开始加载下一页:', nextPage);
-              setPage(nextPage);
-            } else {
-              console.log('页面已加载，跳过:', nextPage);
-            }
+  // --- 3D Carousel Logic ---
+  useEffect(() => {
+    console.log(`Carousel Effect: ActivePage=${activePage}, ActiveCardIndex=${activeCardIndex}`);
+    const activeGroupData = groupedEntries.find(g => g.page === activePage);
+    if (!activeGroupData || activeGroupData.entries.length === 0) {
+        console.log("Carousel Effect: No active group data or empty group.");
+        return; // No group or no cards in the active group
+    }
+
+    const cardsInGroup = activeGroupData.entries;
+    const currentTargetIndex = activeCardIndex; // The card that should be in the center
+
+    // --- Apply Transforms with Delay ---
+    const animationFrameId = requestAnimationFrame(() => {
+      // const pageChanged = activePage !== prevActivePageRef.current; // Use navigation flag instead
+      const playEntryAnimation = isPageNavigatingRef.current;
+      console.log(`Carousel Effect (apply): Play entry animation: ${playEntryAnimation}`);
+
+      cardsInGroup.forEach((entry, index) => {
+        const cardElement = cardRefs.current[entry.id];
+        if (!cardElement) {
+          console.warn(`Carousel Effect: Card element not found for ID: ${entry.id} during transform application.`);
+          return; 
+        }
+
+        // Calculate final target state (position, opacity, z-index)
+        let relativePos = index - currentTargetIndex;
+        const groupSize = cardsInGroup.length;
+        if (groupSize > 1) { 
+            if (relativePos > groupSize / 2) relativePos -= groupSize;
+            if (relativePos < -groupSize / 2) relativePos += groupSize;
+        }
+        const angleDivisor = Math.min(VISIBLE_CARDS, groupSize) || 1;
+        const angle = relativePos * (VISIBLE_ANGLE / angleDivisor);
+        const finalX = Math.sin(angle) * RADIUS;
+        const finalY = -40 + Math.abs(relativePos) * 15;
+        const finalZ = Math.cos(angle) * RADIUS * 0.6;
+        const finalRotateY = -angle * 0.8;
+        const finalTransform = `translate3d(${finalX}px, ${finalY}px, ${finalZ}px) rotateY(${finalRotateY}rad)`;
+        const finalZIndex = 100 - Math.abs(relativePos) * 10;
+        const finalOpacity = Math.max(0.1, 1 - Math.min(Math.abs(relativePos), 5) * 0.18);
+
+        // Apply styles based on whether navigation triggered this
+        if (playEntryAnimation) {
+          // Page changed via nav: Apply entry animation
+          cardElement.style.transition = 'none';
+          cardElement.style.opacity = '0';
+          cardElement.style.transform = `translate3d(${finalX}px, ${finalY + 30}px, ${finalZ - 50}px) scale(0.8) rotateY(${finalRotateY}rad)`;
+          cardElement.style.zIndex = finalZIndex.toString(); 
+          void cardElement.offsetHeight;
+          const delay = Math.abs(relativePos) * 0.05;
+          cardElement.style.transition = `transform 0.5s ${delay}s ease-out, opacity 0.4s ${delay}s ease-out`;
+          cardElement.style.opacity = finalOpacity.toString();
+          cardElement.style.transform = finalTransform;
+          cardElement.style.pointerEvents = Math.abs(relativePos) > Math.floor(VISIBLE_CARDS / 2) ? 'none' : 'auto';
+        } else {
+          // Just focus shift: Apply final state directly with transition
+          cardElement.style.transition = 'transform 0.6s ease-out, opacity 0.6s ease-out';
+          cardElement.style.opacity = finalOpacity.toString();
+          cardElement.style.transform = finalTransform;
+          cardElement.style.zIndex = finalZIndex.toString();
+          cardElement.style.pointerEvents = Math.abs(relativePos) > Math.floor(VISIBLE_CARDS / 2) ? 'none' : 'auto';
+        }
+
+        // Update active class (applies regardless of animation)
+        if (index === currentTargetIndex && !entry.isPlaceholder) {
+          if (!cardElement.classList.contains('active')) {
+              cardElement.classList.add('active');
           }
-        },
-        { threshold: 0.1, rootMargin: '100px' }
-      );
+        } else {
+          cardElement.classList.remove('active');
+        }
+      });
 
-      const currentRef = observerRef.current;
-      if (currentRef) {
-        console.log('开始观察底部元素');
-        observerInstance.current.observe(currentRef);
+      // Reset the navigation flag after applying styles for this run
+      if (playEntryAnimation) {
+          isPageNavigatingRef.current = false;
       }
-    };
+    }); // End of requestAnimationFrame
 
-    // 设置观察器
-    setupObserver();
+    // Update the previous page ref *after* the effect logic has run - REMOVED
+    // prevActivePageRef.current = activePage;
 
-    // 清理函数
-    return () => {
-      if (observerInstance.current) {
-        console.log('清理观察器');
-        observerInstance.current.disconnect();
-        observerInstance.current = null;
+    // Cleanup function to cancel the animation frame if the effect re-runs
+    return () => cancelAnimationFrame(animationFrameId);
+
+    // Ensure dependencies correctly reflect what the effect uses
+}, [activePage, activeCardIndex, groupedEntries, PAGE_SIZE, RADIUS, VISIBLE_ANGLE, VISIBLE_CARDS]);
+
+  // --- Event Handlers ---
+
+  // Page Navigation Button Click
+  const handleNavClick = useCallback(async (pageNumber: number) => {
+    if (pageNumber === activePage || loadingPage === pageNumber) return; 
+
+    console.log(`Navigating to page: ${pageNumber}`);
+    isPageNavigatingRef.current = true; // Set flag before fetching/setting state
+
+    let newEntriesForPage: Entry[] = []; // Store fetched entries if needed
+
+    // --- Step 1: Fetch data if necessary ---
+    if (!loadedPages.current.has(pageNumber)) {
+      console.log(`Page ${pageNumber} not loaded. Fetching...`);
+      setLoadingPage(pageNumber);
+      try {
+        // Modify fetchEntries slightly to return new entries or indicate success?
+        // For now, assume fetchEntries updates the main 'entries' state.
+        await fetchEntries(pageNumber);
+        // We need to get the *latest* entries state here, which is tricky post-await.
+        // A common pattern is to trigger a re-render and let a useEffect handle the rest,
+        // or pass a callback to fetchEntries.
+        // Let's try a simpler approach first: set activePage and let useEffects handle it,
+        // but we need to be sure the calculation uses updated data.
+        console.log(`Page ${pageNumber} fetch initiated.`);
+      } catch (error) {
+        console.error(`Error fetching page ${pageNumber}:`, error);
+        setLoadingPage(null); // Clear loading state on error
+        return; // Stop navigation if fetch fails
+      } finally {
+         // Clear loading state AFTER potential state updates from fetchEntries resolve
+         // Use setTimeout to ensure it runs after the current execution context
+         setTimeout(() => setLoadingPage(null), 0);
       }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasMore, nickname, initialLoadDone.current]);
+       // At this point, fetchEntries has been called and likely updated the 'entries' state,
+       // triggering a future re-render where groupedEntries will be updated.
+    } else {
+        console.log(`Page ${pageNumber} already loaded.`);
+    }
 
-  const handleEntryHoverStart = useCallback((id: string, index: number) => {
-    setActiveEntryId(id);
-    setActiveEntryIndex(index);
+    // --- Step 2: Set Active Page (triggers re-render) ---
+    setActivePage(pageNumber);
+
+    // --- Step 3: Determine Target Card and Update State (Best effort after state update) ---
+    // This part is tricky because `groupedEntries` might not be updated yet in this render cycle
+    // after a fetch. Let's calculate based on the *expected* structure post-fetch/update.
+
+    // We need to use the main `entries` state, assuming it has been (or will be) updated.
+    // Filter the main entries list for the target page.
+    // Note: Accessing state directly (`entries`) here might use the value from the *previous* render
+    // if called immediately after an awaited state update.
+    // This calculation might be better placed in a useEffect triggered by `activePage` and `entries`.
+
+    // *** Let's move the index/ID setting logic to a dedicated useEffect ***
+
+/* // Old logic moved to useEffect
+    const targetGroup = groupedEntries.find(g => g.page === pageNumber);
+    const entriesOnTargetPage = targetGroup ? targetGroup.entries : padWithPlaceholders([], pageNumber, PAGE_SIZE);
+    const middleIndex = entriesOnTargetPage.length > 0 ? Math.floor(entriesOnTargetPage.length / 2) : 0;
+    setActiveCardIndex(middleIndex);
+
+    const middleEntry = entriesOnTargetPage[middleIndex];
+    if (middleEntry && !middleEntry.isPlaceholder) {
+        setActiveCardId(middleEntry.id);
+        console.log(`Nav click: Set active card ID: ${middleEntry.id} (Global Index: ${middleEntry.globalIndex})`);
+    } else {
+        setActiveCardId(null); // Reset if group/card not found or is placeholder
+        console.log(`Nav click: Target middle card not found or is placeholder for page ${pageNumber}.`);
+    }
+*/
+  }, [activePage, loadingPage, fetchEntries]); // Remove groupedEntries dependency
+
+  // --- Effect to Update Card Index and ID after Page Change or Data Load ---
+  useEffect(() => {
+      // This effect runs when activePage changes or when groupedEntries is recalculated (due to entries changing)
+      console.log(`Effect: Updating index/ID for activePage: ${activePage}`);
+
+      const targetGroup = groupedEntries.find(g => g.page === activePage);
+      // Use the padded entries from the current groupedEntries memo
+      const entriesOnTargetPage = targetGroup ? targetGroup.entries : padWithPlaceholders([], activePage, PAGE_SIZE);
+
+      if (entriesOnTargetPage.length === 0) {
+          console.warn(`Effect: No entries found for active page ${activePage} in groupedEntries.`);
+          // Reset index/ID if page is somehow empty after load?
+          // setActiveCardIndex(0);
+          // setActiveCardId(null);
+          return;
+      }
+
+      const middleIndex = Math.floor(entriesOnTargetPage.length / 2);
+      // Only update if the index actually changes (or initially)
+      // This check might be redundant if dependencies are correct, but can prevent loops
+      // if (activeCardIndex !== middleIndex) { // Let's remove this check for now to ensure update
+          setActiveCardIndex(middleIndex);
+          console.log(`Effect: Set active card index: ${middleIndex}`);
+      // }
+
+      const middleEntry = entriesOnTargetPage[middleIndex];
+      const newActiveCardId = (middleEntry && !middleEntry.isPlaceholder) ? middleEntry.id : null;
+
+      // Only update if the ID actually changes
+      // if (activeCardId !== newActiveCardId) { // Let's remove this check for now
+          setActiveCardId(newActiveCardId);
+          if (newActiveCardId) {
+              console.log(`Effect: Set active card ID: ${newActiveCardId} (Global Index: ${middleEntry?.globalIndex})`);
+          } else {
+              console.log(`Effect: Reset active card ID (middle card is placeholder or not found).`);
+          }
+      // }
+
+  }, [activePage, groupedEntries]); // Trigger when page changes or entries/groups update
+
+  // Card Click
+  const handleCardClick = (entry: Entry, indexInPage: number) => {
+    if (entry.page !== activePage) {
+        // If clicking a card on an inactive page, switch to that page first
+        handleNavClick(entry.page);
+        // We might need a slight delay or better state management to then set the card index,
+        // but for now, let's assume handleNavClick resets it appropriately.
+        // Or, set the index directly after switching the page.
+        setActiveCardIndex(indexInPage);
+         setActiveCardId(entry.id); // Update active ID immediately
+         console.log(`Card click (page switch): Set active card ID: ${entry.id}`);
+    } else if (indexInPage !== activeCardIndex) {
+        // If clicking a card on the active page but not the center one
+        console.log(`Focusing card index ${indexInPage} on page ${activePage}`);
+        setActiveCardIndex(indexInPage);
+        setActiveCardId(entry.id); // Update active ID immediately
+         console.log(`Card click (focus): Set active card ID: ${entry.id}`);
+    } else {
+         // Clicking the already active card - potentially open modal
+         // Only open modal for non-placeholder cards
+         if (!entry.isPlaceholder) {
+             console.log(`Clicked active card: ${entry.id}. Opening modal.`);
+             setModalContent({ date: formatDate(entry.date), content: entry.content });
+             setIsModalOpen(true);
+             document.body.style.overflow = 'hidden'; // Prevent background scroll
+         } else {
+             console.log(`Clicked active placeholder card: ${entry.id}. Doing nothing.`);
+         }
+    }
+  };
+
+  // Modal Close
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setModalContent(null);
+    document.body.style.overflow = ''; // Restore background scroll
+  };
+
+  // --- Progress Indicator Drag Logic ---
+  const loadProgressPosition = useCallback(() => {
+    let positionLoaded = false;
+    try {
+      const savedPosition = localStorage.getItem('progressIndicatorPosition');
+      if (savedPosition) {
+        const pos = JSON.parse(savedPosition);
+        // Check for valid x, y coordinates (used when saving left/top)
+        if (pos && typeof pos.x === 'number' && typeof pos.y === 'number') {
+          setProgressPosition(pos); // Store the state
+           // Apply loaded position directly if element exists
+           if (progressIndicatorRef.current) {
+               // Apply as left/top
+               progressIndicatorRef.current.style.left = `${pos.x}px`;
+               progressIndicatorRef.current.style.top = `${pos.y}px`;
+               progressIndicatorRef.current.style.right = 'auto';
+               progressIndicatorRef.current.style.bottom = 'auto';
+               console.log("Progress indicator position loaded (left/top):", pos);
+               positionLoaded = true;
+           }
+        } else if (pos && pos.right && pos.bottom) {
+            // Compatibility or preference for right/bottom saving
+            setProgressPosition({ // Estimate x/y for state if needed, but apply right/bottom
+                x: window.innerWidth - (parseFloat(pos.right) || 0) - (progressIndicatorRef.current?.offsetWidth || 100),
+                y: window.innerHeight - (parseFloat(pos.bottom) || 0) - (progressIndicatorRef.current?.offsetHeight || 100)
+            });
+             if (progressIndicatorRef.current) {
+               progressIndicatorRef.current.style.right = pos.right;
+               progressIndicatorRef.current.style.bottom = pos.bottom;
+               progressIndicatorRef.current.style.left = 'auto';
+               progressIndicatorRef.current.style.top = 'auto';
+               console.log("Progress indicator position loaded (right/bottom):", pos);
+               positionLoaded = true;
+           }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to load progress indicator position:', e);
+    }
+
+     // Default position if loading fails or no position saved
+     if (!positionLoaded && progressIndicatorRef.current) {
+         console.log("Setting default progress indicator position (left/bottom).");
+         // Ensure default position is set using left/bottom
+         progressIndicatorRef.current.style.left = '2rem'; // Change from right to left
+         progressIndicatorRef.current.style.bottom = '2rem';
+         progressIndicatorRef.current.style.right = 'auto'; // Ensure right is auto
+         progressIndicatorRef.current.style.top = 'auto';
+         // Update state if needed, calculate approximate x/y based on default left/bottom
+         const rect = progressIndicatorRef.current.getBoundingClientRect();
+         setProgressPosition({ x: rect.left, y: rect.top });
+     }
   }, []);
 
-  const handleEntryHoverEnd = useCallback(() => {
-    setActiveEntryId(null);
-    setActiveEntryIndex(null);
+  const saveProgressPosition = useCallback((element: HTMLDivElement) => {
+    // Save position based on final computed style (prefer right/bottom if available)
+    const style = window.getComputedStyle(element);
+    let positionToSave;
+    // Prioritize saving left/top as it's directly used in drag calculations
+     positionToSave = { x: element.offsetLeft, y: element.offsetTop };
+    // Alternatively, save right/bottom if preferred:
+    // positionToSave = { right: style.right, bottom: style.bottom };
+
+    try {
+      localStorage.setItem('progressIndicatorPosition', JSON.stringify(positionToSave));
+      console.log("Progress indicator position saved:", positionToSave);
+    } catch (e) {
+      console.warn('Failed to save progress indicator position:', e);
+    }
   }, []);
+
+  // Load position effect - ensure it runs *after* the indicator ref is likely set.
+  useEffect(() => {
+    // Use setTimeout to delay loading until after the initial render slightly,
+    // ensuring the ref is populated and dimensions are available.
+    const timer = setTimeout(() => {
+        if (progressIndicatorRef.current) {
+             loadProgressPosition();
+        } else {
+            console.warn("Progress indicator ref not ready for position loading.");
+            // Optionally retry or handle this case
+        }
+    }, 50); // Short delay
+
+    return () => clearTimeout(timer);
+  }, [loadProgressPosition]); // Depend on the memoized load function
+
+   const handleProgressMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+        e.preventDefault(); // Prevent text selection/default drag behavior
+        setIsDraggingProgress(true);
+
+        const indicator = progressIndicatorRef.current;
+        if (!indicator) return;
+
+        indicator.style.transition = 'none'; // Disable transition during drag
+        indicator.classList.add('dragging');
+        if(dragOverlayRef.current) dragOverlayRef.current.style.display = 'block'; // Show overlay
+
+        const rect = indicator.getBoundingClientRect();
+        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+
+        dragOffset.current = {
+            x: clientX - rect.left,
+            y: clientY - rect.top,
+        };
+   }, []);
+
+    const handleProgressMouseMove = useCallback((e: MouseEvent | TouchEvent) => {
+        if (!isDraggingProgress || !progressIndicatorRef.current) return;
+
+        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+
+        let newX = clientX - dragOffset.current.x;
+        let newY = clientY - dragOffset.current.y;
+
+        // Boundary checks
+        const indicator = progressIndicatorRef.current;
+        const maxX = window.innerWidth - indicator.offsetWidth;
+        const maxY = window.innerHeight - indicator.offsetHeight;
+        newX = Math.max(0, Math.min(newX, maxX));
+        newY = Math.max(0, Math.min(newY, maxY));
+
+        indicator.style.left = `${newX}px`;
+        indicator.style.top = `${newY}px`;
+        indicator.style.right = 'auto'; // Ensure right/bottom are not interfering
+        indicator.style.bottom = 'auto';
+
+        // No need to update state here constantly, directly manipulate style
+    }, [isDraggingProgress]);
+
+   const handleProgressMouseUp = useCallback(() => {
+        if (!isDraggingProgress) return;
+        setIsDraggingProgress(false);
+
+        const indicator = progressIndicatorRef.current;
+         if(dragOverlayRef.current) dragOverlayRef.current.style.display = 'none'; // Hide overlay
+
+        if (indicator) {
+            indicator.style.transition = ''; // Re-enable transitions
+            indicator.classList.remove('dragging');
+            const finalPos = { x: indicator.offsetLeft, y: indicator.offsetTop };
+             setProgressPosition(finalPos); // Update state with final position
+             saveProgressPosition(indicator); // Save the final position using the element
+        }
+    }, [isDraggingProgress, saveProgressPosition]);
+
+    // Add global listeners for mouse move and up when dragging
+    useEffect(() => {
+        if (isDraggingProgress) {
+            window.addEventListener('mousemove', handleProgressMouseMove);
+            window.addEventListener('touchmove', handleProgressMouseMove, { passive: false });
+            window.addEventListener('mouseup', handleProgressMouseUp);
+            window.addEventListener('touchend', handleProgressMouseUp);
+        } else {
+            window.removeEventListener('mousemove', handleProgressMouseMove);
+            window.removeEventListener('touchmove', handleProgressMouseMove);
+            window.removeEventListener('mouseup', handleProgressMouseUp);
+            window.removeEventListener('touchend', handleProgressMouseUp);
+        }
+
+        // Cleanup listeners
+        return () => {
+            window.removeEventListener('mousemove', handleProgressMouseMove);
+            window.removeEventListener('touchmove', handleProgressMouseMove);
+            window.removeEventListener('mouseup', handleProgressMouseUp);
+            window.removeEventListener('touchend', handleProgressMouseUp);
+        };
+    }, [isDraggingProgress, handleProgressMouseMove, handleProgressMouseUp]);
+
+
+  // --- Render ---
+
+  // Calculate progress percentage
+  const progressPercent = totalCount > 0 ? Math.round((entries.length / totalCount) * 100) : 0;
+
+  // Find global index of the active card ID
+   const activeCardGlobalIndex = useMemo(() => {
+       if (!activeCardId) return null;
+       const index = entries.findIndex(e => e.id === activeCardId);
+       return index !== -1 ? index + 1 : null; // Return 1-based index or null
+   }, [activeCardId, entries]);
+
+   // Calculate total pages
+   const totalPages = totalCount > 0 ? Math.ceil(totalCount / PAGE_SIZE) : 0;
 
   if (!nickname) {
-    return <div className="text-center text-gray-500">Loading...</div>;
+    // TODO: Replace with a more visually appealing loading/prompt state?
+    return <div className="text-center text-gray-500 p-10">Please provide a nickname in the URL (e.g., ?nickname=...)</div>;
   }
 
   return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-4">时光轴</h2>
-      <div className="relative">
-        {/* 初始加载时显示骨架屏 */}
-        {entries.length === 0 && loading && (
-          <>
-            <TimelineSkeleton />
-            <motion.p
-              className="text-center text-gray-500 mt-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
-            >
-              正在加载记忆...
-            </motion.p>
-          </>
-        )}
+    <div className="container mx-auto px-4 py-2 relative">
+        {/* Hidden overlay for smoother dragging - Ensure this is styled correctly */}
+       <div ref={dragOverlayRef} id="progress-drag-overlay" style={{ display: 'none' }}></div>
 
-        {/* 使用虚拟化的时间轴组件 */}
-        {entries.length > 0 && (
-          <VirtualizedTimeline 
-            entries={entries} 
-            activeEntryId={activeEntryId} 
-            setActiveEntryId={handleEntryHoverStart}
-            clearActiveEntry={handleEntryHoverEnd}
-          />
-        )}
-        
-        {/* 进度指示器 - 传递activeEntryIndex */}
-        <AnimatePresence>
-          {showProgress && totalCount > 0 && (
-            <ProgressIndicator 
-              loadedCount={entries.length} 
-              totalCount={totalCount}
-              activeEntryIndex={activeEntryIndex}
-            />
-          )}
-        </AnimatePresence>
+      {/* Title (Optional - can be part of page layout) */}
+      {/* <h1 className="text-center text-3xl font-bold mb-8">时光轴</h1> */}
+
+      {/* --- Carousel --- */}
+      <div className="carousel-container performance-boost">
+        {groupedEntries.map(({ page: pageNum, entries: entriesInGroup }) => (
+          <div
+            key={pageNum}
+            ref={el => { carouselGroupRefs.current[pageNum] = el; }}
+            className={`carousel-group ${pageNum === activePage ? 'active' : ''}`}
+            data-group={pageNum}
+          >
+            <div className="timeline">
+              {entriesInGroup.map((entry, indexInPage) => {
+                const isCardActive = pageNum === activePage && indexInPage === activeCardIndex;
+                // Placeholder check moved to data generation
+                const isPlaceholder = entry.isPlaceholder ?? false;
+                const needFade = !isPlaceholder && checkNeedFade(entry.content);
+
+                return (
+                  <div
+                    key={entry.id}
+                    ref={el => { cardRefs.current[entry.id] = el; }}
+                    className={`timeline-card ${isPlaceholder ? 'placeholder-card' : ''} ${isCardActive ? 'active' : ''}`}
+                    data-id={entry.id}
+                    data-index={indexInPage}
+                    onClick={() => handleCardClick(entry, indexInPage)}
+                    // Add hover effects if needed via CSS or state
+                  >
+                    <div className="card-date">{formatDate(entry.date)}</div>
+                    <div className="card-content">
+                      <div
+                         className="content-text"
+                         style={{
+                           // @ts-ignore - CSS custom properties need to be asserted
+                           '--lines-to-show': LINES_TO_SHOW,
+                           '--line-height': LINE_HEIGHT,
+                           // max height calculation can be removed if pure CSS handles truncation well
+                          // maxHeight: `calc(var(--line-height) * var(--lines-to-show) * 1em)`
+                         }}
+                       >
+                         {entry.content}
+                       </div>
+                       {/* Fade element might not be needed if CSS gradient is applied directly on content-text overflow */}
+                       {needFade && !isPlaceholder && <div className="content-fade"></div>}
+                    </div>
+                    {!isPlaceholder && (
+                      <div className="card-footer">
+                        <div className="icon-holder" onClick={(e) => { e.stopPropagation(); alert('Like clicked!'); }}>
+                           <Heart size={18} />
+                         </div>
+                         <div className="icon-holder" onClick={(e) => { e.stopPropagation(); alert('Star clicked!'); }}>
+                           <Star size={18} />
+                         </div>
+                      </div>
+                    )}
+                     {/* Footer for placeholder - Ensure this is styled correctly in CSS */}
+                     {isPlaceholder && <div className="card-footer"></div>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
-      {hasMore && (
-        <div ref={observerRef} className="h-10">
-          {loading && (
-            <motion.p
-              className="text-center text-gray-500"
+      {/* --- Page Navigation --- */}
+      <div className="group-nav">
+        {/* Use the new Pagination component */}
+        <Pagination
+           currentPage={activePage}
+           totalPages={totalPages}
+           onPageChange={handleNavClick}
+           loadingPage={loadingPage}
+           loadedPages={loadedPages.current} // Pass loadedPages Set
+           // maxVisibleButtons={9} // Optionally override default
+         />
+      </div>
+
+      {/* --- Progress Indicator --- */}
+      <AnimatePresence>
+         {/* Render indicator container if initial load attempted/done, not strictly totalCount > 0 */}
+         {/* Content inside will still depend on totalCount */}
+         {(initialLoadDone.current || entries.length > 0 || loading) && nickname && (
+            <motion.div
+                ref={progressIndicatorRef}
+                className="progress-indicator"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                transition={{ duration: 0.3 }}
+                 style={{ // Initial position can be set here, but useEffect will override
+                     position: 'fixed', // Ensure it's fixed
+                    // Let useEffect handle position loading/setting
+                 }}
+                 onMouseDown={handleProgressMouseDown}
+                 onTouchStart={handleProgressMouseDown}
+            >
+                 <div className="progress-circle" style={{ '--progress-percent': `${progressPercent}%` } as React.CSSProperties}>
+                   <div className="progress-inner">
+                       <div className="progress-count">{entries.length}/{totalCount > 0 ? totalCount : '--'}</div>
+                       <div className="progress-percent">{progressPercent}%</div>
+                       {activeCardGlobalIndex !== null && (
+                           <motion.div
+                               className="progress-active"
+                                key={activeCardGlobalIndex} // Key change triggers animation
+                               initial={{ opacity: 0, y: 5 }}
+                               animate={{ opacity: 1, y: 0 }}
+                               transition={{ duration: 0.2 }}
+                           >
+                                <span className="progress-highlight">#{activeCardGlobalIndex}</span>
+                            </motion.div>
+                        )}
+                    </div>
+                </div>
+            </motion.div>
+         )}
+      </AnimatePresence>
+
+       {/* --- Modal --- */}
+       <AnimatePresence>
+         {isModalOpen && modalContent && (
+           <motion.div
+             className="modal-overlay active" // Use class to control display via CSS
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
-            >
-              正在加载更多记忆...
-            </motion.p>
-          )}
-        </div>
-      )}
+             exit={{ opacity: 0 }}
+             onClick={closeModal} // Close on overlay click
+           >
+             <motion.div
+               className="content-modal"
+               initial={{ scale: 0.7, opacity: 0 }}
+               animate={{ scale: 1, opacity: 1 }}
+               exit={{ scale: 0.7, opacity: 0 }}
+               transition={{ type: "spring", stiffness: 300, damping: 30 }}
+               onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
+             >
+               <button className="modal-close" onClick={closeModal}>&times;</button>
+               <div className="modal-date">{modalContent.date}</div>
+               <div className="modal-content">
+                 {modalContent.content}
+               </div>
+             </motion.div>
+           </motion.div>
+         )}
+       </AnimatePresence>
 
-      {!hasMore && entries.length > 0 && (
-        <motion.p
-          className="text-center text-gray-500 italic mt-8 mb-12"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          时光长河的尽头，是美好回忆的起点...
-        </motion.p>
+      {/* --- Loading/End Indicators --- */}
+      {/* Observer target for infinite scroll - REMOVED */}
+      {/* <div ref={observerRef} className="h-10 mt-8">
+          {loading && entries.length > 0 && ( // Show loading only when loading more, not initial
+            <p className="text-center text-gray-500">Loading more entries...</p>
+          )}
+      </div> */}
+
+      {/* Initial Loading Skeleton */}
+      {loading && entries.length === 0 && (
+            // Simple loading text, as skeleton might be complex with carousel
+            <div className="text-center text-gray-500 p-10 absolute inset-0 flex items-center justify-center bg-gray-100/50 z-10">
+                Loading Timeline...
+        </div>
       )}
     </div>
   );
