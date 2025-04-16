@@ -22,5 +22,11 @@
         "argsIgnorePattern": "^_"
       }
     ]
-  }
+  },
+  "ignorePatterns": ["docs/**/*", "node_modules/**/*"],
+  "overrides": [
+    {
+      "files": ["**/*.ts", "**/*.tsx"]
+    }
+  ]
 }
