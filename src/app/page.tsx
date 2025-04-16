@@ -23,23 +23,7 @@ import React, { Suspense, useEffect, useState } from 'react';
 const Timeline = dynamic(() => import('@/components/Timeline'), {
   ssr: false,
   loading: () => (
-    <div className="animate-pulse space-y-8 py-8">
-      <div className="text-center text-gray-500">加载时间轴中...</div>
-      {[1, 2, 3].map((item) => (
-        <div key={item} className="relative pl-8 pb-8">
-          <div className="absolute left-0 top-2 w-5 h-5 rounded-full bg-violet-200 dark:bg-violet-700 shadow-[0_0_12px_rgba(139,92,246,0.3)]"></div>
-          <div className="absolute left-[10px] top-[40px] w-[2px] h-[calc(100%-48px)] bg-gradient-to-b from-violet-200 via-violet-300 to-violet-200 dark:from-violet-700 dark:via-violet-600 dark:to-violet-700"></div>
-          <div className="mb-2 h-4 w-32 bg-violet-100 dark:bg-violet-800 rounded-full"></div>
-          <div className="p-6 rounded-lg bg-white dark:bg-slate-800 shadow-sm border border-violet-100 dark:border-violet-800">
-            <div className="space-y-4">
-              <div className="h-4 bg-violet-50 dark:bg-violet-900/50 rounded-full w-full"></div>
-              <div className="h-4 bg-violet-50 dark:bg-violet-900/50 rounded-full w-4/5"></div>
-              <div className="h-4 bg-violet-50 dark:bg-violet-900/50 rounded-full w-2/3"></div>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
+    <div className="text-center text-gray-500">加载时间轴中...</div>
   )
 });
 

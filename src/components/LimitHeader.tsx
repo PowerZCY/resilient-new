@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 export function LimitHeader() {
   return (
-    <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 shadow-sm">
+    <header className="bg-gray-50 dark:bg-gray-950 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* 改为三栏布局，每栏固定宽度比例 */}
         <div className="grid grid-cols-12 items-center h-16">
@@ -19,11 +19,11 @@ export function LimitHeader() {
                 initial={{ rotate: -10, scale: 0.9 }}
                 animate={{ rotate: 0, scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="flex-shrink-0 group-hover:scale-110 transition-transform"
+                className="flex-shrink-0 group-hover:scale-110 transition-transform h-7 flex items-center"
               >
                 <Sparkles className="h-7 w-7 text-blue-600" />
               </motion.div>
-              <h1 className="ml-2.5 text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-violet-600 whitespace-nowrap group-hover:from-blue-500 group-hover:to-violet-500 transition-all">
+              <h1 className="ml-2.5 text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-violet-600 whitespace-nowrap group-hover:from-blue-500 group-hover:to-violet-500 transition-all m-0">
                 突破消极偏见♾️
               </h1>
             </Link>

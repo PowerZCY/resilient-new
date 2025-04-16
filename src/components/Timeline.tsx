@@ -48,7 +48,7 @@ const formatDate = (dateString: string): string => {
       return dateString; // Return original string if invalid
     }
     // Use prototype format "YYYY年M月D日"
-    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
   } catch (e) {
     console.error("Error formatting date:", dateString, e);
     return dateString; // Return original on error
@@ -381,8 +381,8 @@ export default function Timeline(): JSX.Element {
         const cardElement = cardRefs.current[entry.id];
         if (!cardElement) {
           console.warn(`Carousel Effect: Card element not found for ID: ${entry.id} during transform application.`);
-          return; 
-        }
+        return;
+      }
 
         // Calculate final target state (position, opacity, z-index)
         let relativePos = index - currentTargetIndex;
@@ -428,7 +428,7 @@ export default function Timeline(): JSX.Element {
           if (!cardElement.classList.contains('active')) {
               cardElement.classList.add('active');
           }
-        } else {
+            } else {
           cardElement.classList.remove('active');
         }
       });
@@ -503,21 +503,6 @@ export default function Timeline(): JSX.Element {
 
     // *** Let's move the index/ID setting logic to a dedicated useEffect ***
 
-/* // Old logic moved to useEffect
-    const targetGroup = groupedEntries.find(g => g.page === pageNumber);
-    const entriesOnTargetPage = targetGroup ? targetGroup.entries : padWithPlaceholders([], pageNumber, PAGE_SIZE);
-    const middleIndex = entriesOnTargetPage.length > 0 ? Math.floor(entriesOnTargetPage.length / 2) : 0;
-    setActiveCardIndex(middleIndex);
-
-    const middleEntry = entriesOnTargetPage[middleIndex];
-    if (middleEntry && !middleEntry.isPlaceholder) {
-        setActiveCardId(middleEntry.id);
-        console.log(`Nav click: Set active card ID: ${middleEntry.id} (Global Index: ${middleEntry.globalIndex})`);
-    } else {
-        setActiveCardId(null); // Reset if group/card not found or is placeholder
-        console.log(`Nav click: Target middle card not found or is placeholder for page ${pageNumber}.`);
-    }
-*/
   }, [activePage, loadingPage, fetchEntries]); // Remove groupedEntries dependency
 
   // --- Effect to Update Card Index and ID after Page Change or Data Load ---
@@ -875,7 +860,7 @@ export default function Timeline(): JSX.Element {
       </div>
 
       {/* --- Progress Indicator --- */}
-      <AnimatePresence>
+        <AnimatePresence>
          {/* Render indicator container if initial load attempted/done, not strictly totalCount > 0 */}
          {/* Content inside will still depend on totalCount */}
          {(initialLoadDone.current || entries.length > 0 || loading) && nickname && (
@@ -908,7 +893,7 @@ export default function Timeline(): JSX.Element {
                                 <span className="progress-highlight">#{activeCardGlobalIndex}</span>
                             </motion.div>
                         )}
-                    </div>
+      </div>
                 </div>
             </motion.div>
          )}
@@ -936,7 +921,7 @@ export default function Timeline(): JSX.Element {
                <div className="modal-date">{modalContent.date}</div>
                <div className="modal-content">
                  {modalContent.content}
-               </div>
+        </div>
              </motion.div>
            </motion.div>
          )}
@@ -950,12 +935,12 @@ export default function Timeline(): JSX.Element {
           )}
       </div> */}
 
-      {/* Initial Loading Skeleton */}
+      {/* Initial Loading - Revert to simple text */}
       {loading && entries.length === 0 && (
-            // Simple loading text, as skeleton might be complex with carousel
+            // Revert to simple loading text instead of skeleton
             <div className="text-center text-gray-500 p-10 absolute inset-0 flex items-center justify-center bg-gray-100/50 z-10">
                 Loading Timeline...
-        </div>
+            </div>
       )}
     </div>
   );
