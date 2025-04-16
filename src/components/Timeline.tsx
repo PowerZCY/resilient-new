@@ -180,7 +180,6 @@ export default function Timeline(): JSX.Element {
   const progressIndicatorRef = useRef<HTMLDivElement | null>(null); // Ref for progress indicator
   const dragOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 }); // For progress drag offset
   const dragOverlayRef = useRef<HTMLDivElement | null>(null); // Ref for drag overlay
-  // const prevActivePageRef = useRef<number>(activePage); // Ref to store previous active page - REMOVED
   const isPageNavigatingRef = useRef<boolean>(false); // Ref to track if navigation triggered the effect
 
   // --- Hooks ---
@@ -260,16 +259,18 @@ export default function Timeline(): JSX.Element {
         if (pageNum === 1) {
           initialLoadDone.current = true;
           setActivePage(1); // Ensure first page is active after fetch
-           // Calculate middle index for the first page's cards
+           // Calculate middle index - CHANGE: Set index to 0 for the first card
            const firstPageEntries = newEntries;
-           // Pad with placeholders if needed for initial middle index calculation
            const paddedFirstPage = padWithPlaceholders(firstPageEntries, 1, limit);
-           const middleIndex = paddedFirstPage.length > 0 ? Math.floor(paddedFirstPage.length / 2) : 0;
-           setActiveCardIndex(middleIndex);
-           if(paddedFirstPage[middleIndex]) {
-               setActiveCardId(paddedFirstPage[middleIndex].id);
+           // const middleIndex = paddedFirstPage.length > 0 ? Math.floor(paddedFirstPage.length / 2) : 0;
+           const targetIndex = 0; // Activate the first card
+           setActiveCardIndex(targetIndex);
+           // Set active ID based on the first card, if it exists and isn't a placeholder
+           const firstEntry = paddedFirstPage[targetIndex];
+           if(firstEntry && !firstEntry.isPlaceholder) {
+               setActiveCardId(firstEntry.id);
            }
-           console.log(`Initial load done. Active page: 1, Active card index: ${middleIndex}`);
+           console.log(`Initial load done. Active page: 1, Active card index: ${targetIndex}`);
         }
 
         // No need to disconnect observer here, let the `hasMore` state handle it in the observer effect
@@ -522,24 +523,24 @@ export default function Timeline(): JSX.Element {
           return;
       }
 
-      const middleIndex = Math.floor(entriesOnTargetPage.length / 2);
+      const targetIndex = 0; // CHANGE: Always target the first card
       // Only update if the index actually changes (or initially)
       // This check might be redundant if dependencies are correct, but can prevent loops
       // if (activeCardIndex !== middleIndex) { // Let's remove this check for now to ensure update
-          setActiveCardIndex(middleIndex);
-          console.log(`Effect: Set active card index: ${middleIndex}`);
+          setActiveCardIndex(targetIndex);
+          console.log(`Effect: Set active card index: ${targetIndex}`);
       // }
 
-      const middleEntry = entriesOnTargetPage[middleIndex];
-      const newActiveCardId = (middleEntry && !middleEntry.isPlaceholder) ? middleEntry.id : null;
+      const targetEntry = entriesOnTargetPage[targetIndex]; // Use targetIndex
+      const newActiveCardId = (targetEntry && !targetEntry.isPlaceholder) ? targetEntry.id : null;
 
       // Only update if the ID actually changes
       // if (activeCardId !== newActiveCardId) { // Let's remove this check for now
           setActiveCardId(newActiveCardId);
           if (newActiveCardId) {
-              console.log(`Effect: Set active card ID: ${newActiveCardId} (Global Index: ${middleEntry?.globalIndex})`);
+              console.log(`Effect: Set active card ID: ${newActiveCardId} (Global Index: ${targetEntry?.globalIndex})`);
           } else {
-              console.log(`Effect: Reset active card ID (middle card is placeholder or not found).`);
+              console.log(`Effect: Reset active card ID (target card is placeholder or not found).`);
           }
       // }
 
@@ -762,10 +763,24 @@ export default function Timeline(): JSX.Element {
 
   // Find global index of the active card ID
    const activeCardGlobalIndex = useMemo(() => {
-       if (!activeCardId) return null;
-       const index = entries.findIndex(e => e.id === activeCardId);
-       return index !== -1 ? index + 1 : null; // Return 1-based index or null
-   }, [activeCardId, entries]);
+       // Find the active group
+       const activeGroup = groupedEntries.find(g => g.page === activePage);
+       if (!activeGroup || activeCardIndex < 0 || activeCardIndex >= activeGroup.entries.length) {
+           // Group not found or index out of bounds
+           return null;
+       }
+       // Get the active entry within the group
+       const activeEntry = activeGroup.entries[activeCardIndex];
+       if (!activeEntry || activeEntry.isPlaceholder) {
+           // Entry not found or is a placeholder, don't show global index
+           return null;
+       }
+       // Calculate global index mathematically for non-placeholder cards
+       // Assumes PAGE_SIZE items per page conceptually.
+       const calculatedIndex = (activePage - 1) * PAGE_SIZE + (activeCardIndex + 1);
+       return calculatedIndex;
+
+   }, [activePage, activeCardIndex, groupedEntries, PAGE_SIZE]); // Dependencies needed
 
    // Calculate total pages
    const totalPages = totalCount > 0 ? Math.ceil(totalCount / PAGE_SIZE) : 0;
@@ -926,14 +941,6 @@ export default function Timeline(): JSX.Element {
            </motion.div>
          )}
        </AnimatePresence>
-
-      {/* --- Loading/End Indicators --- */}
-      {/* Observer target for infinite scroll - REMOVED */}
-      {/* <div ref={observerRef} className="h-10 mt-8">
-          {loading && entries.length > 0 && ( // Show loading only when loading more, not initial
-            <p className="text-center text-gray-500">Loading more entries...</p>
-          )}
-      </div> */}
 
       {/* Initial Loading - Revert to simple text */}
       {loading && entries.length === 0 && (
