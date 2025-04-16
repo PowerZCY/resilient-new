@@ -32,8 +32,6 @@ interface ApiResponse {
 const RADIUS = 550; // 环绕半径
 const VISIBLE_CARDS = 10; // 可见卡片数量 (调整此值影响角度)
 const VISIBLE_ANGLE = Math.PI * 0.8; // 可见角度范围 (调整此值影响卡片间距)
-const CARD_WIDTH = 180;
-const CARD_HEIGHT = 280;
 const LINES_TO_SHOW = 6; // For content truncation CSS variable `--lines-to-show`
 const LINE_HEIGHT = 1.6; // For content truncation calculation
 const PAGE_SIZE = 10; // Define page size consistent with prototype
@@ -70,7 +68,6 @@ interface PaginationProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   loadingPage: number | null;
-  loadedPages: Set<number>; // Pass loadedPages to style buttons differently (optional)
   maxVisibleButtons?: number;
 }
 
@@ -79,7 +76,6 @@ const Pagination: React.FC<PaginationProps> = ({
   totalPages,
   onPageChange,
   loadingPage,
-  loadedPages,
   maxVisibleButtons = 11, // Default to 11 visible buttons
 }) => {
   const renderPageButtons = () => {
@@ -158,16 +154,12 @@ const Pagination: React.FC<PaginationProps> = ({
 export default function Timeline(): JSX.Element {
   // --- State ---
   const [entries, setEntries] = useState<Entry[]>([]); // All loaded entries
-  const [page, setPage] = useState<number>(1); // Current page being loaded (for fetching)
   const [loading, setLoading] = useState<boolean>(false); // Loading state for API calls
-  const [hasMore, setHasMore] = useState<boolean>(true); // More data available?
   const [totalCount, setTotalCount] = useState<number>(0); // Total entries from API
   const [activePage, setActivePage] = useState<number>(1); // Currently displayed page/group in carousel
   const [activeCardIndex, setActiveCardIndex] = useState<number>(0); // Index of the focused card *within the active page*
-  const [activeCardId, setActiveCardId] = useState<string | null>(null); // ID of the globally active card
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // Modal state
   const [modalContent, setModalContent] = useState<{ date: string; content: string } | null>(null);
-  const [progressPosition, setProgressPosition] = useState<{ x: number; y: number } | null>(null);
   const [isDraggingProgress, setIsDraggingProgress] = useState<boolean>(false);
   const [loadingPage, setLoadingPage] = useState<number | null>(null); // Track page being loaded via button click
 
@@ -226,10 +218,6 @@ export default function Timeline(): JSX.Element {
             console.log(`Page ${pageNum} already loaded, skipping entry processing but ensuring totalCount is set.`);
             isLoadingRef.current = false; // Ensure loading state is reset
             setLoading(false);
-            // Check hasMore status based on potentially updated totalCount
-            const currentTotalEntries = entries.length; // Use current length before potential additions
-            const hasMoreData = currentTotalEntries < total;
-            setHasMore(hasMoreData);
             if (pageNum === 1) initialLoadDone.current = true; // Ensure initial load flag is set
             return; // Skip the rest if page data already exists
         }
@@ -253,27 +241,15 @@ export default function Timeline(): JSX.Element {
         });
 
         loadedPages.current.add(pageNum);
-        const hasMoreData = (entries.length + newEntries.length) < total; // Calculate based on combined length
-        setHasMore(hasMoreData);
 
         if (pageNum === 1) {
           initialLoadDone.current = true;
           setActivePage(1); // Ensure first page is active after fetch
            // Calculate middle index - CHANGE: Set index to 0 for the first card
-           const firstPageEntries = newEntries;
-           const paddedFirstPage = padWithPlaceholders(firstPageEntries, 1, limit);
-           // const middleIndex = paddedFirstPage.length > 0 ? Math.floor(paddedFirstPage.length / 2) : 0;
            const targetIndex = 0; // Activate the first card
            setActiveCardIndex(targetIndex);
-           // Set active ID based on the first card, if it exists and isn't a placeholder
-           const firstEntry = paddedFirstPage[targetIndex];
-           if(firstEntry && !firstEntry.isPlaceholder) {
-               setActiveCardId(firstEntry.id);
-           }
            console.log(`Initial load done. Active page: 1, Active card index: ${targetIndex}`);
         }
-
-        // No need to disconnect observer here, let the `hasMore` state handle it in the observer effect
 
       } catch (error: unknown) {
         console.error('Error fetching entries:', error);
@@ -291,14 +267,9 @@ export default function Timeline(): JSX.Element {
     console.log('Nickname changed or initial mount:', nickname);
     // Reset state on nickname change
     setEntries([]);
-    setPage(1);
     setActivePage(1);
     setActiveCardIndex(0);
-    setActiveCardId(null);
-    // Don't reset totalCount here immediately, let fetch handle it
-    // setTotalCount(0);
     setLoading(false); // Set loading false initially
-    setHasMore(true);
     initialLoadDone.current = false;
     loadedPages.current.clear();
     isLoadingRef.current = false;
@@ -306,11 +277,11 @@ export default function Timeline(): JSX.Element {
 
     // Fetch initial data if nickname exists
     if (nickname) {
-       // Set loading true before fetch
-       setLoading(true);
-      fetchEntries(1);
+       isPageNavigatingRef.current = true; // Signal that this initial load should trigger entry animation
+       setLoading(true); // Set loading true before fetch
+       fetchEntries(1);
     }
-  }, [nickname]);
+  }, [nickname]); 
 
   // --- Placeholder Padding Function ---
   const padWithPlaceholders = (entriesInGroup: Entry[], pageNum: number, targetSize: number): Entry[] => {
@@ -358,7 +329,7 @@ export default function Timeline(): JSX.Element {
                          entries: paddedEntries // Use padded entries
                      };
                  });
-  }, [entries, PAGE_SIZE]); // Depend on entries and PAGE_SIZE
+  }, [entries]);
 
   // --- 3D Carousel Logic ---
   useEffect(() => {
@@ -471,7 +442,7 @@ export default function Timeline(): JSX.Element {
     return () => cancelAnimationFrame(animationFrameId);
 
     // Ensure dependencies correctly reflect what the effect uses
-}, [activePage, activeCardIndex, groupedEntries, PAGE_SIZE, RADIUS, VISIBLE_ANGLE, VISIBLE_CARDS]);
+}, [activePage, activeCardIndex, groupedEntries]);
 
   // --- Event Handlers ---
 
@@ -481,8 +452,6 @@ export default function Timeline(): JSX.Element {
 
     console.log(`Navigating to page: ${pageNumber}`);
     isPageNavigatingRef.current = true; // Set flag before fetching/setting state
-
-    let newEntriesForPage: Entry[] = []; // Store fetched entries if needed
 
     // --- Step 1: Fetch data if necessary ---
     if (!loadedPages.current.has(pageNumber)) {
@@ -543,7 +512,6 @@ export default function Timeline(): JSX.Element {
           console.warn(`Effect: No entries found for active page ${activePage} in groupedEntries.`);
           // Reset index/ID if page is somehow empty after load?
           // setActiveCardIndex(0);
-          // setActiveCardId(null);
           return;
       }
 
@@ -555,19 +523,8 @@ export default function Timeline(): JSX.Element {
           console.log(`Effect: Set active card index: ${targetIndex}`);
       // }
 
-      const targetEntry = entriesOnTargetPage[targetIndex]; // Use targetIndex
-      const newActiveCardId = (targetEntry && !targetEntry.isPlaceholder) ? targetEntry.id : null;
-
       // Only update if the ID actually changes
-      // if (activeCardId !== newActiveCardId) { // Let's remove this check for now
-          setActiveCardId(newActiveCardId);
-          if (newActiveCardId) {
-              console.log(`Effect: Set active card ID: ${newActiveCardId} (Global Index: ${targetEntry?.globalIndex})`);
-          } else {
-              console.log(`Effect: Reset active card ID (target card is placeholder or not found).`);
-          }
-      // }
-
+      // activeCardId state is unused
   }, [activePage, groupedEntries]); // Trigger when page changes or entries/groups update
 
   // Card Click
@@ -579,14 +536,10 @@ export default function Timeline(): JSX.Element {
         // but for now, let's assume handleNavClick resets it appropriately.
         // Or, set the index directly after switching the page.
         setActiveCardIndex(indexInPage);
-         setActiveCardId(entry.id); // Update active ID immediately
-         console.log(`Card click (page switch): Set active card ID: ${entry.id}`);
     } else if (indexInPage !== activeCardIndex) {
         // If clicking a card on the active page but not the center one
         console.log(`Focusing card index ${indexInPage} on page ${activePage}`);
         setActiveCardIndex(indexInPage);
-        setActiveCardId(entry.id); // Update active ID immediately
-         console.log(`Card click (focus): Set active card ID: ${entry.id}`);
     } else {
          // Clicking the already active card - potentially open modal
          // Only open modal for non-placeholder cards
@@ -617,60 +570,53 @@ export default function Timeline(): JSX.Element {
         const pos = JSON.parse(savedPosition);
         // Check for valid x, y coordinates (used when saving left/top)
         if (pos && typeof pos.x === 'number' && typeof pos.y === 'number') {
-          setProgressPosition(pos); // Store the state
-           // Apply loaded position directly if element exists
-           if (progressIndicatorRef.current) {
-               // Apply as left/top
-               progressIndicatorRef.current.style.left = `${pos.x}px`;
-               progressIndicatorRef.current.style.top = `${pos.y}px`;
-               progressIndicatorRef.current.style.right = 'auto';
-               progressIndicatorRef.current.style.bottom = 'auto';
-               console.log("Progress indicator position loaded (left/top):", pos);
-               positionLoaded = true;
-           }
+          // Apply loaded position directly if element exists
+          if (progressIndicatorRef.current) {
+              // Apply as left/top
+              progressIndicatorRef.current.style.left = `${pos.x}px`;
+              progressIndicatorRef.current.style.top = `${pos.y}px`;
+              progressIndicatorRef.current.style.right = 'auto';
+              progressIndicatorRef.current.style.bottom = 'auto';
+              console.log("Progress indicator position loaded (left/top):", pos);
+              positionLoaded = true;
+          }
         } else if (pos && pos.right && pos.bottom) {
             // Compatibility or preference for right/bottom saving
-            setProgressPosition({ // Estimate x/y for state if needed, but apply right/bottom
-                x: window.innerWidth - (parseFloat(pos.right) || 0) - (progressIndicatorRef.current?.offsetWidth || 100),
-                y: window.innerHeight - (parseFloat(pos.bottom) || 0) - (progressIndicatorRef.current?.offsetHeight || 100)
-            });
-             if (progressIndicatorRef.current) {
-               progressIndicatorRef.current.style.right = pos.right;
-               progressIndicatorRef.current.style.bottom = pos.bottom;
-               progressIndicatorRef.current.style.left = 'auto';
-               progressIndicatorRef.current.style.top = 'auto';
-               console.log("Progress indicator position loaded (right/bottom):", pos);
-               positionLoaded = true;
-           }
+            // Estimate x/y for state if needed, but apply right/bottom
+            // No need to set state here anymore
+            // setProgressPosition({ ... });
+            if (progressIndicatorRef.current) {
+              progressIndicatorRef.current.style.right = pos.right;
+              progressIndicatorRef.current.style.bottom = pos.bottom; // Use loaded bottom
+              progressIndicatorRef.current.style.left = 'auto'; // Use auto for left
+              progressIndicatorRef.current.style.top = 'auto'; // Use auto for top
+              console.log("Progress indicator position loaded (right/bottom from storage):", pos);
+              positionLoaded = true;
+          }
         }
       }
     } catch (e) {
       console.warn('Failed to load progress indicator position:', e);
     }
 
-     // Default position if loading fails or no position saved
-     if (!positionLoaded && progressIndicatorRef.current) {
-         console.log("Setting default progress indicator position (left/bottom).");
-         // Ensure default position is set using left/bottom
-         progressIndicatorRef.current.style.left = '2rem'; // Change from right to left
-         progressIndicatorRef.current.style.bottom = '2rem';
-         progressIndicatorRef.current.style.right = 'auto'; // Ensure right is auto
-         progressIndicatorRef.current.style.top = 'auto';
-         // Update state if needed, calculate approximate x/y based on default left/bottom
-         const rect = progressIndicatorRef.current.getBoundingClientRect();
-         setProgressPosition({ x: rect.left, y: rect.top });
-     }
+    // Default position if loading fails or no position saved
+    if (!positionLoaded && progressIndicatorRef.current) {
+        console.log("Setting default progress indicator position (left/bottom).");
+        // Ensure default position is set using left/bottom
+        progressIndicatorRef.current.style.left = '2rem'; // Change from right to left
+        progressIndicatorRef.current.style.bottom = '2rem';
+        progressIndicatorRef.current.style.right = 'auto'; // Ensure right is auto
+        progressIndicatorRef.current.style.top = 'auto';
+        // Update state if needed, calculate approximate x/y based on default left/bottom
+        // No need to set state here anymore
+        // const rect = progressIndicatorRef.current.getBoundingClientRect();
+        // setProgressPosition({ x: rect.left, y: rect.top });
+    }
   }, []);
 
   const saveProgressPosition = useCallback((element: HTMLDivElement) => {
     // Save position based on final computed style (prefer right/bottom if available)
-    const style = window.getComputedStyle(element);
-    let positionToSave;
-    // Prioritize saving left/top as it's directly used in drag calculations
-     positionToSave = { x: element.offsetLeft, y: element.offsetTop };
-    // Alternatively, save right/bottom if preferred:
-    // positionToSave = { right: style.right, bottom: style.bottom };
-
+    const positionToSave = { x: element.offsetLeft, y: element.offsetTop };
     try {
       localStorage.setItem('progressIndicatorPosition', JSON.stringify(positionToSave));
       console.log("Progress indicator position saved:", positionToSave);
@@ -750,9 +696,7 @@ export default function Timeline(): JSX.Element {
         if (indicator) {
             indicator.style.transition = ''; // Re-enable transitions
             indicator.classList.remove('dragging');
-            const finalPos = { x: indicator.offsetLeft, y: indicator.offsetTop };
-             setProgressPosition(finalPos); // Update state with final position
-             saveProgressPosition(indicator); // Save the final position using the element
+            saveProgressPosition(indicator); // Save the final position using the element
         }
     }, [isDraggingProgress, saveProgressPosition]);
 
@@ -804,7 +748,7 @@ export default function Timeline(): JSX.Element {
        const calculatedIndex = (activePage - 1) * PAGE_SIZE + (activeCardIndex + 1);
        return calculatedIndex;
 
-   }, [activePage, activeCardIndex, groupedEntries, PAGE_SIZE]); // Dependencies needed
+   }, [activePage, activeCardIndex, groupedEntries]); // PAGE_SIZE removed from dependencies
 
    // Calculate total pages
    const totalPages = totalCount > 0 ? Math.ceil(totalCount / PAGE_SIZE) : 0;
@@ -853,7 +797,7 @@ export default function Timeline(): JSX.Element {
                       <div
                          className="content-text"
                          style={{
-                           // @ts-ignore - CSS custom properties need to be asserted
+                           // @ts-expect-error - CSS custom properties need to be asserted
                            '--lines-to-show': LINES_TO_SHOW,
                            '--line-height': LINE_HEIGHT,
                            // max height calculation can be removed if pure CSS handles truncation well
@@ -893,9 +837,7 @@ export default function Timeline(): JSX.Element {
            totalPages={totalPages}
            onPageChange={handleNavClick}
            loadingPage={loadingPage}
-           loadedPages={loadedPages.current} // Pass loadedPages Set
-           // maxVisibleButtons={9} // Optionally override default
-         />
+        />
       </div>
 
       {/* --- Progress Indicator --- */}
@@ -965,14 +907,6 @@ export default function Timeline(): JSX.Element {
            </motion.div>
          )}
        </AnimatePresence>
-
-      {/* Initial Loading - Revert to simple text */}
-      {loading && entries.length === 0 && (
-            // Revert to simple loading text instead of skeleton
-            <div className="text-center text-gray-500 p-10 absolute inset-0 flex items-center justify-center bg-gray-100/50 z-10">
-                Loading Timeline...
-            </div>
-      )}
     </div>
   );
 }
