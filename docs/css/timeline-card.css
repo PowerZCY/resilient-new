@@ -17,7 +17,7 @@
   --card-bg-color: #fffef0; /* 改为信纸米黄色 */
   --card-ornament-color: #8B5CF6; /* 装饰颜色 */
   --card-glow-color: rgba(139, 92, 246, 0.5); /* 紫色光晕色 */
-  --letter-font: "HYYouRanTi", "汉仪悠然体", "STKaiti", "华文楷体", "\534E\6587\6977\4F53", serif; /* 文字内容字体 */
+  --letter-font: "华文楷体", "\534E\6587\6977\4F53", "汉仪悠然体简", "HYYouRanTiJ", "STKaiti", serif; /* 文字内容字体 */
   --label-font: "Times New Roman", Times, serif; /* 日期标签和占位卡片字体 */
   --letter-text-color: #543c2a; /* 信件文字颜色 */
   --letter-border-color: #d9b38c; /* 信件边框颜色 */
@@ -84,10 +84,12 @@
   justify-content: center;
   align-items: center;
   height: 100%;
-  font-size: 1.5rem;
+  font-size: 1.5rem !important; /* 添加!important确保优先级 */
   color: var(--gray-500);
   text-align: center;
   -webkit-line-clamp: unset;
+  -moz-line-clamp: unset;
+  line-clamp: unset;
   max-height: none;
   overflow: visible;
   font-family: var(--label-font) !important; /* 使用Times New字体 */
@@ -501,7 +503,7 @@ h1 {
   position: relative;
   cursor: pointer;
   font-family: var(--letter-font) !important; /* 使用汉仪悠然体或华文楷体 */
-  font-size: 0.8rem !important; /* 字体大小 */
+  font-size: 0.75rem !important; /* 字体大小 */
   color: var(--ink-blue);
   text-align: justify;
   padding: 0.5rem;
@@ -516,6 +518,8 @@ h1 {
   /* 文本截断 */
   display: -webkit-box;
   -webkit-line-clamp: var(--lines-to-show);
+  -moz-line-clamp: var(--lines-to-show);
+  line-clamp: var(--lines-to-show);
   -webkit-box-orient: vertical;
   overflow: hidden;
   max-height: calc(var(--line-height) * var(--lines-to-show) * 1em);
@@ -665,7 +669,7 @@ h1 {
 }
 
 .progress-count {
-  font-size: 1.1rem;
+  font-size: 1.0rem;
   font-weight: 700;
   color: #333;
   margin: 0;
@@ -673,7 +677,7 @@ h1 {
 }
 
 .progress-percent {
-  font-size: 1.6rem;
+  font-size: 1.3rem;
   font-weight: 600;
   color: #3a86ff;
   margin-top: 2px;
@@ -684,7 +688,7 @@ h1 {
   bottom: -10px;
   background: #b066ff;
   color: white;
-  font-size: 0.75rem;
+  font-size: 0.70rem;
   padding: 2px 8px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(176, 102, 255, 0.4);
@@ -771,7 +775,7 @@ h1 {
   white-space: pre-wrap;
   line-height: 1.6;
   font-family: var(--letter-font) !important; /* 使用汉仪悠然体或华文楷体 */
-  font-size: 0.8rem !important; /* 字体大小 */
+  font-size: 1.0rem !important; /* 字体大小 */
   color: var(--ink-blue);
   letter-spacing: 0.03em;
   padding: 0.5rem;
