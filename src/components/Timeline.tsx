@@ -259,6 +259,7 @@ export default function Timeline(): JSX.Element {
         setLoading(false);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [nickname, limit, entries.length] // Add entries.length dependency for hasMore calculation
   );
 
@@ -281,6 +282,7 @@ export default function Timeline(): JSX.Element {
        setLoading(true); // Set loading true before fetch
        fetchEntries(1);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nickname]); 
 
   // --- Placeholder Padding Function ---
