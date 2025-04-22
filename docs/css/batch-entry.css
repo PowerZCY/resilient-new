@@ -79,66 +79,54 @@ body {
 
 /* Carousel Wrapper & Container */
 .carousel-wrapper {
-    max-width: 900px; /* Match centered content width */
-    margin: 0 auto 25px auto; /* Center and add bottom margin */
-    overflow-x: auto;
-    overflow-y: hidden;
+    margin-bottom: 25px;
+    overflow: visible;
     padding: 20px 0 30px 0;
     position: relative;
+    perspective: 1500px;
+    min-height: 500px;
 }
 
 .entries-container {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 25px; /* Add normal gap between cards */
-  padding-left: 20px; /* Adjusted padding */
-  padding-right: 20px; /* Adjusted padding */
-  min-height: 360px; /* Adjusted height */
-  align-items: center;
+  height: 400px;
+  position: relative;
+  width: 100%;
+  transform-style: preserve-3d;
+  margin: 0 auto;
 }
 
-/* Scrollbar Styling (Optional, Webkit specific) */
-.carousel-wrapper::-webkit-scrollbar {
-    height: 8px;
-}
-
-.carousel-wrapper::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
-
-.carousel-wrapper::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 4px;
-}
-
-.carousel-wrapper::-webkit-scrollbar-thumb:hover {
-    background: #aaa;
-}
-
-/* Entry Card Styling - FINAL ATTEMPT at REPLICATION */
-.entry-card {
+/* Entry Card Styling - Adjust for 3D */
+.entry-card:not(.add-new-card) {
   background-color: var(--card-bg-color);
   border-radius: 12px;
-  /* border: 1px solid var(--letter-border-color); */ /* REMOVED Brownish border */
-  border: 1px solid var(--primary-color); /* APPLY Purple border */
-  box-shadow: 0 5px 15px rgba(139, 92, 246, 0.15); /* Adjusted shadow to use primary color alpha */
+  border: 1px solid var(--primary-color);
+  box-shadow: 0 5px 15px rgba(139, 92, 246, 0.15);
   width: 260px;
-  /* height: 340px; */
-  height: 360px; /* INCREASED Height */
-  flex-shrink: 0;
+  height: 360px;
   display: flex;
   flex-direction: column;
-  position: relative;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   overflow: visible;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: box-shadow 0.3s ease;
   font-family: var(--letter-font);
+  backface-visibility: hidden;
+  transform-origin: center center;
+  cursor: pointer;
 }
 
-.entry-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 22px rgba(139, 92, 246, 0.2); /* Adjusted hover shadow */
+.entry-card:not(.add-new-card):hover {
+  transform: translate(-50%, -50%);
+  box-shadow: 0 8px 22px rgba(139, 92, 246, 0.2);
   z-index: 10;
+}
+
+/* Active card style (potentially add border or glow) */
+.entry-card.active:not(.add-new-card) {
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+    border-color: #a78bfa;
 }
 
 /* Date Header - EXACT REPLICATION */
@@ -289,44 +277,34 @@ body {
     cursor: not-allowed;
 }
 
-/* Add New Card - Inherit base style, override specifics */
+/* Add New Card - Adjust positioning */
 .add-new-card {
-  /* Inherit from .entry-card: background, border-radius, width, height, flex-shrink, display, flex-direction, position, transition, font-family */
-  /* Apply necessary base styles explicitly if needed */
   background-color: var(--card-bg-color);
   border-radius: 12px;
-  width: 260px; /* Match data card */
-  height: 360px; /* Match data card */
+  width: 260px;
+  height: 360px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  position: relative;
+  position: absolute;
+  bottom: -80px;
+  right: 20px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  font-family: sans-serif; /* Keep sans-serif for this card's text */
-
-  /* Override border to purple */
+  font-family: sans-serif;
   border: 1px solid var(--primary-color);
   box-shadow: 0 5px 15px rgba(139, 92, 246, 0.15);
-
-  /* REMOVE styles specific to the old dashed look */
-  /* border-style: dashed; */
-  /* border-color: #d8cffc; */
-  /* background-color: #f9f7ff; */
-
-  cursor: pointer; /* Keep cursor pointer */
-  overflow: visible; /* Ensure date header is not clipped */
+  cursor: pointer;
+  overflow: visible;
+  z-index: 5;
 }
 
 .add-new-card:hover {
-  /* Keep hover effect consistent */
   transform: translateY(-6px);
   box-shadow: 0 8px 22px rgba(139, 92, 246, 0.2);
-  z-index: 10;
 }
 
 /* Style the fixed date header for Add New card */
 .add-new-card .card-date-header {
-  /* Base styles copied from data card header */
   position: absolute;
   top: -16px;
   left: 50%;
@@ -341,28 +319,23 @@ body {
   z-index: 10;
   white-space: nowrap;
   font-family: var(--label-font);
-
-  /* Make it non-interactive */
   cursor: default;
-  pointer-events: none; /* Disable pointer events */
+  pointer-events: none;
 }
 
 /* Style the content area for Add New card */
 .add-new-card .card-content {
-  /* Base styles from data card content */
   padding: 2.25rem 1.25rem 1rem;
   flex-grow: 1;
-  display: flex; /* Use flex to center inner content */
-  flex-direction: column; /* Stack inner content vertically */
-  align-items: center; /* Center horizontally */
-  justify-content: center; /* Center vertically */
-  overflow: hidden; /* Hide overflow */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
   text-align: center;
-
-  /* REMOVE lined background */
   background-image: none;
-  line-height: normal; /* Reset line height */
-  position: relative; /* Keep relative positioning if needed */
+  line-height: normal;
+  position: relative;
 }
 
 /* Remove the ornament from add-new card */
@@ -371,14 +344,13 @@ body {
 }
 
 .add-new-inner {
-  /* Styles for the actual content (+ icon, text) */
-  color: #a78bfa; /* Purple text color */
+  color: #a78bfa;
 }
 
 .add-icon {
   font-size: 3em;
   margin-bottom: 15px;
-  display: block; /* Ensure icon is block for centering */
+  display: block;
 }
 
 .add-new-inner span {
@@ -396,9 +368,8 @@ body {
 
 /* Style the empty footer for Add New card - REMOVE border */
 .add-new-card .card-footer {
-  /* Base styles from data card footer */
   padding: 0.6rem 1.25rem;
-  border-top: none; /* Remove the dashed line */
+  border-top: none;
   background-color: var(--card-bg-color);
   flex-shrink: 0;
   height: 43px;
@@ -453,12 +424,11 @@ body {
 }
 
 .header-right .submit-btn:hover::before {
-    /* Keep gradient visible on hover, maybe slightly brighter if desired */
     opacity: 1;
 }
 
 .header-right .submit-btn:hover {
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Add subtle shadow on hover */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Dot styles remain the same */
@@ -478,8 +448,8 @@ body {
 
 /* Text style for enabled state */
 .header-right .submit-btn .submit-btn-inner span:not(.dot) {
-    color: #374151; /* Dark gray text */
-    line-height: 1.3; /* Normalize line height */
+    color: #374151;
+    line-height: 1.3;
 }
 
 /* Disabled state */
@@ -489,18 +459,18 @@ body {
 }
 
 .header-right .submit-btn:disabled::before {
-    opacity: 0; /* Hide gradient border */
+    opacity: 0;
 }
 
 .header-right .submit-btn:disabled .submit-btn-inner {
-    background: #f3f4f6; /* Light gray background */
+    background: #f3f4f6;
 }
 
 .header-right .submit-btn:disabled .submit-btn-inner span:not(.dot),
 .header-right .submit-btn:disabled .icon,
 .header-right .submit-btn:disabled .dot {
     opacity: 0.5;
-    color: #9ca3af; /* Muted color for text */
+    color: #9ca3af;
 }
 /* Ensure disabled dots are also muted */
 .header-right .submit-btn:disabled .dot-left { background-color: #d8b4fe; opacity: 0.5; }
