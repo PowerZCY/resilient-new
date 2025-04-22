@@ -1,23 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
   const entriesContainer = document.getElementById('entries-container');
   const entryCardTemplate = document.getElementById('entry-card-template');
-  const addNewCardTemplate = document.getElementById('add-new-card-template');
   const submitBtn = document.getElementById('submit-btn');
   const entryCountDisplay = document.querySelector('.entry-count');
-  const carouselWrapper = document.querySelector('.carousel-wrapper'); // Get wrapper for add-new card placement
+  const activeIndicator = document.getElementById('active-indicator');
+  const dragOverlay = document.getElementById('drag-overlay');
 
   const MAX_ENTRIES = 20;
-  // --- 3D Carousel Constants (from Timeline.tsx) ---
-  const RADIUS = 550; // Based on Timeline.tsx
-  const VISIBLE_CARDS = 10; // Based on Timeline.tsx
-  const VISIBLE_ANGLE = Math.PI * 0.8; // Based on Timeline.tsx
+  // --- 3D Carousel Constants (Hybrid Approach) ---
+  const ANGLE_STEP = 5; // Degrees per card distance from center
+  const X_STEP = 65; // Pixels horizontal offset per card distance
+  const Z_STEP_PER_LEVEL = 80; // Pixels depth offset per card distance
+  const Y_INITIAL_OFFSET = -40; // Base vertical offset for cards
+  const Y_STEP_PER_LEVEL = 15; // Pixels vertical offset increase per card distance
 
   let entries = []; // Array to hold entry data { id, date, content }
   let activeCardIndex = 0; // Index of the currently centered card
-  let addNewCardElement = null; // Reference to the add new card DOM element
 
   // Store card elements for easy access in layout function
   let dataCardElements = [];
+
+  // --- Draggable Indicator State --- 
+  let isDraggingIndicator = false;
+  let dragOffset = { x: 0, y: 0 };
+  let dragStartPosition = { x: 0, y: 0 }; // Store start position to detect drag vs click
 
   // --- Helper Functions ---
 
@@ -54,53 +60,102 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateEntryCountDisplay() {
     // Now counts only data entries
     entryCountDisplay.textContent = `${entries.length}/${MAX_ENTRIES} 组`;
-    // Add new card visibility logic might need adjustment based on new position
-    if (addNewCardElement) {
-        addNewCardElement.style.display = entries.length >= MAX_ENTRIES ? 'none' : 'flex';
+    if (activeIndicator) {
+        // Control display based on whether MAX_ENTRIES is reached
+        // Use hidden class for smoother transition
+        if (entries.length >= MAX_ENTRIES) {
+             activeIndicator.classList.add('hidden');
+        } else {
+             activeIndicator.classList.remove('hidden');
+        }
     }
-  }
-
-  // Update card index text display
-  function updateAllCardIndices() {
-      dataCardElements.forEach((card, index) => {
-          const indexSpan = card.querySelector('.entry-index');
-          if (indexSpan) {
-              indexSpan.textContent = `体验 #${index + 1}`;
-          }
-      });
   }
 
   // --- 3D Carousel Layout Function ---
   function applyCarouselLayout(targetIndex = 0) {
      requestAnimationFrame(() => {
+         const containerWidth = entriesContainer.offsetWidth;
+         const containerHeight = entriesContainer.offsetHeight;
+         const centerX = containerWidth / 2;
+         const centerY = containerHeight / 2; // Correct vertical center
+
          const groupSize = dataCardElements.length;
-         if (groupSize === 0) return;
+         const hasAddNew = entries.length < MAX_ENTRIES && activeIndicator;
+
+         // --- Calculate Visual Centering Offset --- 
+         let minXOffset = 0;
+         let maxXOffset = 0;
+
+         // Calculate offsets for data cards
+         const dataCardXOffsets = dataCardElements.map((_, index) => {
+             const relativePos = index - targetIndex;
+             return relativePos * X_STEP;
+         });
+
+         // Determine min/max from data cards
+         if (dataCardXOffsets.length > 0) {
+             minXOffset = Math.min(...dataCardXOffsets);
+             maxXOffset = Math.max(...dataCardXOffsets);
+         }
+
+         // Calculate offset for AddNew card (always relativePos = 1)
+         if (hasAddNew) {
+             const addNewRelativePos = 1; // Always position relative to the right of the active card
+             const addNewXOffset = addNewRelativePos * X_STEP;
+
+             // Update overall min/max including AddNew card
+             // If no data cards exist yet, AddNew defines the bounds
+             if (dataCardXOffsets.length === 0) {
+                  minXOffset = addNewXOffset; // Assuming active card is conceptually at 0
+                  maxXOffset = addNewXOffset;
+             } else {
+                  minXOffset = Math.min(minXOffset, addNewXOffset);
+                  maxXOffset = Math.max(maxXOffset, addNewXOffset);
+             }
+         }
+
+         // Calculate the midpoint of the entire group's horizontal spread
+         const visualMidpointX = (minXOffset + maxXOffset) / 2;
+         // Calculate the shift needed to center this midpoint in the container
+         const centeringShift = -visualMidpointX;
 
          dataCardElements.forEach((cardElement, index) => {
              if (!cardElement) return;
 
-             let relativePos = index - targetIndex;
-             // Wrap around logic (optional, uncomment if needed for circular feel)
-             /*
-             if (groupSize > 1) {
-                 if (relativePos > groupSize / 2) relativePos -= groupSize;
-                 if (relativePos < -groupSize / 2) relativePos += groupSize;
+             // Calculate logical relative position
+             const logicalRelativePos = index - targetIndex;
+
+             // Calculate visual relative position for wrap-around effect
+             let visualRelativePos = logicalRelativePos;
+             if (groupSize > 1) { // Wrap-around logic only needed for more than 1 card
+                 const halfSize = groupSize / 2;
+                 if (logicalRelativePos > halfSize) {
+                     visualRelativePos = logicalRelativePos - groupSize;
+                 } else if (logicalRelativePos <= -halfSize) { // Use <= for negative half
+                     visualRelativePos = logicalRelativePos + groupSize;
+                 }
              }
-             */
 
-             const angleDivisor = Math.min(VISIBLE_CARDS, groupSize) || 1;
-             const angle = relativePos * (VISIBLE_ANGLE / angleDivisor);
+             // Use visualRelativePos for layout calculations
+             const relativePos = visualRelativePos;
 
-             // Calculate transformations based on Timeline.tsx logic
-             const x = Math.sin(angle) * RADIUS;
-             const y = -40 + Math.abs(relativePos) * 15; // Adjust y based on distance
-             const z = Math.cos(angle) * RADIUS * 0.6 - RADIUS * 0.6; // Adjust z for center focus
-             const rotateY = -angle * 0.8;
+             // --- Step-based Calculation --- 
+             const angleDeg = relativePos * ANGLE_STEP;
+             const rotateYRad = angleDeg * (Math.PI / 180);
+             const x = relativePos * X_STEP; // Base position relative to the active card (where relativePos = 0)
+             const z = -Math.abs(relativePos) * Z_STEP_PER_LEVEL;
+             const y = Y_INITIAL_OFFSET + Math.abs(relativePos) * Y_STEP_PER_LEVEL;
 
-             const transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${rotateY}rad)`;
-             const zIndex = 100 - Math.abs(relativePos) * 10;
-             const opacity = Math.max(0.1, 1 - Math.min(Math.abs(relativePos), 5) * 0.18);
-             const pointerEvents = Math.abs(relativePos) > Math.floor(VISIBLE_CARDS / 2) ? 'none' : 'auto';
+             // Position relative to container center using the calculated relative offset x AND VISUAL CENTERING SHIFT
+             const finalX = centerX + x + centeringShift;
+             const finalY = centerY + y;
+             const transform = `translate3d(${finalX}px, ${finalY}px, ${z}px) rotateY(${rotateYRad}rad)`;
+
+             // Adjust zIndex and opacity based on distance for layering
+             const zIndex = 100 - Math.abs(relativePos);
+             // Make opacity drop off more gently for closer cards
+             const opacity = Math.max(0.4, 1 - Math.abs(relativePos) * 0.12); // Further adjusted opacity fade
+             const pointerEvents = Math.abs(relativePos) > 3 ? 'none' : 'auto'; // Limit interaction range slightly
 
              // Apply styles
              cardElement.style.transition = 'transform 0.6s ease-out, opacity 0.6s ease-out';
@@ -116,26 +171,12 @@ document.addEventListener('DOMContentLoaded', () => {
                  cardElement.classList.remove('active');
              }
          });
+
+         // --- REMOVED Add New Card positioning logic from here --- 
      });
   }
 
   // --- Core Functions ---
-
-  function renderAddNewCard() {
-      if (!addNewCardTemplate || !carouselWrapper) return;
-      if (addNewCardElement) addNewCardElement.remove(); // Remove existing if any
-
-      const cardClone = addNewCardTemplate.content.cloneNode(true);
-      addNewCardElement = cardClone.querySelector('.add-new-card');
-
-      if (addNewCardElement) {
-          addNewCardElement.addEventListener('click', handleAddNewEntryClick); // Use new handler name
-          // Append to wrapper, AFTER the entries container
-          carouselWrapper.appendChild(addNewCardElement);
-      }
-      // Update visibility based on count (if needed)
-      updateEntryCountDisplay();
-  }
 
   // Function to render a data entry card
   function renderEntryCard(entryData, index) {
@@ -144,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cardClone = entryCardTemplate.content.cloneNode(true);
     const cardElement = cardClone.querySelector('.entry-card');
     cardElement.dataset.id = entryData.id;
-    cardElement.dataset.index = index; // Store index for click handling
+    cardElement.dataset.index = index; // Store current ARRAY index for click handling
 
     const dateHeader = cardElement.querySelector('.card-date-header');
     const dateDisplay = cardElement.querySelector('.date-display');
@@ -208,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
     deleteBtn.style.visibility = 'visible';
 
     // Insert the card into the entries container
-    entriesContainer.appendChild(cardElement);
+    entriesContainer.appendChild(cardElement); // Append to the end
     return cardElement; // Return the created element
   }
 
@@ -217,37 +258,50 @@ document.addEventListener('DOMContentLoaded', () => {
       if (entries.length >= MAX_ENTRIES) return;
 
       let newDate = new Date();
-      if (entries.length > 0 && entries[entries.length - 1].date) {
+      if (entries.length > 0 && entries[entries.length - 1].date) { // Use last entry date
           try {
               const lastEntryDate = new Date(entries[entries.length - 1].date + 'T00:00:00');
               newDate = new Date(lastEntryDate);
-              newDate.setDate(newDate.getDate() + 1);
+              newDate.setDate(newDate.getDate() + 1); // New card date is day after the last
           } catch(e) {
                console.error("Error calculating next date:", e);
           }
       }
 
       const newEntry = {
-        id: generateId(),
+        id: generateId(), // Internal unique ID
         date: formatDateForInput(newDate),
-        content: ''
+        content: '' // No displayIndex needed
       };
 
-      const newIndex = entries.length; // Index will be the current length before pushing
-      entries.push(newEntry);
+      const newArrayIndex = entries.length; // Index will be the current length BEFORE pushing
+      entries.push(newEntry); // Append to data array
 
       // Render the new data card and add to elements array
-      const newCardElement = renderEntryCard(newEntry, newIndex);
+      const newCardElement = renderEntryCard(newEntry, newArrayIndex);
       if (newCardElement) {
+          // Apply initial state for animation
+          newCardElement.style.position = 'absolute';
+          // Start new card from a slightly different default state, centered horizontally
+          const initialX = entriesContainer.offsetWidth / 2;
+          const initialY = entriesContainer.offsetHeight / 2;
+          newCardElement.style.opacity = '0'; 
+          newCardElement.style.transform = `translate3d(${initialX}px, ${initialY}px, -150px) scale(0.5) rotateY(30deg)`;
+
+          // Append element to the elements array
           dataCardElements.push(newCardElement);
       }
 
       // Update state and layout
-      activeCardIndex = newIndex; // Focus the new card
-      applyCarouselLayout(activeCardIndex);
+      activeCardIndex = newArrayIndex; // Focus the newly added card at the end
       updateSubmitButtonState();
       updateEntryCountDisplay();
-      // updateAllCardIndices(); // Indices updated in renderEntryCard
+
+      // Apply layout AFTER the DOM element is ready and initial styles are set
+      // Use a minimal timeout to ensure the browser registers the initial state before transitioning
+      setTimeout(() => {
+          applyCarouselLayout(activeCardIndex); // Use the updated active index
+      }, 0);
   }
 
   function removeEntry(id) {
@@ -265,19 +319,30 @@ document.addEventListener('DOMContentLoaded', () => {
     dataCardElements.splice(indexToRemove, 1);
 
     // Adjust active index if necessary
-    if (activeCardIndex >= entries.length) {
+    if (activeCardIndex > indexToRemove) {
+        activeCardIndex--; // Shift active index left if removed item was before it
+    } else if (activeCardIndex === indexToRemove && activeCardIndex >= entries.length) {
+        // If the removed item was the active one and it was the last one
+        activeCardIndex = Math.max(0, entries.length - 1);
+    } else if (activeCardIndex >= entries.length) {
+        // General case if active index becomes out of bounds
         activeCardIndex = Math.max(0, entries.length - 1);
     }
 
-    // Re-assign data-index attribute to remaining cards
-    dataCardElements.forEach((card, index) => {
-        card.dataset.index = index;
-    });
+    // Re-assign data-index attribute AND UPDATE DISPLAYED INDEX for remaining cards
+    for (let i = indexToRemove; i < dataCardElements.length; i++) {
+        const card = dataCardElements[i];
+        card.dataset.index = i; // Update array index
+        // Update the displayed sequential index in the footer
+        const indexSpan = card.querySelector('.entry-index');
+        if (indexSpan) {
+            indexSpan.textContent = `体验 #${i + 1}`;
+        }
+    }
 
     // Update UI
     updateSubmitButtonState();
     updateEntryCountDisplay();
-    updateAllCardIndices(); // <-- Update index text display
     applyCarouselLayout(activeCardIndex); // Re-apply layout
   }
 
@@ -311,9 +376,139 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1500);
   });
 
+  // --- Draggable Indicator Logic (from Timeline.tsx, adapted) --- 
+  function loadIndicatorPosition() {
+      // Simplified: Always start at default position defined in CSS
+      // Add localStorage load logic here if needed
+      if (activeIndicator) {
+         // Ensure initial styles if not loaded from storage
+         if (!activeIndicator.style.left && !activeIndicator.style.top) {
+              const defaultStyle = window.getComputedStyle(activeIndicator);
+              activeIndicator.style.bottom = defaultStyle.bottom;
+              activeIndicator.style.right = defaultStyle.right;
+              activeIndicator.style.left = 'auto';
+              activeIndicator.style.top = 'auto';
+         }
+      }
+  }
+  
+  function saveIndicatorPosition(element) {
+      // Save left/top position
+      const positionToSave = { x: element.offsetLeft, y: element.offsetTop };
+      try {
+          localStorage.setItem('batchEntryIndicatorPosition', JSON.stringify(positionToSave));
+          console.log("Indicator position saved:", positionToSave);
+      } catch (e) {
+          console.warn('Failed to save indicator position:', e);
+      }
+  }
+  
+  function handleDragStart(e) {
+      if (!activeIndicator) return;
+
+      isDraggingIndicator = false; // Reset flag initially
+      activeIndicator.classList.add('dragging');
+      if (dragOverlay) dragOverlay.style.display = 'block';
+
+      const rect = activeIndicator.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      // Store start position for click detection
+      dragStartPosition = { x: clientX, y: clientY };
+
+      dragOffset = {
+          x: clientX - rect.left,
+          y: clientY - rect.top,
+      };
+
+      // Add move/end listeners globally
+      window.addEventListener('mousemove', handleDragMove);
+      window.addEventListener('touchmove', handleDragMove, { passive: false });
+      window.addEventListener('mouseup', handleDragEnd);
+      window.addEventListener('touchend', handleDragEnd);
+  }
+  
+  function handleDragMove(e) {
+      if (!activeIndicator) return; // Check if dragging is intended (mouse button down etc.) - Basic check
+      // Set dragging flag only when movement occurs
+      if (!isDraggingIndicator) {
+         // Check if moved beyond a small threshold to confirm drag
+         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+         const deltaX = Math.abs(clientX - dragStartPosition.x);
+         const deltaY = Math.abs(clientY - dragStartPosition.y);
+         if (deltaX > 5 || deltaY > 5) { // Threshold of 5px
+             isDraggingIndicator = true; 
+         }
+      }
+
+      // Only move if dragging is confirmed
+      if (!isDraggingIndicator) return;
+
+      e.preventDefault(); // Prevent scrolling during drag on touch devices
+
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      let newX = clientX - dragOffset.x;
+      let newY = clientY - dragOffset.y;
+
+      // Boundary checks
+      const maxX = window.innerWidth - activeIndicator.offsetWidth;
+      const maxY = window.innerHeight - activeIndicator.offsetHeight;
+      newX = Math.max(0, Math.min(newX, maxX));
+      newY = Math.max(0, Math.min(newY, maxY));
+
+      activeIndicator.style.left = `${newX}px`;
+      activeIndicator.style.top = `${newY}px`;
+      activeIndicator.style.right = 'auto'; // Ensure right/bottom are not interfering
+      activeIndicator.style.bottom = 'auto';
+  }
+  
+  function handleDragEnd() {
+      // Check isDraggingIndicator flag before saving position
+      if (!activeIndicator) return;
+
+      if (isDraggingIndicator) {
+          saveIndicatorPosition(activeIndicator); // Save final position only if dragged
+      }
+
+      activeIndicator.classList.remove('dragging');
+      if (dragOverlay) dragOverlay.style.display = 'none';
+
+      // Remove global listeners
+      window.removeEventListener('mousemove', handleDragMove);
+      window.removeEventListener('touchmove', handleDragMove);
+      window.removeEventListener('mouseup', handleDragEnd);
+      window.removeEventListener('touchend', handleDragEnd);
+
+      // Reset dragging flag *after* potential click handler runs
+      // Use setTimeout to ensure flag is reset after event bubble phase
+      setTimeout(() => {
+          isDraggingIndicator = false;
+      }, 0);
+  }
+
   // --- Initialization ---
 
-  renderAddNewCard(); // Render the static add new card
+  if (activeIndicator) {
+    // Add click listener for adding entries (only if not dragging)
+    activeIndicator.addEventListener('click', (e) => {
+        // Check the flag set during move/end
+        if (!isDraggingIndicator) {
+             handleAddNewEntryClick(e);
+        }
+    });
+    // Add drag listeners
+    activeIndicator.addEventListener('mousedown', handleDragStart);
+    activeIndicator.addEventListener('touchstart', handleDragStart, { passive: false });
+    loadIndicatorPosition(); // Load saved position or set default
+  } else {
+    console.error('Active Indicator element not found!');
+  }
+  updateEntryCountDisplay(); // Set initial FAB visibility
+
   handleAddNewEntryClick(); // Create the first data card via new handler
 
   // Initial layout application

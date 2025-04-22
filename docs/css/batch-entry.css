@@ -83,7 +83,7 @@ body {
     overflow: visible;
     padding: 20px 0 30px 0;
     position: relative;
-    perspective: 1500px;
+    perspective: 2500px;
     min-height: 500px;
 }
 
@@ -96,19 +96,16 @@ body {
 }
 
 /* Entry Card Styling - Adjust for 3D */
-.entry-card:not(.add-new-card) {
+.entry-card:not(.add-new-card) { /* Target only data cards for 3D */
   background-color: var(--card-bg-color);
   border-radius: 12px;
   border: 1px solid var(--primary-color);
   box-shadow: 0 5px 15px rgba(139, 92, 246, 0.15);
   width: 260px;
   height: 360px;
-  display: flex;
+  display: flex; /* Keep flex for internal layout */
   flex-direction: column;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: absolute; /* ADDED */
   overflow: visible;
   transition: box-shadow 0.3s ease;
   font-family: var(--letter-font);
@@ -117,10 +114,10 @@ body {
   cursor: pointer;
 }
 
+/* Remove hover transform, it will be handled by JS */
 .entry-card:not(.add-new-card):hover {
-  transform: translate(-50%, -50%);
   box-shadow: 0 8px 22px rgba(139, 92, 246, 0.2);
-  z-index: 10;
+  z-index: 10; /* Keep hover z-index boost if desired */
 }
 
 /* Active card style (potentially add border or glow) */
@@ -277,104 +274,113 @@ body {
     cursor: not-allowed;
 }
 
-/* Add New Card - Adjust positioning */
+/* Add New Card - Position below the carousel */
+/* REMOVE All .add-new-card related styles */
+/*
 .add-new-card {
-  background-color: var(--card-bg-color);
-  border-radius: 12px;
-  width: 260px;
-  height: 360px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  bottom: -80px;
-  right: 20px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  font-family: sans-serif;
-  border: 1px solid var(--primary-color);
-  box-shadow: 0 5px 15px rgba(139, 92, 246, 0.15);
-  cursor: pointer;
-  overflow: visible;
-  z-index: 5;
+  ...
 }
-
 .add-new-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 22px rgba(139, 92, 246, 0.2);
+  ...
 }
-
-/* Style the fixed date header for Add New card */
 .add-new-card .card-date-header {
-  position: absolute;
-  top: -16px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: var(--primary-color);
-  color: white;
-  padding: 6px 18px;
-  border-radius: 20px;
-  font-weight: bold;
-  font-size: 0.9rem;
-  box-shadow: 0 3px 8px rgba(139, 92, 246, 0.3);
-  z-index: 10;
-  white-space: nowrap;
-  font-family: var(--label-font);
-  cursor: default;
-  pointer-events: none;
+  ...
 }
-
-/* Style the content area for Add New card */
 .add-new-card .card-content {
-  padding: 2.25rem 1.25rem 1rem;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  text-align: center;
-  background-image: none;
-  line-height: normal;
-  position: relative;
+  ...
 }
-
-/* Remove the ornament from add-new card */
 .add-new-card .card-content::before {
-    display: none;
+  ...
 }
-
 .add-new-inner {
-  color: #a78bfa;
+  ...
 }
-
 .add-icon {
-  font-size: 3em;
-  margin-bottom: 15px;
-  display: block;
+  ...
 }
-
 .add-new-inner span {
-  font-weight: 600;
-  font-size: 1.1em;
-  margin-bottom: 5px;
-  display: block;
+  ...
 }
-
 .coming-soon-text {
-  font-size: 0.8em;
-  color: #c4b5fd;
-  display: block;
+  ...
+}
+.add-new-card .card-footer {
+  ...
+}
+*/
+
+/* --- Draggable Active Indicator Styling (Inspired by Timeline.tsx) --- */
+.active-indicator {
+    position: fixed;
+    bottom: 40px; /* Initial position */
+    right: 40px; /* Initial position */
+    z-index: 1000;
+    cursor: grab; /* Indicate draggable */
+    touch-action: none; /* Prevent default touch actions like scrolling */
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    opacity: 1;
+    width: 84px; /* Adjust size to accommodate borders */
+    height: 84px;
 }
 
-/* Style the empty footer for Add New card - REMOVE border */
-.add-new-card .card-footer {
-  padding: 0.6rem 1.25rem;
-  border-top: none;
-  background-color: var(--card-bg-color);
-  flex-shrink: 0;
-  height: 43px;
-  border-bottom-left-radius: 11px;
-  border-bottom-right-radius: 11px;
+.active-indicator.dragging {
+    cursor: grabbing;
+    transition: none; /* Disable transition during drag */
+}
+
+.indicator-circle {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.08); /* Outer faint grey border */
+    box-shadow: inset 0 0 0 4px var(--primary-color), /* Inner color ring */
+                0 6px 20px rgba(139, 92, 246, 0.25); /* Softer outer shadow */
+    background-color: rgba(255, 255, 255, 0.8); /* Fallback */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.indicator-inner {
+    text-align: center;
+    color: #333;
+    position: relative; /* Needed for positioning children */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Adjust if needed based on content height */
+    width: 100%;
+    height: 100%;
+}
+
+.indicator-action {
+    font-size: 1.8em; /* Adjust icon size */
+    color: var(--primary-color);
+    /* Ensure it's centered now that ID is gone */
+}
+
+/* Style for hiding the indicator */
+.active-indicator.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.5);
+}
+
+/* Drag Overlay Styling */
+.drag-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999; /* Below indicator when dragging */
+    display: none; /* Hidden by default */
+    background: transparent; /* Or a very faint overlay */
+    cursor: grabbing;
 }
 
 /* Submit Button in Header - Final Style */

@@ -38,6 +38,21 @@
         </div>
     </div>
 
+    <!-- Draggable Active Card Indicator & Add Button -->
+    <div id="active-indicator" class="active-indicator" title="添加记录 / 当前选中">
+        <div class="indicator-circle">
+            <div class="indicator-inner">
+                <!-- Main action/icon -->
+                <div class="indicator-action">
+                    <i class="fas fa-plus"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drag Overlay -->
+    <div id="drag-overlay" class="drag-overlay"></div>
+
   </div>
 
   <!-- Entry Card Template -->
@@ -57,20 +72,6 @@
           <i class="far fa-trash-alt"></i>
         </button>
       </div>
-    </div>
-  </template>
-
-  <!-- Add New Card Template -->
-  <template id="add-new-card-template">
-    <div class="entry-card add-new-card">
-        <div class="card-date-header add-card-date">Z年C月Y日</div>
-        <div class="card-content add-card-content">
-            <div class="add-new-inner">
-                <i class="fas fa-plus add-icon"></i>
-                <span>添加记录</span>
-            </div>
-        </div>
-        <div class="card-footer add-card-footer"></div>
     </div>
   </template>
 
