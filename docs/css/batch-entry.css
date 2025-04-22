@@ -80,10 +80,10 @@ body {
 /* Carousel Wrapper & Container */
 .carousel-wrapper {
     margin-bottom: 25px;
-    overflow: visible;
+    overflow: hidden; /* Prevent scrollbars */
     padding: 20px 0 30px 0;
     position: relative;
-    perspective: 2500px;
+    perspective: 2500px; /* INCREASED perspective to reduce size difference */
     min-height: 500px;
 }
 
@@ -106,16 +106,23 @@ body {
   display: flex; /* Keep flex for internal layout */
   flex-direction: column;
   position: absolute; /* ADDED */
+  left: 50%; /* ADDED for CSS centering */
+  top: 50%; /* ADDED for CSS centering */
+  /* Base transform for centering + JS transforms */
+  transform: translate(-50%, -50%); 
   overflow: visible;
-  transition: box-shadow 0.3s ease;
+  /* Use JS-driven transition for transform/opacity */
+  transition: box-shadow 0.3s ease, transform 0.6s ease-out, opacity 0.6s ease-out;
   font-family: var(--letter-font);
-  backface-visibility: hidden;
-  transform-origin: center center;
-  cursor: pointer;
+  backface-visibility: hidden; /* ADDED */
+  transform-origin: center center; /* ADDED */
+  cursor: pointer; /* ADDED - Make cards clickable */
 }
 
 /* Remove hover transform, it will be handled by JS */
 .entry-card:not(.add-new-card):hover {
+  /* Keep base centering transform on hover */
+  transform: translate(-50%, -50%); 
   box-shadow: 0 8px 22px rgba(139, 92, 246, 0.2);
   z-index: 10; /* Keep hover z-index boost if desired */
 }
@@ -311,21 +318,16 @@ body {
 
 /* --- Draggable Active Indicator Styling (Inspired by Timeline.tsx) --- */
 .active-indicator {
-    position: fixed;
-    bottom: 40px; /* Initial position */
-    right: 40px; /* Initial position */
+    position: absolute; /* Relative to nearest positioned ancestor (.entries-container) */
+    /* Initial position set by JS */
+    transform: translate(-50%, -50%) translateY(0); /* Base transform for centering and animation */
     z-index: 1000;
-    cursor: grab; /* Indicate draggable */
+    cursor: pointer; /* Now just a button */
     touch-action: none; /* Prevent default touch actions like scrolling */
-    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    transition: opacity 0.3s ease-out, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Added transform transition */
     opacity: 1;
     width: 84px; /* Adjust size to accommodate borders */
     height: 84px;
-}
-
-.active-indicator.dragging {
-    cursor: grabbing;
-    transition: none; /* Disable transition during drag */
 }
 
 .indicator-circle {
@@ -367,20 +369,7 @@ body {
 .active-indicator.hidden {
     opacity: 0;
     pointer-events: none;
-    transform: scale(0.5);
-}
-
-/* Drag Overlay Styling */
-.drag-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 999; /* Below indicator when dragging */
-    display: none; /* Hidden by default */
-    background: transparent; /* Or a very faint overlay */
-    cursor: grabbing;
+    transform: translate(-50%, -50%) translateY(30px); /* Fade out downwards */
 }
 
 /* Submit Button in Header - Final Style */

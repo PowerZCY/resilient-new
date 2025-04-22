@@ -7,23 +7,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const dragOverlay = document.getElementById('drag-overlay');
 
   const MAX_ENTRIES = 20;
-  // --- 3D Carousel Constants (Hybrid Approach) ---
-  const ANGLE_STEP = 5; // Degrees per card distance from center
-  const X_STEP = 65; // Pixels horizontal offset per card distance
+  // --- 3D Carousel Constants (Hybrid - SinX, Step Rotate/Z) ---
+  const ANGLE_STEP = 5; // Degrees per card distance from center (for RotateY)
   const Z_STEP_PER_LEVEL = 80; // Pixels depth offset per card distance
   const Y_INITIAL_OFFSET = -40; // Base vertical offset for cards
   const Y_STEP_PER_LEVEL = 15; // Pixels vertical offset increase per card distance
+  const RADIUS_X = 550; // ADJUST: Horizontal spread radius (Increase for more spread)
+  const VISIBLE_CARDS_FOR_X = 10; // VISUAL card count for X spread calculation
+  const VISIBLE_ANGLE_FOR_X = Math.PI * 0.8; // ADJUST: Angle range for X spread
 
   let entries = []; // Array to hold entry data { id, date, content }
   let activeCardIndex = 0; // Index of the currently centered card
 
   // Store card elements for easy access in layout function
   let dataCardElements = [];
-
-  // --- Draggable Indicator State --- 
-  let isDraggingIndicator = false;
-  let dragOffset = { x: 0, y: 0 };
-  let dragStartPosition = { x: 0, y: 0 }; // Store start position to detect drag vs click
 
   // --- Helper Functions ---
 
@@ -82,42 +79,9 @@ document.addEventListener('DOMContentLoaded', () => {
          const groupSize = dataCardElements.length;
          const hasAddNew = entries.length < MAX_ENTRIES && activeIndicator;
 
-         // --- Calculate Visual Centering Offset --- 
-         let minXOffset = 0;
-         let maxXOffset = 0;
-
-         // Calculate offsets for data cards
-         const dataCardXOffsets = dataCardElements.map((_, index) => {
-             const relativePos = index - targetIndex;
-             return relativePos * X_STEP;
-         });
-
-         // Determine min/max from data cards
-         if (dataCardXOffsets.length > 0) {
-             minXOffset = Math.min(...dataCardXOffsets);
-             maxXOffset = Math.max(...dataCardXOffsets);
-         }
-
-         // Calculate offset for AddNew card (always relativePos = 1)
-         if (hasAddNew) {
-             const addNewRelativePos = 1; // Always position relative to the right of the active card
-             const addNewXOffset = addNewRelativePos * X_STEP;
-
-             // Update overall min/max including AddNew card
-             // If no data cards exist yet, AddNew defines the bounds
-             if (dataCardXOffsets.length === 0) {
-                  minXOffset = addNewXOffset; // Assuming active card is conceptually at 0
-                  maxXOffset = addNewXOffset;
-             } else {
-                  minXOffset = Math.min(minXOffset, addNewXOffset);
-                  maxXOffset = Math.max(maxXOffset, addNewXOffset);
-             }
-         }
-
-         // Calculate the midpoint of the entire group's horizontal spread
-         const visualMidpointX = (minXOffset + maxXOffset) / 2;
-         // Calculate the shift needed to center this midpoint in the container
-         const centeringShift = -visualMidpointX;
+         // Variables to store center card position for indicator placement
+         let centerCardX = centerX; // Default to container center
+         let centerCardY = centerY;
 
          dataCardElements.forEach((cardElement, index) => {
              if (!cardElement) return;
@@ -140,22 +104,37 @@ document.addEventListener('DOMContentLoaded', () => {
              const relativePos = visualRelativePos;
 
              // --- Step-based Calculation --- 
-             const angleDeg = relativePos * ANGLE_STEP;
-             const rotateYRad = angleDeg * (Math.PI / 180);
-             const x = relativePos * X_STEP; // Base position relative to the active card (where relativePos = 0)
-             const z = -Math.abs(relativePos) * Z_STEP_PER_LEVEL;
-             const y = Y_INITIAL_OFFSET + Math.abs(relativePos) * Y_STEP_PER_LEVEL;
+             const isCenterCard = (relativePos === 0);
 
-             // Position relative to container center using the calculated relative offset x AND VISUAL CENTERING SHIFT
-             const finalX = centerX + x + centeringShift;
+             const angleDeg = relativePos * ANGLE_STEP; // For RotateY
+             const rotateYRad = angleDeg * (Math.PI / 180);
+
+             // Calculate X using sin(angle) based on VISUAL count
+             const angleDivisorX = VISIBLE_CARDS_FOR_X; // Use fixed visual count
+             const angleForX = relativePos * (VISIBLE_ANGLE_FOR_X / angleDivisorX);
+             const x = Math.sin(angleForX) * RADIUS_X;
+
+             const z = -Math.abs(relativePos) * Z_STEP_PER_LEVEL; // For Z (depth/stacking)
+             const y = 0 + Math.abs(relativePos) * Y_STEP_PER_LEVEL; // For Y - REMOVED Y_INITIAL_OFFSET
+
+             // Position relative to container center using the calculated relative offset x
+             const finalX = centerX + x;
              const finalY = centerY + y;
-             const transform = `translate3d(${finalX}px, ${finalY}px, ${z}px) rotateY(${rotateYRad}rad)`;
+             const transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, ${z}px) rotateY(${rotateYRad}rad)`;
+
+             // If this is the center card, store its final position
+             if (isCenterCard) {
+                 centerCardX = finalX;
+                 centerCardY = finalY;
+             }
 
              // Adjust zIndex and opacity based on distance for layering
              const zIndex = 100 - Math.abs(relativePos);
-             // Make opacity drop off more gently for closer cards
-             const opacity = Math.max(0.4, 1 - Math.abs(relativePos) * 0.12); // Further adjusted opacity fade
-             const pointerEvents = Math.abs(relativePos) > 3 ? 'none' : 'auto'; // Limit interaction range slightly
+
+             // --- Visibility Check --- 
+             const isVisible = Math.abs(relativePos) <= VISIBLE_CARDS_FOR_X / 2;
+             const opacity = isVisible ? Math.max(0.4, 1 - Math.abs(relativePos) * 0.12) : 0;
+             const pointerEvents = isVisible ? 'auto' : 'none';
 
              // Apply styles
              cardElement.style.transition = 'transform 0.6s ease-out, opacity 0.6s ease-out';
@@ -172,7 +151,19 @@ document.addEventListener('DOMContentLoaded', () => {
              }
          });
 
-         // --- REMOVED Add New Card positioning logic from here --- 
+         // --- Position the Active Indicator --- 
+         if (activeIndicator) {
+             const cardHeight = dataCardElements[targetIndex]?.offsetHeight || 360; // Get height or use default
+             const verticalGap = 125; // INCREASED gap below the card
+
+             // Calculate indicator position below the center card
+             const indicatorX = centerCardX; // Align horizontally
+             const indicatorY = centerCardY + cardHeight / 2 + verticalGap; // Position below
+
+             // Apply the position
+             activeIndicator.style.left = `${indicatorX}px`;
+             activeIndicator.style.top = `${indicatorY}px`;
+         }
      });
   }
 
@@ -376,134 +367,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1500);
   });
 
-  // --- Draggable Indicator Logic (from Timeline.tsx, adapted) --- 
-  function loadIndicatorPosition() {
-      // Simplified: Always start at default position defined in CSS
-      // Add localStorage load logic here if needed
-      if (activeIndicator) {
-         // Ensure initial styles if not loaded from storage
-         if (!activeIndicator.style.left && !activeIndicator.style.top) {
-              const defaultStyle = window.getComputedStyle(activeIndicator);
-              activeIndicator.style.bottom = defaultStyle.bottom;
-              activeIndicator.style.right = defaultStyle.right;
-              activeIndicator.style.left = 'auto';
-              activeIndicator.style.top = 'auto';
-         }
-      }
-  }
-  
-  function saveIndicatorPosition(element) {
-      // Save left/top position
-      const positionToSave = { x: element.offsetLeft, y: element.offsetTop };
-      try {
-          localStorage.setItem('batchEntryIndicatorPosition', JSON.stringify(positionToSave));
-          console.log("Indicator position saved:", positionToSave);
-      } catch (e) {
-          console.warn('Failed to save indicator position:', e);
-      }
-  }
-  
-  function handleDragStart(e) {
-      if (!activeIndicator) return;
-
-      isDraggingIndicator = false; // Reset flag initially
-      activeIndicator.classList.add('dragging');
-      if (dragOverlay) dragOverlay.style.display = 'block';
-
-      const rect = activeIndicator.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-      // Store start position for click detection
-      dragStartPosition = { x: clientX, y: clientY };
-
-      dragOffset = {
-          x: clientX - rect.left,
-          y: clientY - rect.top,
-      };
-
-      // Add move/end listeners globally
-      window.addEventListener('mousemove', handleDragMove);
-      window.addEventListener('touchmove', handleDragMove, { passive: false });
-      window.addEventListener('mouseup', handleDragEnd);
-      window.addEventListener('touchend', handleDragEnd);
-  }
-  
-  function handleDragMove(e) {
-      if (!activeIndicator) return; // Check if dragging is intended (mouse button down etc.) - Basic check
-      // Set dragging flag only when movement occurs
-      if (!isDraggingIndicator) {
-         // Check if moved beyond a small threshold to confirm drag
-         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-         const deltaX = Math.abs(clientX - dragStartPosition.x);
-         const deltaY = Math.abs(clientY - dragStartPosition.y);
-         if (deltaX > 5 || deltaY > 5) { // Threshold of 5px
-             isDraggingIndicator = true; 
-         }
-      }
-
-      // Only move if dragging is confirmed
-      if (!isDraggingIndicator) return;
-
-      e.preventDefault(); // Prevent scrolling during drag on touch devices
-
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-      let newX = clientX - dragOffset.x;
-      let newY = clientY - dragOffset.y;
-
-      // Boundary checks
-      const maxX = window.innerWidth - activeIndicator.offsetWidth;
-      const maxY = window.innerHeight - activeIndicator.offsetHeight;
-      newX = Math.max(0, Math.min(newX, maxX));
-      newY = Math.max(0, Math.min(newY, maxY));
-
-      activeIndicator.style.left = `${newX}px`;
-      activeIndicator.style.top = `${newY}px`;
-      activeIndicator.style.right = 'auto'; // Ensure right/bottom are not interfering
-      activeIndicator.style.bottom = 'auto';
-  }
-  
-  function handleDragEnd() {
-      // Check isDraggingIndicator flag before saving position
-      if (!activeIndicator) return;
-
-      if (isDraggingIndicator) {
-          saveIndicatorPosition(activeIndicator); // Save final position only if dragged
-      }
-
-      activeIndicator.classList.remove('dragging');
-      if (dragOverlay) dragOverlay.style.display = 'none';
-
-      // Remove global listeners
-      window.removeEventListener('mousemove', handleDragMove);
-      window.removeEventListener('touchmove', handleDragMove);
-      window.removeEventListener('mouseup', handleDragEnd);
-      window.removeEventListener('touchend', handleDragEnd);
-
-      // Reset dragging flag *after* potential click handler runs
-      // Use setTimeout to ensure flag is reset after event bubble phase
-      setTimeout(() => {
-          isDraggingIndicator = false;
-      }, 0);
-  }
-
   // --- Initialization ---
 
   if (activeIndicator) {
     // Add click listener for adding entries (only if not dragging)
     activeIndicator.addEventListener('click', (e) => {
-        // Check the flag set during move/end
-        if (!isDraggingIndicator) {
-             handleAddNewEntryClick(e);
-        }
+        // No need for drag check anymore
+        handleAddNewEntryClick(e);
     });
-    // Add drag listeners
-    activeIndicator.addEventListener('mousedown', handleDragStart);
-    activeIndicator.addEventListener('touchstart', handleDragStart, { passive: false });
-    loadIndicatorPosition(); // Load saved position or set default
   } else {
     console.error('Active Indicator element not found!');
   }
