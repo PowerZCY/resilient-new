@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>批量添加记录原型 (横向卡片)</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="css/batch-entry.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+Screen+R&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="page-container">
+    <div class="centered-content">
+        <div class="main-header">
+            <div class="header-left">
+                <h1><i class="fas fa-calendar-plus icon"></i> 上报好体验、好事儿、成就</h1>
+                <div class="entry-count">0/20 组</div>
+            </div>
+            <div class="header-right">
+                <button id="submit-btn" class="submit-btn" disabled>
+                    <div class="submit-btn-inner">
+                        <span class="dot dot-left"></span>
+                        <i class="fas fa-paper-plane icon"></i>
+                        <span>提交</span>
+                        <span class="dot dot-right"></span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carousel Wrapper -->
+    <div class="carousel-wrapper">
+        <div id="entries-container" class="entries-container">
+        <!-- Entry cards and the add-new card will be dynamically inserted here -->
+        </div>
+    </div>
+
+  </div>
+
+  <!-- Entry Card Template -->
+  <template id="entry-card-template">
+    <div class="entry-card">
+      <div class="card-date-header" title="点击修改日期">
+        <span class="date-display"></span>
+        <input type="date" class="date-input-hidden" aria-label="日期输入">
+      </div>
+      <div class="card-content">
+        <textarea class="content-textarea" rows="4" placeholder="输入好体验、好事儿或成就..." aria-label="内容输入"></textarea>
+        <div class="char-count">0 个字符</div>
+      </div>
+      <div class="card-footer">
+        <span class="entry-index">体验 #</span>
+        <button class="action-btn delete-btn" title="删除此条目">
+          <i class="far fa-trash-alt"></i>
+        </button>
+      </div>
+    </div>
+  </template>
+
+  <!-- Add New Card Template -->
+  <template id="add-new-card-template">
+    <div class="entry-card add-new-card">
+        <div class="card-date-header add-card-date">Z年C月Y日</div>
+        <div class="card-content add-card-content">
+            <div class="add-new-inner">
+                <i class="fas fa-plus add-icon"></i>
+                <span>添加记录</span>
+            </div>
+        </div>
+        <div class="card-footer add-card-footer"></div>
+    </div>
+  </template>
+
+  <script src="js/batch-entry.js"></script>
+</body>
+</html> 
