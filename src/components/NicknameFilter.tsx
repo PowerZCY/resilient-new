@@ -3,8 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { User } from 'lucide-react';
-import LogoutDialog from './LogoutDialog';
+import { UserButton } from "@clerk/nextjs";
 
 // 定义用户数据，包括名称和对应的颜色
 const users = [
@@ -18,7 +17,6 @@ export default function NicknameFilter(): JSX.Element {
   const defaultNickname = 'Zia慢成';
   const isFirstRender = useRef<boolean>(true);
   const isUpdatingUrl = useRef<boolean>(false);
-  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState<boolean>(false);
 
   // 确保初始化时处理 null 或 undefined
   const [nickname, setNickname] = useState<string>(() => {
@@ -71,50 +69,21 @@ export default function NicknameFilter(): JSX.Element {
     [router, nickname]
   );
 
-  // 处理用户图标点击，打开登出对话框
-  const handleUserIconClick = () => {
-    setIsLogoutDialogOpen(true);
-  };
-
-  // 关闭登出对话框
-  const handleCloseLogoutDialog = () => {
-    setIsLogoutDialogOpen(false);
-  };
-
-  // 获取当前选中用户的颜色
-  const activeUserColor = users.find(user => user.name === nickname)?.color || users[0].color;
-
   return (
     <div className="flex items-center">
-      <div className="relative flex rounded-full p-1 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 shadow-lg">
+      <div className="relative flex items-center rounded-full p-1.5 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 shadow-lg">
         <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 rounded-full blur-sm opacity-50"></div>
         
-        {/* 用户图标 - 添加点击事件打开登出对话框 */}
-        <div 
-          className="relative z-10 flex items-center justify-center w-10 h-10 rounded-full bg-white/90 mr-1 cursor-pointer"
-          onClick={handleUserIconClick}
-        >
-          <motion.div 
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className="flex items-center justify-center"
-          >
-            <div className="relative">
-              <User className="h-5 w-5" style={{ color: activeUserColor }} />
-              <motion.div 
-                className="absolute inset-0 rounded-full"
-                animate={{ 
-                  boxShadow: [
-                    `0 0 0 rgba(${activeUserColor}, 0)`,
-                    `0 0 8px rgba(${activeUserColor}, 0.5)`,
-                    `0 0 0 rgba(${activeUserColor}, 0)`
-                  ]
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-            </div>
-          </motion.div>
+        {/* 用户图标 - 替换为 UserButton */}
+        <div className="relative z-10 mr-1 flex items-center">
+          <UserButton
+            afterSignOutUrl='/'
+            appearance={{
+              elements: {
+                userButtonAvatarBox: "w-10 h-10",
+              }
+            }}
+          />
         </div>
         
         {users.map((user) => {
@@ -124,7 +93,7 @@ export default function NicknameFilter(): JSX.Element {
             <motion.button
               key={user.name}
               onClick={() => handleFilter(user.name)}
-              className={`relative z-10 px-8 py-2.5 rounded-full text-sm font-medium transition-all duration-200 flex items-center justify-center min-w-[120px] ${
+              className={`relative z-10 px-10 py-3 rounded-full text-sm font-medium transition-all duration-200 flex items-center justify-center min-w-[120px] ${
                 isActive 
                   ? 'bg-white text-purple-900 shadow-md' 
                   : 'bg-transparent text-white hover:bg-white/10'
@@ -145,12 +114,6 @@ export default function NicknameFilter(): JSX.Element {
           );
         })}
       </div>
-      
-      {/* 登出确认对话框 */}
-      <LogoutDialog 
-        isOpen={isLogoutDialogOpen} 
-        onClose={handleCloseLogoutDialog} 
-      />
     </div>
   );
 }
