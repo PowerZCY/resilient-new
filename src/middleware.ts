@@ -7,118 +7,54 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-import { Logger } from '@/lib/logger';
-import { jwtVerify } from 'jose';
+import { clerkMiddleware, ClerkMiddlewareAuth, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextRequest, NextResponse } from 'next/server';
 import { appConfig } from '@/lib/appConfig';
 
-// 定义需要保护的路径
-const PROTECTED_PATHS = [
-  '/',  // 添加根路径，保护主页
-  '/api/entries',
-  '/api/entries/heatmap',
-  '/new'
-];
+const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)'])
 
-// 不需要验证的路径
-const PUBLIC_PATHS = [
-  '/api/auth/login',
-  '/api/auth/logout',
-  '/login',
-  '/_next',
-  '/favicon.ico',
-  '/logo.svg'
-];
-
-export async function middleware(request: NextRequest) {
-  // 生成请求ID用于日志追踪
-  const requestId = crypto.randomUUID();
-  // 创建响应对象并设置请求头
-  const response = NextResponse.next();
-  response.headers.set('X-Request-ID', requestId);
-
-  // 检查是否需要进行认证
-  const url = request.nextUrl.pathname;
-
-  // 检查是否是公开路径
-  if (PUBLIC_PATHS.some(path => url.startsWith(path))) {
-    return response;  // 返回带有请求ID的响应
-  }
-
-  // 检查是否是受保护路径
-  const needsAuth = PROTECTED_PATHS.some(path => {
-    // 对于根路径，需要精确匹配
-    if (path === '/' && url === '/') {
-      return true;
-    }
-    // 对于其他路径，使用前缀匹配
-    return url.startsWith(path) && path !== '/';
-  });
-
-  if (needsAuth) {
-    // 从Cookie中获取令牌
-    const token = request.cookies.get('auth_token')?.value;
-
-    if (!token) {
-      // 如果是API请求，返回401错误
-      if (url.startsWith('/api/')) {
-        return NextResponse.json(
-          { success: false, message: 'Unauthorized access' },
-          { status: 401 }
-        );
-      }
-
-      // 否则重定向到登录页面
-      return NextResponse.redirect(new URL('/login', request.url));
+export default clerkMiddleware(async (auth: ClerkMiddlewareAuth, req: NextRequest) => {
+    if (!isPublicRoute(req)) {
+        const { userId, redirectToSignIn } = await auth()
+        if (!userId) {
+            return redirectToSignIn()
+        }
+        if (!appConfig.clerk.userIds.includes(userId)) {
+            console.log('appConfig.clerk.userIds:', appConfig.clerk.userIds)
+            console.warn('Illegal user:', userId)
+            return NextResponse.json(
+                { success: false, message: 'Unauthorized access' },
+                { status: 401 }
+              );
+        }
+        console.log('User is authorized:', userId)
     }
 
-    try {
-      // 验证令牌
-      const jwtSecret = appConfig.JWT_SECRET;
-      if (!jwtSecret) {
-        throw new Error('JWT_SECRET environment variable is not set');
-      }
+    // If protect() didn't redirect, execution continues here.
+    // Generate request ID.
+    const requestId = crypto.randomUUID();
 
-      const encoder = new TextEncoder();
-      const { payload } = await jwtVerify(
-        token,
-        encoder.encode(jwtSecret)
-      );
+    // Create a base response to allow the request to proceed.
+    // Pass request headers to allow Clerk-added headers to pass through.
+    const response = NextResponse.next({
+        request: {
+            headers: new Headers(req.headers),
+        },
+    });
 
-      // 将用户信息添加到请求头中
-      response.headers.set('X-User-ID', payload.id as string);
+    // Add the custom header.
+    response.headers.set('X-Request-ID', requestId);
 
-      // 对昵称进行Base64编码，避免中文字符问题
-      const nickname = payload.nickname as string;
-      const encodedNickname = Buffer.from(nickname).toString('base64');
-      response.headers.set('X-User-Nickname-Base64', encodedNickname);
-      return response;
-    } catch (error) {
-      // 将unknown类型转换为Error类型
-      const errorInstance = error instanceof Error ? error : new Error(String(error));
-      Logger.error('JWT verification failed', errorInstance, null, requestId);
+    // Return the modified response.
+    return response;
+}, { debug: appConfig.clerk.debug }
+);
 
-      // 如果是API请求，返回401错误
-      if (url.startsWith('/api/')) {
-        return NextResponse.json(
-          { success: false, message: 'Token invalid or expired' },
-          { status: 401 }
-        );
-      }
-
-      // 否则重定向到登录页面
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-  }
-
-  // 对于其他路径，继续处理
-  return NextResponse.next();
-}
-
-// 只对 API 路由启用中间件
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico).*)',
-  ]
-}
+    matcher: [
+        // Skip Next.js internals and all static files, unless found in search params
+        '/((?!_next|[^?]*.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+        // Always run for API routes
+        '/(api|trpc)(.*)',
+    ],
+};
