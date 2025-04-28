@@ -12,9 +12,7 @@ interface Entry {
 export async function POST(request: Request) {
   const requestId = request.headers.get('X-Request-ID');
   const body = await request.json();
-  const entries: Entry[] = Array.isArray(body) ? body : [body]; // 确保支持单条和批量
-
-  Logger.info('Timeline data creating in bulk', { nickname: entries[0]?.nickname, count: entries.length }, requestId);
+  const entries: Entry[] = Array.isArray(body) ? body : [body];
 
   try {
     // 批量创建记录
@@ -37,13 +35,11 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
-  const requestId = request.headers.get('X-Request-ID');
   const { searchParams } = new URL(request.url);
   const nickname = searchParams.get('nickname');
   const page = parseInt(searchParams.get('page') || '1', 10);
   const limit = parseInt(searchParams.get('limit') || '20', 10);
 
-  Logger.info('Timeline data fetching', { nickname, page, limit }, requestId);
 
   const skip = (page - 1) * limit;
 
@@ -58,18 +54,6 @@ export async function GET(request: Request) {
       where: nickname ? { nickname } : undefined,
     }),
   ]);
-
-  Logger.info(
-    'Timeline data fetched successfully',
-    {
-      nickname,
-      page,
-      limit,
-      count: entries.length,
-      total,
-    },
-    requestId
-  );
 
   return NextResponse.json({
     entries,
