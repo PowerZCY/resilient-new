@@ -2,11 +2,12 @@
 
 import { useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { UserButton } from "@clerk/nextjs";
+import { UserButton, useUser } from "@clerk/nextjs";
 import { useNickname } from '@/context/NicknameContext';
 
 export default function NicknameFilter(): JSX.Element {
   const { nickname, setAndPushNickname, availableUsers } = useNickname();
+  const { isLoaded, isSignedIn } = useUser();
 
   const handleFilter = useCallback(
     (value: string): void => {
@@ -22,14 +23,18 @@ export default function NicknameFilter(): JSX.Element {
         <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 rounded-full blur-sm opacity-50"></div>
         
         <div className="relative z-10 mr-1 flex items-center">
-          <UserButton
-            afterSignOutUrl='/'
-            appearance={{
-              elements: {
-                userButtonAvatarBox: "w-10 h-10",
-              }
-            }}
-          />
+          {isLoaded && isSignedIn ? (
+            <UserButton
+              afterSignOutUrl='/'
+              appearance={{
+                elements: {
+                  userButtonAvatarBox: "w-10 h-10",
+                }
+              }}
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
+          )}
         </div>
         
         {availableUsers.map((user) => {

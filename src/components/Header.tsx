@@ -6,8 +6,11 @@ import { NavigationMenu } from '@/components/NavigationMenu';
 import NicknameFilter from '@/components/NicknameFilter';
 import { appConfig } from '@/lib/appConfig';
 import Link from 'next/link';
-import { OrganizationSwitcher } from '@clerk/nextjs';
+import { OrganizationSwitcher, useAuth } from '@clerk/nextjs';
+
 export function Header() {
+  const { isLoaded } = useAuth();
+
   return (
     <header className="bg-gray-50 dark:bg-gray-950 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -42,16 +45,19 @@ export function Header() {
           {/* 右侧用户筛选器和组织切换器 */}
           <div className="flex items-center space-x-2">
             <NicknameFilter />
-            <OrganizationSwitcher
-              appearance={{
-                elements: {
-                  organizationSwitcherTrigger:
-                    // Added w-40 for fixed width and justify-between for internal spacing
-                    "relative z-10 px-4 py-3 w-40 rounded-full text-sm font-medium bg-white text-purple-900 shadow-md border border-gray-200 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition flex items-center justify-between",
-                  organizationSwitcherTriggerIcon: "text-purple-900 flex-shrink-0", // Added flex-shrink-0 just in case
-                },
-              }}
-            />
+            {isLoaded ? (
+              <OrganizationSwitcher
+                appearance={{
+                  elements: {
+                    organizationSwitcherTrigger:
+                      "relative z-10 px-4 py-3 w-40 h-10 rounded-full text-sm font-medium bg-white text-purple-900 shadow-md border border-gray-200 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition flex items-center justify-between",
+                    organizationSwitcherTriggerIcon: "text-purple-900 flex-shrink-0",
+                  },
+                }}
+              />
+            ) : (
+              <div className="w-40 h-10 rounded-full bg-gray-200 animate-pulse"></div>
+            )}
           </div>
         </div>
       </div>
