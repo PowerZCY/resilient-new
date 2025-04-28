@@ -175,24 +175,33 @@ export default function Timeline(): JSX.Element {
   const isPageNavigatingRef = useRef<boolean>(false); // Ref to track if navigation triggered the effect
 
   // --- Hooks ---
-  const { nickname } = useNickname(); // <-- Get nickname from Context
+  const { nickname, isNicknameInitialized } = useNickname(); // <-- Get nickname and initialized status
   const limit: number = PAGE_SIZE; // Use PAGE_SIZE constant
 
   // --- Data Fetching (Adapted from original) ---
   const fetchEntries = useCallback(
     async (pageNum: number): Promise<void> => {
-      if (!nickname || isLoadingRef.current || loadedPages.current.has(pageNum)) {
-        console.log(`Skipping fetch: page=${pageNum}, nickname=${nickname}, loading=${isLoadingRef.current}, loaded=${loadedPages.current.has(pageNum)}`);
-        if (!isLoadingRef.current && pageNum === 1 && !initialLoadDone.current) {
-           // Ensure initial setup happens even if page 1 is already "loaded" (e.g., on fast refresh)
+      // Guard against fetching if context isn't ready, nickname is missing, already loading, or page is loaded
+      if (!isNicknameInitialized || !nickname || isLoadingRef.current || loadedPages.current.has(pageNum)) {
+        console.log(`Timeline: Skipping fetch: page=${pageNum}, initialized=${isNicknameInitialized}, nickname=${nickname}, loading=${isLoadingRef.current}, loaded=${loadedPages.current.has(pageNum)}`);
+        // If context is initialized but no nickname, ensure loading state is false
+        if (isNicknameInitialized && !nickname) {
+           setLoading(false); // Stop loading if there's no user to fetch for
+           setTotalCount(0);
+           setEntries([]); // Clear entries
+           loadedPages.current.clear();
+           initialLoadDone.current = true; // Mark as done even if no data
+        }
+        // Ensure initial setup happens even if page 1 is already "loaded" but not marked done
+        else if (pageNum === 1 && loadedPages.current.has(pageNum) && !initialLoadDone.current) {
            initialLoadDone.current = true;
-           setActivePage(1); // Activate first page
-           setActiveCardIndex(0); // Default to first card
+           setActivePage(1);
+           setActiveCardIndex(0);
         }
         return;
       }
 
-      console.log(`Fetching data: page=${pageNum}, nickname=${nickname}`);
+      console.log(`Timeline: Fetching data: page=${pageNum}, nickname=${nickname}`);
       isLoadingRef.current = true;
       setLoading(true); // Keep original loading state for skeleton/indicator
 
@@ -259,7 +268,7 @@ export default function Timeline(): JSX.Element {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [nickname, limit, entries.length] // Add entries.length dependency for hasMore calculation
+    [nickname, limit, entries.length, isNicknameInitialized] // Add isNicknameInitialized and fetchEntries
   );
 
   // --- Initial Load & Nickname Change ---
@@ -275,14 +284,21 @@ export default function Timeline(): JSX.Element {
     isLoadingRef.current = false;
     cardRefs.current = {}; // Clear card refs
 
-    // Fetch initial data if nickname exists
-    if (nickname) {
-       isPageNavigatingRef.current = true; // Signal that this initial load should trigger entry animation
-       setLoading(true); // Set loading true before fetch
-       fetchEntries(1);
+    // If context is initialized but nickname is missing (e.g., user not matched)
+    if (!nickname) {
+        console.log('Timeline: NicknameContext initialized, but no nickname available.');
+        setLoading(false); // Not loading data
+        // State reset already happened above
+        return;
     }
+
+    // Context initialized and nickname exists, proceed with fetch
+    console.log('Timeline: NicknameContext initialized, fetching data for', nickname);
+    isPageNavigatingRef.current = true;
+    setLoading(true);
+    fetchEntries(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nickname]); 
+  }, [nickname, isNicknameInitialized]);
 
   // --- Placeholder Padding Function ---
   const padWithPlaceholders = (entriesInGroup: Entry[], pageNum: number, targetSize: number): Entry[] => {
@@ -754,9 +770,20 @@ export default function Timeline(): JSX.Element {
    // Calculate total pages
    const totalPages = totalCount > 0 ? Math.ceil(totalCount / PAGE_SIZE) : 0;
 
+  // --- Loading and Initial State Handling ---
+  if (!isNicknameInitialized || loading) {
+    // Show a loading indicator while context initializes or data is fetching
+    return <div className="text-center text-gray-500 p-10">Loading Timeline...</div>;
+  }
+
+  // Context initialized, not loading, but still no nickname
   if (!nickname) {
-    // TODO: Replace with a more visually appealing loading/prompt state?
-    return <div className="text-center text-gray-500 p-10">Please provide a nickname in the URL (e.g., ?nickname=...)</div>;
+    return <div className="text-center text-gray-500 p-10">No user selected or timeline available.</div>;
+  }
+
+  // Initialized, not loading, nickname exists, but no entries found (API returned 0 total)
+  if (totalCount === 0 && initialLoadDone.current) {
+     return <div className="text-center text-gray-500 p-10">No entries found for {nickname}.</div>;
   }
 
   return (

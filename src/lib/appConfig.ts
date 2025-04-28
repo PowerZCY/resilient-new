@@ -26,12 +26,12 @@ const admin: UserData[] = [
   {
     name: 'Zia慢成',
     color: '#4f46e5',
-    email: process.env.CLERK_FORCE_USER_EMAIL1
+    email: process.env.NEXT_PUBLIC_CLERK_FORCE_USER_EMAIL1
   },
   {
     name: '帝八哥',
     color: '#ec4899',
-    email: process.env.CLERK_FORCE_USER_EMAIL2
+    email: process.env.NEXT_PUBLIC_CLERK_FORCE_USER_EMAIL2
   }
 ]
 

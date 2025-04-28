@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { Card } from '@tremor/react';
-import { useSearchParams } from 'next/navigation';
 import CalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
 import { useNickname } from '@/context/NicknameContext';
@@ -18,49 +17,59 @@ interface EntryData {
 }
 
 export default function ContributionHeatmap() {
-  const { nickname } = useNickname();
+  const { nickname, isNicknameInitialized } = useNickname();
   const [data, setData] = useState<DataPoint[]>([]);
-  const searchParams = useSearchParams();
   const dataCache = useRef<Record<string, DataPoint[]>>({});
   const isLoadingRef = useRef<boolean>(false);
+  const [isComponentLoading, setIsComponentLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (nickname) {
-      console.log(`CalendarHeatmap: Fetching data for ${nickname}`);
-      // 如果已经有缓存数据，直接使用
-      if (dataCache.current[nickname]) {
-        // console.log('使用缓存的热力图数据:', nickname);
-        setData(dataCache.current[nickname]);
-        return;
+    if (!isNicknameInitialized || !nickname) {
+      console.log(`CalendarHeatmap: Skip fetch, initialized: ${isNicknameInitialized}, nickname: ${nickname}`);
+      if (isNicknameInitialized) {
+        setIsComponentLoading(false);
+        setData([]);
       }
-      
-      // 防止重复请求
-      if (isLoadingRef.current) {
-        // console.log('热力图数据正在加载中，跳过请求:', nickname);
-        return;
-      }
-      
-      // console.log('获取热力图数据:', nickname);
-      isLoadingRef.current = true;
-      
-      fetch(`/api/entries/heatmap?nickname=${encodeURIComponent(nickname)}`)
-        .then(res => res.json())
-        .then(entries => {
-          const processedData = processDataForHeatmap(entries);
-          // 缓存数据
-          dataCache.current[nickname] = processedData;
-          setData(processedData);
-          // console.log('热力图数据已加载:', nickname);
-        })
-        .catch(err => {
-          console.error('Failed to fetch heatmap data:', err);
-          setData([]);
-        })
-        .finally(() => {
-          isLoadingRef.current = false;
-        });
+      return;
     }
-  }, [nickname]);
+
+    console.log(`CalendarHeatmap: Fetching data for ${nickname}`);
+    setIsComponentLoading(true);
+
+    if (dataCache.current[nickname]) {
+      setData(dataCache.current[nickname]);
+      setIsComponentLoading(false);
+      console.log('CalendarHeatmap: Using cached data for', nickname);
+      return;
+    }
+
+    if (isLoadingRef.current) {
+      console.log('CalendarHeatmap: Fetch already in progress for', nickname);
+      return;
+    }
+
+    isLoadingRef.current = true;
+    
+    fetch(`/api/entries/heatmap?nickname=${encodeURIComponent(nickname)}`)
+      .then(res => {
+         if (!res.ok) throw new Error(`API Error: ${res.status}`);
+         return res.json();
+      })
+      .then(entries => {
+        const processedData = processDataForHeatmap(entries);
+        dataCache.current[nickname] = processedData;
+        setData(processedData);
+        console.log('CalendarHeatmap: Data loaded for', nickname);
+      })
+      .catch(err => {
+        console.error('Failed to fetch heatmap data:', err);
+        setData([]);
+      })
+      .finally(() => {
+        isLoadingRef.current = false;
+        setIsComponentLoading(false);
+      });
+  }, [nickname, isNicknameInitialized]);
 
   const processDataForHeatmap = (entries: EntryData[]): DataPoint[] => {
     if (!Array.isArray(entries)) {
@@ -90,14 +99,25 @@ export default function ContributionHeatmap() {
   const today = new Date();
   const oneYearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
 
-  // 如果没有 nickname，显示加载状态或空状态
-  if (!nickname) {
+  if (!isNicknameInitialized || isComponentLoading) {
     return (
       <div className="relative group">
         <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-violet-600 rounded-lg opacity-0 group-hover:opacity-75 transition duration-500 blur-sm animate-pulse" />
         <Card className="relative border border-[#509863] p-4 rounded-lg bg-white dark:bg-slate-800">
           <div className="text-center text-gray-500">
             Loading...
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!nickname) {
+    return (
+      <div className="relative group">
+        <Card className="relative border border-gray-300 p-4 rounded-lg bg-white dark:bg-slate-800">
+          <div className="text-center text-gray-500">
+            No user selected or data available.
           </div>
         </Card>
       </div>
