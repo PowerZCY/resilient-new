@@ -204,7 +204,7 @@ function NewEntryContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeCardIndex, setActiveCardIndex] = useState<number>(0);
   const [cardStyles, setCardStyles] = useState<React.CSSProperties[]>([]);
-  const [indicatorStyle, setIndicatorStyle] = useState<React.CSSProperties>({});
+  const [indicatorStyle, setIndicatorStyle] = useState<React.CSSProperties>({ opacity: 0 });
 
   const entriesContainerRef = useRef<HTMLDivElement>(null);
   const cardElementsRef = useRef<(HTMLDivElement | null)[]>([]); // 用于存储卡片 DOM 元素的引用
