@@ -19,14 +19,6 @@ export default clerkMiddleware(async (auth: ClerkMiddlewareAuth, req: NextReques
         if (!userId) {
             return redirectToSignIn()
         }
-        if (!appConfig.clerk.userIds.includes(userId)) {
-            console.log('appConfig.clerk.userIds:', appConfig.clerk.userIds)
-            console.warn('Illegal user:', userId)
-            return NextResponse.json(
-                { success: false, message: 'Unauthorized access' },
-                { status: 401 }
-              );
-        }
         console.log('User is authorized:', userId)
     }
 

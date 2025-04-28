@@ -15,6 +15,26 @@ export type MenuItem = {
   external?: boolean; // 是否为外部链接
 };
 
+// Define the structure of your user data
+export type UserData ={
+  name: string;
+  color: string;
+  email?: string;
+}
+
+const admin: UserData[] = [
+  {
+    name: 'Zia慢成',
+    color: '#4f46e5',
+    email: process.env.CLERK_FORCE_USER_EMAIL1
+  },
+  {
+    name: '帝八哥',
+    color: '#ec4899',
+    email: process.env.CLERK_FORCE_USER_EMAIL2
+  }
+]
+
 // 菜单配置
 const menu: MenuItem[] = [
   {
@@ -76,10 +96,7 @@ export const appConfig = {
 
   clerk: {
     debug: process.env.CLERK_DEBUG === 'true',
-    userIds: [
-      process.env.CLERK_FORCE_USER_ID1, 
-      process.env.CLERK_FORCE_USER_ID2
-    ]
+    user: admin
   },
 
   // 数据库配置

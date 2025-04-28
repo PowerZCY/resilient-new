@@ -9,10 +9,10 @@
 'use client';
 
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion'; // Keep for modal/progress indicator animations
 import { Heart, Star } from 'lucide-react'; // Import icons
 import '../styles/timeline-card.css'; // Import the new CSS
+import { useNickname } from '@/context/NicknameContext'; // <-- Import useNickname
 
 interface Entry {
   id: string;
@@ -175,8 +175,7 @@ export default function Timeline(): JSX.Element {
   const isPageNavigatingRef = useRef<boolean>(false); // Ref to track if navigation triggered the effect
 
   // --- Hooks ---
-  const searchParams = useSearchParams();
-  const nickname: string | null = searchParams.get('nickname');
+  const { nickname } = useNickname(); // <-- Get nickname from Context
   const limit: number = PAGE_SIZE; // Use PAGE_SIZE constant
 
   // --- Data Fetching (Adapted from original) ---

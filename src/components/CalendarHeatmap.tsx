@@ -5,6 +5,7 @@ import { Card } from '@tremor/react';
 import { useSearchParams } from 'next/navigation';
 import CalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
+import { useNickname } from '@/context/NicknameContext';
 
 interface DataPoint {
   date: string;
@@ -17,48 +18,48 @@ interface EntryData {
 }
 
 export default function ContributionHeatmap() {
+  const { nickname } = useNickname();
   const [data, setData] = useState<DataPoint[]>([]);
   const searchParams = useSearchParams();
-  const nickname = searchParams.get('nickname');
   const dataCache = useRef<Record<string, DataPoint[]>>({});
   const isLoadingRef = useRef<boolean>(false);
 
   useEffect(() => {
-    // 只在有 nickname 时才加载数据
-    if (!nickname) return;
-    
-    // 如果已经有缓存数据，直接使用
-    if (dataCache.current[nickname]) {
-      // console.log('使用缓存的热力图数据:', nickname);
-      setData(dataCache.current[nickname]);
-      return;
+    if (nickname) {
+      console.log(`CalendarHeatmap: Fetching data for ${nickname}`);
+      // 如果已经有缓存数据，直接使用
+      if (dataCache.current[nickname]) {
+        // console.log('使用缓存的热力图数据:', nickname);
+        setData(dataCache.current[nickname]);
+        return;
+      }
+      
+      // 防止重复请求
+      if (isLoadingRef.current) {
+        // console.log('热力图数据正在加载中，跳过请求:', nickname);
+        return;
+      }
+      
+      // console.log('获取热力图数据:', nickname);
+      isLoadingRef.current = true;
+      
+      fetch(`/api/entries/heatmap?nickname=${encodeURIComponent(nickname)}`)
+        .then(res => res.json())
+        .then(entries => {
+          const processedData = processDataForHeatmap(entries);
+          // 缓存数据
+          dataCache.current[nickname] = processedData;
+          setData(processedData);
+          // console.log('热力图数据已加载:', nickname);
+        })
+        .catch(err => {
+          console.error('Failed to fetch heatmap data:', err);
+          setData([]);
+        })
+        .finally(() => {
+          isLoadingRef.current = false;
+        });
     }
-    
-    // 防止重复请求
-    if (isLoadingRef.current) {
-      // console.log('热力图数据正在加载中，跳过请求:', nickname);
-      return;
-    }
-    
-    // console.log('获取热力图数据:', nickname);
-    isLoadingRef.current = true;
-    
-    fetch(`/api/entries/heatmap?nickname=${encodeURIComponent(nickname)}`)
-      .then(res => res.json())
-      .then(entries => {
-        const processedData = processDataForHeatmap(entries);
-        // 缓存数据
-        dataCache.current[nickname] = processedData;
-        setData(processedData);
-        // console.log('热力图数据已加载:', nickname);
-      })
-      .catch(err => {
-        console.error('Failed to fetch heatmap data:', err);
-        setData([]);
-      })
-      .finally(() => {
-        isLoadingRef.current = false;
-      });
   }, [nickname]);
 
   const processDataForHeatmap = (entries: EntryData[]): DataPoint[] => {

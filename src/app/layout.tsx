@@ -33,7 +33,7 @@ const customLocalization = {
     start: {
       actionLink__join_waitlist: '加入候选列表',
       actionText__join_waitlist: '想要提前接入？',
-      subtitle: '欢迎回来！请登录继续',
+      subtitle: '欢迎回来！请登录',
       title: '登录·{{applicationName}}·',
     }
   },

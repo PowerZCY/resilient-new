@@ -1,10 +1,11 @@
 'use client'; // 保持客户端组件标记
 
 import { Suspense, useCallback, useEffect, useRef, useState, forwardRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Calendar as CalendarIconLucide, Loader2, Plus, Send, Trash2 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import '../../styles/batch-entry.css'; // 导入新的CSS文件
+import { NicknameProvider, useNickname } from '@/context/NicknameContext'; // <-- Import useNickname
 
 // Import shadcn/ui components
 import { Button } from "@/components/ui/button"
@@ -196,9 +197,8 @@ EntryCard.displayName = 'EntryCard';
 
 // --- 主内容组件 ---
 function NewEntryContent() {
+  const { nickname } = useNickname(); // <-- Get nickname from Context
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const nickname = searchParams.get('nickname') || '';
 
   const [entries, setEntries] = useState<EntryItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -425,6 +425,13 @@ function NewEntryContent() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
+    // 检查 nickname 是否存在
+    if (!nickname) {
+        alert('无法确定用户，请刷新页面或重新登录。');
+        setIsSubmitting(false); // Reset submitting state
+        return;
+    }
+
     setIsSubmitting(true);
     const validEntries = entries.filter(entry => entry.content.trim() !== '');
 
@@ -434,14 +441,15 @@ function NewEntryContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(
           validEntries.map(entry => ({
-            nickname,
+            nickname, // <-- Use nickname from context
             content: entry.content,
-            date: new Date(entry.date + 'T00:00:00').toISOString(), // 确保使用本地日期转换
+            date: new Date(entry.date + 'T00:00:00').toISOString(),
           }))
         ),
       });
 
       if (response.ok) {
+        // Redirect using the context nickname
         router.push(`/?nickname=${encodeURIComponent(nickname)}`);
       } else {
         console.error('Failed to submit entries');
@@ -472,8 +480,7 @@ function NewEntryContent() {
               id="submit-btn"
               className="submit-btn"
               onClick={handleSubmit}
-              // Disable if no entries OR if ANY entry has empty content
-              disabled={isSubmitting || entries.length === 0 || !entries.every(entry => entry.content.trim() !== '')}
+              disabled={isSubmitting || entries.length === 0 || !entries.every(entry => entry.content.trim() !== '') || !nickname} // Add nickname check to disabled state
             >
               <div className="submit-btn-inner">
                 {isSubmitting ? (
@@ -555,8 +562,10 @@ export default function NewEntryPage() {
     // Suspense 用于处理 Next.js 的 useSearchParams
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center">加载中...</div>}>
       {/* 可能需要调整 Header 的样式以避免与新布局冲突 */}
-      <Header />
-      <NewEntryContent />
+      <NicknameProvider>
+        <Header />
+        <NewEntryContent />
+      </NicknameProvider>
     </Suspense>
   );
 }
