@@ -7,6 +7,10 @@ import NicknameFilter from '@/components/NicknameFilter';
 import { appConfig } from '@/lib/appConfig';
 import Link from 'next/link';
 import { OrganizationSwitcher, useAuth } from '@clerk/nextjs';
+import ClerkLogoIcon from '@/components/icons/ClerkLogoIcon';
+import UserIcon from '@/components/icons/UserIcon';
+import TermsPage from '@/app/legal/terms/page';
+import PrivacyPage from '@/app/legal/privacy/page';
 
 export function Header() {
   const { isLoaded } = useAuth();
@@ -54,7 +58,23 @@ export function Header() {
                     organizationSwitcherTriggerIcon: "text-purple-900 flex-shrink-0",
                   },
                 }}
-              />
+              >
+                <OrganizationSwitcher.OrganizationProfilePage
+                  labelIcon={<ClerkLogoIcon />}
+                  label="服务"
+                  url="/legal/terms"
+                >
+                  <TermsPage />
+                </OrganizationSwitcher.OrganizationProfilePage>
+
+                <OrganizationSwitcher.OrganizationProfilePage
+                  labelIcon={<UserIcon />}
+                  label="隐私"
+                  url="/legal/privacy"
+                >
+                  <PrivacyPage />
+                </OrganizationSwitcher.OrganizationProfilePage>
+              </OrganizationSwitcher>
             ) : (
               <div className="w-40 h-10 rounded-full bg-gray-200 animate-pulse"></div>
             )}

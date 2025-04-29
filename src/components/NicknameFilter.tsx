@@ -1,9 +1,11 @@
 'use client';
 
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { UserButton, useUser } from "@clerk/nextjs";
 import { useNickname } from '@/context/NicknameContext';
+import ClerkLogoIcon from '@/components/icons/ClerkLogoIcon';
+import UserIcon from '@/components/icons/UserIcon';
 
 export default function NicknameFilter(): JSX.Element {
   const { nickname, setAndPushNickname, availableUsers } = useNickname();
@@ -31,7 +33,22 @@ export default function NicknameFilter(): JSX.Element {
                   userButtonAvatarBox: "w-10 h-10",
                 }
               }}
-            />
+            >
+              <UserButton.MenuItems>
+                <UserButton.Action label="manageAccount" />
+                <UserButton.Action label="signOut" />
+                {<UserButton.Link 
+                  labelIcon={<ClerkLogoIcon />}
+                  label="服务条款"
+                  href="/legal/terms">
+                </UserButton.Link>}
+                {<UserButton.Link 
+                  labelIcon={<UserIcon />}
+                  label="隐私政策"
+                  href="/legal/privacy">
+                </UserButton.Link>}
+              </UserButton.MenuItems>
+            </UserButton>
           ) : (
             <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
           )}
