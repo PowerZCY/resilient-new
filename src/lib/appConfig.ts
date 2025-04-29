@@ -65,6 +65,7 @@ const menu: MenuItem[] = [
  * 应用配置对象，集中管理所有环境变量和配置项
  */
 export const appConfig = {
+  baseUrl: 'https://d8ger.com',
   // 国际化配置
   i18n: {
     locales: ["zh", "en"] as const,
