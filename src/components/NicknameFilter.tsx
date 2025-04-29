@@ -36,7 +36,6 @@ export default function NicknameFilter(): JSX.Element {
             >
               <UserButton.MenuItems>
                 <UserButton.Action label="manageAccount" />
-                <UserButton.Action label="signOut" />
                 {<UserButton.Link 
                   labelIcon={<ClerkLogoIcon />}
                   label="服务条款"
@@ -47,6 +46,7 @@ export default function NicknameFilter(): JSX.Element {
                   label="隐私政策"
                   href="/legal/privacy">
                 </UserButton.Link>}
+                <UserButton.Action label="signOut" />
               </UserButton.MenuItems>
             </UserButton>
           ) : (
