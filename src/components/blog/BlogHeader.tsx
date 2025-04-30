@@ -39,12 +39,12 @@ export function BlogHeader({ slug }: BlogHeaderProps) {
       </div>
 
       {/* 信息展示区域 - 移到banner下方 */}
-      <div className="relative bg-gradient-to-r from-background/95 to-background/90 backdrop-blur-sm border-b">
+      <div className="relative bg-linear-to-r from-background/95 to-background/90 backdrop-blur-xs border-b">
         {/* 炫彩背景效果 */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_500px_at_-30%_50%,rgba(123,31,162,0.1),transparent_70%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_500px_at_130%_50%,rgba(59,130,246,0.1),transparent_70%)]" />
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-cyan-500/5 to-blue-500/5 animate-gradient-x" />
+          <div className="absolute inset-0 bg-linear-to-r from-purple-500/5 via-cyan-500/5 to-blue-500/5 animate-gradient-x" />
         </div>
 
         {/* 内容区域 */}
@@ -56,7 +56,7 @@ export function BlogHeader({ slug }: BlogHeaderProps) {
                   <Badge
                     key={id}
                     variant="secondary"
-                    className="px-2 py-0.5 text-xs font-normal bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-700 text-white hover:from-purple-400 hover:via-purple-500 hover:to-indigo-600 transition-all duration-300 cursor-pointer"
+                    className="px-2 py-0.5 text-xs font-normal bg-linear-to-br from-purple-500 via-purple-600 to-indigo-700 text-white hover:from-purple-400 hover:via-purple-500 hover:to-indigo-600 transition-all duration-300 cursor-pointer"
                   >
                     {id}
                   </Badge>
@@ -100,8 +100,8 @@ export function BlogHeader({ slug }: BlogHeaderProps) {
         {/* 装饰效果 */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-[linear-gradient(45deg,var(--primary)/3_12%,transparent_30%,transparent_70%,var(--primary)/3_88%)] bg-[length:24px_24px]" />
-          <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-border to-transparent opacity-20" />
-          <div className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-border to-transparent opacity-20" />
+          <div className="absolute inset-y-0 left-0 w-px bg-linear-to-b from-transparent via-border to-transparent opacity-20" />
+          <div className="absolute inset-y-0 right-0 w-px bg-linear-to-b from-transparent via-border to-transparent opacity-20" />
         </div>
       </div>
     </div>

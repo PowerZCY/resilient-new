@@ -34,7 +34,7 @@ export default function UserMenu() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={handleUserIconClick}
-        className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         aria-label="用户菜单"
       >
         <User className="h-5 w-5 text-indigo-600" />

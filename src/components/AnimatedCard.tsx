@@ -13,7 +13,7 @@ export default function AnimatedCard({ children }: AnimatedCardProps) {
       transition={{ duration: 0.3 }}
     >
       {/* 发光边框效果 */}
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-violet-600 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm" />
+      <div className="absolute -inset-0.5 bg-linear-to-r from-blue-600 to-violet-600 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xs" />
       
       {/* 波浪动画背景 */}
       <div className="absolute inset-0 overflow-hidden rounded-xl">

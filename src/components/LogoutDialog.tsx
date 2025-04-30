@@ -75,7 +75,7 @@ export default function LogoutDialog({ isOpen, onClose }: LogoutDialogProps) {
               <h3 className="text-lg font-semibold text-gray-900">登出</h3>
               <button
                 onClick={onClose}
-                className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                className="text-gray-500 hover:text-gray-700 focus:outline-hidden"
               >
                 <X size={20} />
               </button>
@@ -93,14 +93,14 @@ export default function LogoutDialog({ isOpen, onClose }: LogoutDialogProps) {
                 <button
                   onClick={onClose}
                   disabled={isLoading}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                 >
                   取消
                 </button>
                 <button
                   onClick={handleLogout}
                   disabled={isLoading}
-                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center"
+                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center"
                 >
                   {isLoading ? (
                     <>

@@ -16,7 +16,7 @@ export default function BlogPostClient({ slug, content }: BlogPostClientProps) {
   const [toc, setToc] = useState<TableOfContents[]>([]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen bg-linear-to-b from-background to-muted/20">
       <LimitHeader />
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

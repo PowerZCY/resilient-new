@@ -1,3 +1,4 @@
+/* Import a handwriting font if available (optional) */
 @import url('https://fonts.googleapis.com/css2?family=LXGW+WenKai+Screen+R&display=swap');
 
 :root {
@@ -479,9 +480,6 @@ body {
 @media (min-width: 640px) {
     /* Add any responsive adjustments if needed for the new layout */
 }
-
-/* Import a handwriting font if available (optional) */
-@import url('https://fonts.googleapis.com/css2?family=LXGW+WenKai+Screen+R&display=swap');
 
 /* Make sure the import is at the top, or handle font loading appropriately */
 

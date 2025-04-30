@@ -102,7 +102,7 @@ export default function ContributionHeatmap() {
   if (!isNicknameInitialized || isComponentLoading) {
     return (
       <div className="relative group">
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-violet-600 rounded-lg opacity-0 group-hover:opacity-75 transition duration-500 blur-sm animate-pulse" />
+        <div className="absolute -inset-0.5 bg-linear-to-r from-blue-600 to-violet-600 rounded-lg opacity-0 group-hover:opacity-75 transition duration-500 blur-xs animate-pulse" />
         <Card className="relative border border-[#509863] p-4 rounded-lg bg-white dark:bg-slate-800">
           <div className="text-center text-gray-500">
             Loading...
@@ -129,7 +129,7 @@ export default function ContributionHeatmap() {
       <h2 className="text-2xl font-semibold mb-2">{nickname}&apos;s Contributions</h2>
       <div className="relative group">
         {/* 发光边框效果 */}
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-violet-600 rounded-lg opacity-0 group-hover:opacity-75 transition duration-500 blur-sm animate-glow" />
+        <div className="absolute -inset-0.5 bg-linear-to-r from-blue-600 to-violet-600 rounded-lg opacity-0 group-hover:opacity-75 transition duration-500 blur-xs animate-glow" />
         
         {/* 主卡片内容 */}
         <Card className="relative border border-[#509863] p-4 rounded-lg bg-white dark:bg-slate-800">

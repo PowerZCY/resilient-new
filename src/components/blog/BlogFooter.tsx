@@ -65,9 +65,9 @@ export function BlogFooter({ slug }: BlogFooterProps) {
               variant="ghost"
               size="sm"
               className="flex items-center gap-1 text-white/90 hover:text-white
-                bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-700
+                bg-linear-to-br from-purple-500 via-purple-600 to-indigo-700
                 hover:from-purple-400 hover:via-purple-500 hover:to-indigo-600
-                transition-all duration-300 backdrop-blur-sm shadow-lg
+                transition-all duration-300 backdrop-blur-xs shadow-lg
                 disabled:from-purple-500/50 disabled:via-purple-600/50 disabled:to-indigo-700/50
                 disabled:text-white/50"
               onClick={() => prevPost && handleNavigation(prevPost.slug)}
@@ -82,9 +82,9 @@ export function BlogFooter({ slug }: BlogFooterProps) {
               variant="ghost"
               size="sm"
               className="flex items-center gap-1 text-white/90 hover:text-white
-                bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-700
+                bg-linear-to-br from-purple-500 via-purple-600 to-indigo-700
                 hover:from-purple-400 hover:via-purple-500 hover:to-indigo-600
-                transition-all duration-300 backdrop-blur-sm shadow-lg
+                transition-all duration-300 backdrop-blur-xs shadow-lg
                 disabled:from-purple-500/50 disabled:via-purple-600/50 disabled:to-indigo-700/50
                 disabled:text-white/50"
               onClick={() => nextPost && handleNavigation(nextPost.slug)}

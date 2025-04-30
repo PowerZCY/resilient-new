@@ -15,7 +15,7 @@ export default function SignUpPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="flex-1 flex items-center justify-center bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 p-4">
+      <div className="flex-1 flex items-center justify-center bg-linear-to-r from-indigo-50 via-purple-50 to-pink-50 p-4">
         <Waitlist />
       </div>
     </div>

@@ -95,9 +95,9 @@ export function BlogSidebar({ toc }: BlogSidebarProps) {
       {/* 悬浮球 - JetBrains风格渐变 */}
       <div
         className="fixed right-4 top-[calc(100px)] w-12 h-12 rounded-full flex items-center justify-center cursor-pointer shadow-lg
-          bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-700
+          bg-linear-to-br from-purple-500 via-purple-600 to-indigo-700
           hover:from-purple-400 hover:via-purple-500 hover:to-indigo-600
-          transition-all duration-300 backdrop-blur-sm"
+          transition-all duration-300 backdrop-blur-xs"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -116,12 +116,12 @@ export function BlogSidebar({ toc }: BlogSidebarProps) {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            <Card className="overflow-hidden backdrop-blur-sm">
+            <Card className="overflow-hidden backdrop-blur-xs">
               {/* 渐变背景 */}
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/95 via-purple-600/95 to-indigo-700/95" />
+              <div className="absolute inset-0 bg-linear-to-br from-purple-500/95 via-purple-600/95 to-indigo-700/95" />
 
               {/* 光效装饰 */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
+              <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
 
               {/* 内容区域 */}
               <div className="relative z-10 p-6">
@@ -135,7 +135,7 @@ export function BlogSidebar({ toc }: BlogSidebarProps) {
                         {
                           "pl-4": heading.level === 2,
                           "pl-8": heading.level === 3,
-                          "!text-white font-medium": activeId === heading.id
+                          "text-white! font-medium": activeId === heading.id
                         }
                       )}
                       onClick={() => scrollToHeading(heading.id)}

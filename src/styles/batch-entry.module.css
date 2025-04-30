@@ -1,29 +1,7 @@
 /* Copied from docs/css/batch-entry.css */
 @import url('https://fonts.googleapis.com/css2?family=LXGW+WenKai+Screen+R&display=swap');
 
-:root {
-  /* Define variables based on timeline-card.css for consistency */
-  --primary-color: #8B5CF6;
-  --card-bg-color: #fffefb; /* Adjusted slightly from #fffef0 for potentially better rendering */
-  --letter-border-color: #d9b38c;
-  --letter-text-color: #543c2a;
-  --gray-400: #9ca3af;
-  --letter-font: 'LXGW WenKai Screen R', '华文楷体', 'STKaiti', serif; /* Use loaded font first */
-  --label-font: 'Times New Roman', Times, serif;
-}
-
-/* Ensure font is loaded globally or adjust import method if needed */
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  /* background-color: #f4f6f8; Remove this, Next.js might handle body background elsewhere */
-  margin: 0;
-  color: #333;
-  /* height: 100vh; Let layout dictate height */
-  /* display: flex; */
-  /* flex-direction: column; */
-}
-
-.page-container {
+.pageContainer {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -455,7 +433,7 @@ body {
 .header-right .submit-btn:disabled .dot-right { background-color: #f9a8d4; opacity: 0.5; }
 
 /* Reset some base styles if inherited */
-.page-container h1 {
+.pageContainer h1 {
     margin: 0;
 }
 

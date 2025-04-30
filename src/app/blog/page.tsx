@@ -313,7 +313,7 @@ function BlogContent() {
             prefetch={false}
           >
             <div className="relative rounded-xl overflow-hidden shadow-lg">
-              <div className="relative aspect-[21/9]">
+              <div className="relative aspect-21/9">
                 <Image
                   src="/images/default.webp"
                   alt={featuredPost.title}
@@ -324,13 +324,13 @@ function BlogContent() {
                   loading="eager"
                 />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end p-6 md:p-10 text-white">
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end p-6 md:p-10 text-white">
                 <div className="flex gap-2 mb-2">
                   {featuredPost.tags.map(tag => (
                     <Badge
                       key={tag}
                       variant="secondary"
-                      className="px-2 py-0.5 text-xs font-normal bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-700 text-white hover:from-purple-400 hover:via-purple-500 hover:to-indigo-600 transition-all duration-300"
+                      className="px-2 py-0.5 text-xs font-normal bg-linear-to-br from-purple-500 via-purple-600 to-indigo-700 text-white hover:from-purple-400 hover:via-purple-500 hover:to-indigo-600 transition-all duration-300"
                     >
                       {tag}
                     </Badge>
@@ -372,7 +372,7 @@ function BlogContent() {
             <div className="lg:w-3/4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {paginatedPosts.map((post: BlogPost) => (
-                  <div key={post.id} className="group relative bg-card rounded-lg overflow-hidden border-2 border-transparent hover:border-[#8B5CF6] shadow-sm hover:shadow-purple-500/50 transition-all duration-200 before:absolute before:inset-0 before:rounded-lg before:p-[2px] before:bg-gradient-to-br before:from-purple-500 before:via-purple-600 before:to-indigo-700 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-200 before:-z-10">
+                  <div key={post.id} className="group relative bg-card rounded-lg overflow-hidden border-2 border-transparent hover:border-[#8B5CF6] shadow-xs hover:shadow-purple-500/50 transition-all duration-200 before:absolute before:inset-0 before:rounded-lg before:p-[2px] before:bg-linear-to-br before:from-purple-500 before:via-purple-600 before:to-indigo-700 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-200 before:-z-10">
                     {/* Banner图区域移到外部 */}
                     <div className="relative aspect-[1.91/1]">
                       <Image
@@ -384,7 +384,7 @@ function BlogContent() {
                         priority={false}
                         loading="eager"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-opacity duration-300 group-hover:opacity-90"></div>
+                      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent transition-opacity duration-300 group-hover:opacity-90"></div>
                     </div>
 
                     {/* 修改标签显示部分 - 显示所有标签 */}
@@ -394,7 +394,7 @@ function BlogContent() {
                           <Badge
                             key={tag}
                             variant="secondary"
-                            className="px-2 py-0.5 text-xs font-normal bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-700 text-white hover:from-purple-400 hover:via-purple-500 hover:to-indigo-600 transition-all duration-300"
+                            className="px-2 py-0.5 text-xs font-normal bg-linear-to-br from-purple-500 via-purple-600 to-indigo-700 text-white hover:from-purple-400 hover:via-purple-500 hover:to-indigo-600 transition-all duration-300"
                           >
                             {tag}
                           </Badge>
@@ -408,7 +408,7 @@ function BlogContent() {
                       prefetch={false}
                     >
                       {/* 内容区域 */}
-                      <div className="p-4 flex-grow flex flex-col">
+                      <div className="p-4 grow flex flex-col">
                         <h3 className="text-base font-semibold mb-2 line-clamp-1 group-hover:text-primary transition-colors">
                           <span className={`${post.title.length > 30 ? 'cursor-help' : ''}`} title={post.title.length > 30 ? post.title : undefined}>
                             {post.title}
@@ -425,7 +425,7 @@ function BlogContent() {
                         {/* 底部信息区域保持不变 */}
                         <div className="mt-auto pt-3 border-t flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 min-w-0">
-                            <div className="relative w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
+                            <div className="relative w-6 h-6 rounded-full overflow-hidden shrink-0">
                               <Image
                                 src={post.author.avatar}
                                 alt={post.author.name}
@@ -440,7 +440,7 @@ function BlogContent() {
                               {post.author.name}
                             </span>
                           </div>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
                             <Clock className="h-3 w-3" />
                             <span>{post.readTime}</span>
                           </div>
@@ -479,7 +479,7 @@ function BlogContent() {
 
             {/* 侧边栏 - 最近文章列表始终显示，添加更好的样式 */}
             <div className="lg:w-1/4 space-y-8">
-              <div className="bg-muted/30 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+              <div className="bg-muted/30 p-6 rounded-lg shadow-xs border border-slate-200 dark:border-slate-700">
                 <h3 className="font-medium mb-4 text-lg border-b pb-2">最近文章</h3>
                 <div className="space-y-4">
                   {recentPosts.map((post: BlogPost) => (
@@ -489,7 +489,7 @@ function BlogContent() {
                       className="flex gap-3 group hover:bg-slate-100 dark:hover:bg-slate-800 p-2 rounded-md transition-colors"
                       prefetch={false}
                     >
-                      <div className="relative w-20 h-20 rounded overflow-hidden flex-shrink-0">
+                      <div className="relative w-20 h-20 rounded overflow-hidden shrink-0">
                         <Image
                           src={post.imageUrl}
                           alt={post.title}
