@@ -11,20 +11,11 @@ import ClerkLogoIcon from '@/components/icons/ClerkLogoIcon';
 import UserIcon from '@/components/icons/UserIcon';
 import TermsPage from '@/app/legal/terms/page';
 import PrivacyPage from '@/app/legal/privacy/page';
-import Image from 'next/image';
 export function Header() {
   const { isLoaded } = useAuth();
 
   return (
     <header className="bg-gray-50 dark:bg-gray-950 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 shadow-xs flex flex-col">
-      <div className="mx-auto flex max-w-sm items-center gap-x-4 rounded-xl bg-white p-6 shadow-lg outline outline-black/5 dark:bg-slate-800 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10">
-        <Image className="size-12 shrink-0" src="/logo.svg" alt="ChitChat Logo" property="logo" width={48} height={48}/>
-        <div>
-          <div className="text-xl font-medium text-black dark:text-white">ChitChat</div>
-          <p className="text-gray-500 dark:text-gray-400">You have a new message!</p>
-        </div>
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center gap-x-8">
           {/* 左侧 Logo 和标题 - 添加点击回到首页功能 */}

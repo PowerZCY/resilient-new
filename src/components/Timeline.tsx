@@ -822,7 +822,7 @@ export default function Timeline(): JSX.Element {
             >
               <div className={styles.timeline}> {/* Use CSS Modules */}
                 {entriesInGroup.map((entry, indexInPage) => {
-                  const isCardActive = pageNum === activePage && indexInPage === activeCardIndex;
+                  // const isCardActive = pageNum === activePage && indexInPage === activeCardIndex;
                   const isPlaceholder = entry.isPlaceholder ?? false;
                   const needFade = !isPlaceholder && checkNeedFade(entry.content);
 

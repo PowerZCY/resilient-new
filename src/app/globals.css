@@ -100,7 +100,6 @@
 /* Apply base styles within @layer base */
 @layer base {
   :root {
-    /* Define variables potentially NOT handled by Tailwind config */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -126,13 +125,31 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    /* Custom variables */
+    --primary-color: #8B5CF6;
+    --primary-light: rgba(139, 92, 246, 0.2);
+    --primary-glow: rgba(139, 92, 246, 0.6);
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af; 
+    --gray-500: #6b7280;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --line-height: 1.6;
+    --lines-to-show: 6; 
+    --jetbrains-green: #4CAF50;
+    --jetbrains-green-light: rgba(76, 175, 80, 0.2);
+    --jetbrains-green-glow: rgba(76, 175, 80, 0.6);
+    --card-bg-color: #fffef0; 
+    --card-ornament-color: #8B5CF6; 
+    --card-glow-color: rgba(139, 92, 246, 0.5); 
+    --letter-font: 'LXGW WenKai Screen R', "华文楷体", "\534E\6587\6977\4F53", "汉仪悠然体简", "HYYouRanTiJ", "STKaiti", serif; /* Merged fonts */
+    --label-font: "Times New Roman", Times, serif; 
+    --letter-text-color: #543c2a; 
     --letter-border-color: #d9b38c;
-    --letter-text-color: #543c2a;
-    --gray-400: #9ca3af; /* Consider using Tailwind gray */
-    --letter-font: 'LXGW WenKai Screen R', '华文楷体', 'STKaiti', serif;
-    --label-font: 'Times New Roman', Times, serif;
-    /* Animations (moved from @theme) */
+    --ink-blue: #2c3e50; 
+    --stamp-color: #804a00;
+
     --animate-accordion-down: accordion-down 0.2s ease-out;
     --animate-accordion-up: accordion-up 0.2s ease-out;
     --animate-gradient-x: gradient-x 10s ease infinite;
@@ -183,8 +200,15 @@
   h1 {
     text-align: center;
     margin-bottom: 2rem; /* Consider using Tailwind margin utilities like mb-8 */
-    color: var(--gray-800, hsl(var(--foreground))); /* Fallback to foreground if --gray-800 not defined */
-    /* Ensure --gray-800 is defined in :root or via Tailwind config if used */
+    color: var(--gray-800, hsl(var(--foreground))); 
+  }
+  .container {
+    max-width: 1280px; 
+    margin-left: 0 auto;
+    margin-right: 0 auto;
+    padding-left: 0; 
+    padding-right: 1rem; 
+    position: relative;
   }
 }
 
@@ -227,6 +251,4 @@
   background-size: 400% 400%;
 }
 
-/* Removed @utility container - use Tailwind's 'container' class or configure it in tailwind.config.js */
-/* Removed @custom-variant */
 

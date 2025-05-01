@@ -22,10 +22,9 @@ export default function NicknameFilter(): JSX.Element {
 
   return (
     <div className="flex items-center">
-      <div className="relative flex items-center rounded-full px-5 py-1.5 bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500 shadow-lg">
+      <div className="relative flex items-center rounded-full px-2 py-1 bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500 shadow-lg">
         <div className="absolute inset-0 bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500 rounded-full blur-xs opacity-50"></div>
-        
-        <div className="relative z-10 mr-5 flex items-center">
+        <div className="relative z-10 mr-2 flex items-center">
           {isLoaded && isSignedIn ? (
             <UserButton
               afterSignOutUrl='/'

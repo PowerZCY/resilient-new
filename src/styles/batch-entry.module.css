@@ -447,13 +447,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* REMOVE this hover rule */
-/*
-.header-right .submit-btn:hover::before {
-    opacity: 1;
-}
-*/
-
 .header-right .submit-btn:hover {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Keep hover shadow */
 }

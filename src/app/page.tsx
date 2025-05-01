@@ -63,7 +63,7 @@ function HomeContent() {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full py-2.5 px-4 bg-linear-to-r from-blue-600 to-violet-600 text-white rounded-lg font-medium flex items-center justify-center shadow-xs hover:shadow-md transition-all"
+                  className="w-full py-2.5 px-4 bg-linear-to-r from-blue-600 to-violet-600 text-white rounded-full font-medium flex items-center justify-center shadow-xs hover:shadow-md transition-all"
                 >
                   <PlusCircle className="h-5 w-5 mr-2" />
                   <span>上报体验</span>
