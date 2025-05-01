@@ -15,24 +15,15 @@ import { Header } from '@/components/Header';
 import { NicknameProvider } from '@/context/NicknameContext';
 import { motion } from 'framer-motion';
 import { Calendar, PlusCircle } from 'lucide-react';
-import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
 
-// 动态导入Timeline组件，禁用SSR以避免水合不匹配
-const Timeline = dynamic(() => import('@/components/Timeline'), {
-  ssr: false,
-  loading: () => (
-    <div className="text-center text-gray-500">加载时间轴中...</div>
-  )
-});
 
 // 创建一个包含 useSearchParams 的客户端组件
 function HomeContent() {
   const searchParams = useSearchParams();
   const nickname = searchParams.get('nickname') || 'Zia慢成';
-  const [timelineError] = useState<Error | null>(null);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -75,64 +66,10 @@ function HomeContent() {
             </AnimatedCard>
           </div>
         </div>
-
-        {/* 第二行：时间轴 */}
-        <div className="pt-8">
-          {timelineError ? (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-              <h2 className="text-lg font-medium text-red-800">加载时间轴时出现问题</h2>
-              <p className="text-red-600">请尝试刷新页面</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-              >
-                刷新页面
-              </button>
-            </div>
-          ) : (
-            <ErrorBoundary fallback={
-              <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-                <h2 className="text-lg font-medium text-red-800">时间轴渲染出错</h2>
-                <p className="text-red-600">请尝试刷新页面</p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-                >
-                  刷新页面
-                </button>
-              </div>
-            }>
-              <Timeline />
-            </ErrorBoundary>
-          )}
-        </div>
+      
       </main>
     </div>
   );
-}
-
-// 错误边界组件
-class ErrorBoundary extends React.Component<{
-  children: React.ReactNode;
-  fallback: React.ReactNode;
-}> {
-  state = { hasError: false };
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('Timeline error caught by ErrorBoundary:', error, info);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback;
-    }
-
-    return this.props.children;
-  }
 }
 
 // 主页组件，使用 Suspense 包装 HomeContent

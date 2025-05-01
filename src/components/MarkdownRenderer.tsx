@@ -9,7 +9,6 @@ import rehypeKatex from 'rehype-katex';
 import rehypePrism from 'rehype-prism';
 import mermaid from 'mermaid';
 import 'katex/dist/katex.min.css';
-import 'prismjs/themes/prism-tomorrow.css';
 import { mdComponents, CodeBlockProps } from '@/components/MdCoder';
 
 // 定义标题结构

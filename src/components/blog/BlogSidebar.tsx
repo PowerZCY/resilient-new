@@ -13,7 +13,7 @@ interface BlogSidebarProps {
 export function BlogSidebar({ toc }: BlogSidebarProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [activeId, setActiveId] = useState<string>('');
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout>(undefined);
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) {
@@ -94,10 +94,7 @@ export function BlogSidebar({ toc }: BlogSidebarProps) {
     <>
       {/* 悬浮球 - JetBrains风格渐变 */}
       <div
-        className="fixed right-4 top-[calc(100px)] w-12 h-12 rounded-full flex items-center justify-center cursor-pointer shadow-lg
-          bg-linear-to-br from-purple-500 via-purple-600 to-indigo-700
-          hover:from-purple-400 hover:via-purple-500 hover:to-indigo-600
-          transition-all duration-300 backdrop-blur-xs"
+        className="fixed right-4 top-[calc(100px)] w-12 h-12 rounded-full flex items-center justify-center cursor-pointer shadow-lg bg-linear-to-br from-purple-500 via-purple-600 to-indigo-700 hover:from-purple-400 hover:via-purple-500 hover:to-indigo-600 transition-all duration-300 backdrop-blur-xs"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >

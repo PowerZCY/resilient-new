@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Separator } from '@/components/blog/separator';
 import { useRouter } from 'next/navigation';
-import blogData from '@/../../public/md/blog-config.json';
+import blogData from '@/../public/md/blog-config.json';
 import { appConfig } from '@/lib/appConfig';
 
 interface BlogFooterProps {

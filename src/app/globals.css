@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 *,
 ::before,
@@ -6,95 +6,101 @@
   box-sizing: border-box;
 }
 
-@custom-variant dark (&:is(.dark *));
-
-@theme {
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
-
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
-  --animate-gradient-x: gradient-x 10s ease infinite;
-  --animate-shimmer: shimmer 8s linear infinite;
-
-  @keyframes accordion-down {
-    from {
-      height: 0;
-    }
-    to {
-      height: var(--radix-accordion-content-height);
-    }
+/* Keep custom keyframes */
+@keyframes accordion-down {
+  from {
+    height: 0;
   }
-  @keyframes accordion-up {
-    from {
-      height: var(--radix-accordion-content-height);
-    }
-    to {
-      height: 0;
-    }
+  to {
+    height: var(--radix-accordion-content-height);
   }
-  @keyframes gradient-x {
-    0%,
-    100% {
-      background-size: 200% 200%;
-      background-position: left center;
-    }
-    50% {
-      background-size: 200% 200%;
-      background-position: right center;
-    }
+}
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
   }
-  @keyframes shimmer {
-    0% {
-      background-position: 0% 0%;
-    }
-    100% {
-      background-position: 200% 0%;
-    }
+  to {
+    height: 0;
+  }
+}
+@keyframes gradient-x {
+  0%,
+  100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+@keyframes shimmer {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 200% 0%;
+  }
+}
+@keyframes border-pulse {
+  0% {
+    border-color: rgba(139, 92, 246, 0.3);  /* violet-500 with 0.3 opacity */
+  }
+  50% {
+    border-color: rgba(139, 92, 246, 0.6);  /* violet-500 with 0.6 opacity */
+  }
+  100% {
+    border-color: rgba(139, 92, 246, 0.3);  /* violet-500 with 0.3 opacity */
   }
 }
 
-@utility container {
-  margin-inline: auto;
-  padding-inline: 2rem;
-  @media (width >= --theme(--breakpoint-sm)) {
-    max-width: none;
+@keyframes wave {
+  0% {
+    transform: translateX(-100%) translateY(10%) rotate(0deg);
   }
-  @media (width >= 1400px) {
-    max-width: 1400px;
+  50% {
+    transform: translateX(0%) translateY(-10%) rotate(180deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(10%) rotate(360deg);
   }
 }
 
+@keyframes glow {
+  0% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.01);
+  }
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+}
+
+@keyframes gradient-xy {
+  0% {
+    background-position: 0% 50%;
+    transform: rotate(0deg) scale(0.95);
+  }
+  50% {
+    background-position: 100% 50%;
+    transform: rotate(180deg) scale(1.05);
+  }
+  100% {
+    background-position: 0% 50%;
+    transform: rotate(360deg) scale(0.95);
+  }
+}
+
+
+/* Apply base styles within @layer base */
 @layer base {
   :root {
+    /* Define variables potentially NOT handled by Tailwind config */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -120,11 +126,17 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    /* Custom variables */
     --letter-border-color: #d9b38c;
     --letter-text-color: #543c2a;
-    --gray-400: #9ca3af;
+    --gray-400: #9ca3af; /* Consider using Tailwind gray */
     --letter-font: 'LXGW WenKai Screen R', '华文楷体', 'STKaiti', serif;
     --label-font: 'Times New Roman', Times, serif;
+    /* Animations (moved from @theme) */
+    --animate-accordion-down: accordion-down 0.2s ease-out;
+    --animate-accordion-up: accordion-up 0.2s ease-out;
+    --animate-gradient-x: gradient-x 10s ease infinite;
+    --animate-shimmer: shimmer 8s linear infinite;
   }
 
   .dark {
@@ -155,42 +167,22 @@
   }
 
   * {
-    @apply border-border;
-    border-style: solid;
+    /* @apply border-border; */ /* Replaced with direct variable */
+    border-color: var(--border);
+    border-style: solid; /* This might be redundant with Tailwind base border utilities */
   }
   body {
-    @apply bg-background text-foreground;
+    /* @apply bg-background text-foreground; */ /* Replaced with direct variable */
+    background-color: var(--background);
+    color: var(--foreground);
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; /* Consider using Tailwind's font utilities */
   }
 }
 
-@keyframes border-pulse {
-  0% {
-    border-color: rgba(139, 92, 246, 0.3);  /* violet-500 with 0.3 opacity */
-  }
-  50% {
-    border-color: rgba(139, 92, 246, 0.6);  /* violet-500 with 0.6 opacity */
-  }
-  100% {
-    border-color: rgba(139, 92, 246, 0.3);  /* violet-500 with 0.3 opacity */
-  }
-}
-
+/* Keep custom utility classes */
 .animate-border-pulse {
   animation: border-pulse 3s ease-in-out infinite;
-}
-
-@keyframes wave {
-  0% {
-    transform: translateX(-100%) translateY(10%) rotate(0deg);
-  }
-  50% {
-    transform: translateX(0%) translateY(-10%) rotate(180deg);
-  }
-  100% {
-    transform: translateX(100%) translateY(10%) rotate(360deg);
-  }
 }
 
 .wave-animation {
@@ -218,42 +210,15 @@
   animation-delay: -4s;
 }
 
-@keyframes glow {
-  0% {
-    opacity: 0.5;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.75;
-    transform: scale(1.01);
-  }
-  100% {
-    opacity: 0.5;
-    transform: scale(1);
-  }
-}
-
 .animate-glow {
   animation: glow 2s ease-in-out infinite;
-}
-
-@keyframes gradient-xy {
-  0% {
-    background-position: 0% 50%;
-    transform: rotate(0deg) scale(0.95);
-  }
-  50% {
-    background-position: 100% 50%;
-    transform: rotate(180deg) scale(1.05);
-  }
-  100% {
-    background-position: 0% 50%;
-    transform: rotate(360deg) scale(0.95);
-  }
 }
 
 .animate-gradient-xy {
   animation: gradient-xy 15s ease infinite;
   background-size: 400% 400%;
 }
+
+/* Removed @utility container - use Tailwind's 'container' class or configure it in tailwind.config.js */
+/* Removed @custom-variant */
 

@@ -2,7 +2,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import type { BlogPost, BlogData } from '@/types/blog-data';
-import blogData from '@/../../public/md/blog-config.json';
+import blogData from '@/../public/md/blog-config.json';
 import { Calendar, Clock } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';

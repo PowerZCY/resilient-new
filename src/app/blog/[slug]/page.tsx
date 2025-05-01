@@ -5,6 +5,8 @@ import { notFound } from 'next/navigation';
 import path from 'path';
 import BlogPostClient from './BlogPostClient';
 
+type Params = Promise<{ slug: string }>
+
 async function getBlogPost(slug: string) {
   const locale = appConfig.i18n.defaultLocale;
   try {
@@ -20,12 +22,11 @@ async function getBlogPost(slug: string) {
 }
 
 export default async function BlogPost({
-  params: { slug }
+  params
 }: {
-  params: {
-    slug: string
-  }
+  params: Params
 }) {
+  const { slug } = await params
   const decodedSlug = decodeURIComponent(slug);
   const content = await getBlogPost(decodedSlug);
 

@@ -8,7 +8,7 @@
  */
 'use client';
 
-import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo, type JSX } from 'react';
 import { motion, AnimatePresence } from 'framer-motion'; // Keep for modal/progress indicator animations
 import { Heart, Star } from 'lucide-react'; // Import icons
 import '../styles/timeline-card.css'; // Import the new CSS
@@ -131,18 +131,18 @@ const Pagination: React.FC<PaginationProps> = ({
       const isLoading = loadingPage === pageNum;
   
   return (
-        <button
-          key={isEllipsis ? `ellipsis-${index}` : `page-${page}`}
-          className={`nav-btn ${currentPage === pageNum && !isEllipsis ? 'active' : ''} ${isEllipsis ? 'ellipsis' : ''}`}
-          onClick={() => !isEllipsis && onPageChange(pageNum)}
-          disabled={isEllipsis || isLoading}
-          style={isEllipsis ? { cursor: 'default', opacity: 0.5, border: 'none' } : {}}
-        >
-          {isLoading ? (
-             // Simple loading indicator
-             <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
-          ) : ( page )}
-        </button>
+    <button
+      key={isEllipsis ? `ellipsis-${index}` : `page-${page}`}
+      className={`nav-btn ${currentPage === pageNum && !isEllipsis ? 'active' : ''} ${isEllipsis ? 'ellipsis' : ''}`}
+      onClick={() => !isEllipsis && onPageChange(pageNum)}
+      disabled={isEllipsis || isLoading}
+      style={isEllipsis ? { cursor: 'default', opacity: 0.5, border: 'none' } : {}}
+    >
+      {isLoading ? (
+         // Simple loading indicator
+         (<div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-purple-500 mx-auto"></div>)
+      ) : ( page )}
+    </button>
   );
 });
   };

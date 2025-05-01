@@ -10,7 +10,7 @@
 
 'use client';
 
-import blogData from '@/../../public/md/blog-config.json';
+import blogData from '@/../public/md/blog-config.json';
 import { LimitHeader } from '@/components/LimitHeader';
 import { Badge } from '@/components/ui/badge';
 import { appConfig } from '@/lib/appConfig';

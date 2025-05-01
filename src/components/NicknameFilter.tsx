@@ -6,6 +6,7 @@ import { UserButton, useUser } from "@clerk/nextjs";
 import { useNickname } from '@/context/NicknameContext';
 import ClerkLogoIcon from '@/components/icons/ClerkLogoIcon';
 import UserIcon from '@/components/icons/UserIcon';
+import { type JSX } from 'react';
 
 export default function NicknameFilter(): JSX.Element {
   const { nickname, setAndPushNickname, availableUsers } = useNickname();
