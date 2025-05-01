@@ -11,7 +11,6 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo, type JSX } from 'react';
 import { motion, AnimatePresence } from 'framer-motion'; // Keep for modal/progress indicator animations
 import { Heart, Star } from 'lucide-react'; // Import icons
-import styles from '../styles/timeline-card.module.css'; // Import the new CSS Module
 import { useNickname } from '@/context/NicknameContext'; // <-- Import useNickname
 
 interface Entry {
@@ -131,9 +130,9 @@ const Pagination: React.FC<PaginationProps> = ({
       const isLoading = loadingPage === pageNum;
   
       const getButtonClasses = () => {
-        const baseClass = styles.navBtn;
-        const activeClass = currentPage === pageNum && !isEllipsis ? styles.active : '';
-        const ellipsisClass = isEllipsis ? styles.ellipsis : '';
+        const baseClass = "tlc:nav-btn";
+        const activeClass = currentPage === pageNum && !isEllipsis ? "active" : '';
+        const ellipsisClass = isEllipsis ? "tlc:ellipsis" : '';
         return `${baseClass} ${activeClass} ${ellipsisClass}`.trim();
       };
 
@@ -450,9 +449,9 @@ export default function Timeline(): JSX.Element {
 
         // Update active class (applies regardless of animation)
         if (index === currentTargetIndex && !entry.isPlaceholder) {
-            cardElement.classList.add(styles.active); // Use CSS Module class
+            cardElement.classList.add("active"); // Use global 'active' class, assuming CSS rule is `.tlc:timeline-card.active` or similar
         } else {
-            cardElement.classList.remove(styles.active); // Use CSS Module class
+            cardElement.classList.remove("active"); // Use global 'active' class
         }
       }); // End forEach card
 
@@ -673,7 +672,7 @@ export default function Timeline(): JSX.Element {
         if (!indicator) return;
 
         indicator.style.transition = 'none'; // Disable transition during drag
-        indicator.classList.add(styles.dragging); // Use CSS Module class
+        indicator.classList.add("tlc:dragging"); // Use CSS Module class
         if(dragOverlayRef.current) dragOverlayRef.current.style.display = 'block'; // Show overlay
 
         const rect = indicator.getBoundingClientRect();
@@ -719,7 +718,7 @@ export default function Timeline(): JSX.Element {
 
         if (indicator) {
             indicator.style.transition = ''; // Re-enable transitions
-            indicator.classList.remove(styles.dragging); // Use CSS Module class
+            indicator.classList.remove("tlc:dragging"); // Use CSS Module class
             saveProgressPosition(indicator); // Save the final position using the element
         }
     }, [isDraggingProgress, saveProgressPosition]);
@@ -799,77 +798,65 @@ export default function Timeline(): JSX.Element {
   return (
     // Keep Tailwind classes here
     <div className="container mx-auto px-4 py-2 relative">
-        {/* Hidden overlay for smoother dragging - Ensure this is styled correctly */}
-       <div ref={dragOverlayRef} id="progress-drag-overlay" style={{ display: 'none' }}></div>
-
-      {/* Title (Optional - can be part of page layout) */}
-      {/* <h1 className="text-center text-3xl font-bold mb-8">时光轴</h1> */}
-
+      <div ref={dragOverlayRef} id="progress-drag-overlay" style={{ display: 'none' }}></div>
       {/* --- Carousel --- */}
-      <div className={`${styles.carouselContainer} ${styles.performanceBoost}`}> {/* Use CSS Modules */}
+      <div className="tlc:carousel-container tlc:performance-boost">
         {groupedEntries.map(({ page: pageNum, entries: entriesInGroup }) => {
           const getGroupClasses = () => {
-            const baseClass = styles.carouselGroup;
-            const activeClass = pageNum === activePage ? styles.active : '';
+            const baseClass = "tlc:carousel-group";
+            const activeClass = pageNum === activePage ? "active" : '';
             return `${baseClass} ${activeClass}`.trim();
           };
           return (
             <div
               key={pageNum}
               ref={el => { carouselGroupRefs.current[pageNum] = el; }}
-              className={getGroupClasses()} // Use CSS Modules
+              className={getGroupClasses()}
               data-group={pageNum}
             >
-              <div className={styles.timeline}> {/* Use CSS Modules */}
+              <div className="tlc:timeline">
                 {entriesInGroup.map((entry, indexInPage) => {
-                  // const isCardActive = pageNum === activePage && indexInPage === activeCardIndex;
                   const isPlaceholder = entry.isPlaceholder ?? false;
                   const needFade = !isPlaceholder && checkNeedFade(entry.content);
 
                   const getCardClasses = () => {
-                    const baseClass = styles.timelineCard;
-                    const placeholderClass = isPlaceholder ? styles.placeholderCard : '';
-                    // Note: active class is handled by classList.add/remove in useEffect now
-                    // const activeClass = isCardActive ? styles.active : '';
-                    return `${baseClass} ${placeholderClass}`.trim();
+                    const baseClass = isPlaceholder ? "tlc:placeholder-card" : "tlc:timeline-card";
+                    return `${baseClass}`.trim();
                   };
 
                   return (
                     <div
                       key={entry.id}
                       ref={el => { cardRefs.current[entry.id] = el; }}
-                      className={getCardClasses()} // Use CSS Modules
+                      className={getCardClasses()}
                       data-id={entry.id}
                       data-index={indexInPage}
                       onClick={() => handleCardClick(entry, indexInPage)}
-                      // Add hover effects if needed via CSS or state
                     >
-                      <div className={styles.cardDate}>{formatDate(entry.date)}</div> {/* Use CSS Modules */}
-                      <div className={styles.cardContent}> {/* Use CSS Modules */}
+                      <div className="tlc:card-date">{formatDate(entry.date)}</div>
+                      <div className="tlc:card-content">
                         <div
-                           className={styles.contentText} // Use CSS Modules
+                           className="tlc:content-text"
                            style={{
-                             // @ts-expect-error - CSS custom properties need to be asserted
                              '--lines-to-show': LINES_TO_SHOW,
                              '--line-height': LINE_HEIGHT,
-                           }}
+                           } as React.CSSProperties}
                          >
                            {entry.content}
                          </div>
-                         {needFade && !isPlaceholder && <div className={styles.contentFade}></div>} {/* Use CSS Modules */}
+                         {needFade && !isPlaceholder && <div className="tlc:content-fade"></div>}
                       </div>
                       {!isPlaceholder && (
-                        <div className={styles.cardFooter}> {/* Use CSS Modules */}
-                          <div className={styles.iconHolder} onClick={(e) => { e.stopPropagation(); alert('Like clicked!'); }}> {/* Use CSS Modules */}
+                        <div className="tlc:card-footer">
+                          <div className="tlc:icon-holder" onClick={(e) => { e.stopPropagation(); alert('Like clicked!'); }}>
                              <Heart size={18} />
                            </div>
-                           <div className={styles.iconHolder} onClick={(e) => { e.stopPropagation(); alert('Star clicked!'); }}> {/* Use CSS Modules */}
+                           <div className="tlc:icon-holder" onClick={(e) => { e.stopPropagation(); alert('Star clicked!'); }}>
                              <Star size={18} />
                            </div>
                         </div>
                       )}
-                       {/* Footer for placeholder - Ensure this is styled correctly in CSS */}
-                       {isPlaceholder && <div className={styles.cardFooter}></div>} {/* Use CSS Modules */}
+                       {isPlaceholder && <div className="tlc:card-footer"></div>}
                     </div>
                   );
                 })}
@@ -880,8 +867,7 @@ export default function Timeline(): JSX.Element {
       </div>
 
       {/* --- Page Navigation --- */}
-      <div className={styles.groupNav}> {/* Use CSS Modules */}
-        {/* Use the new Pagination component */}
+      <div className="tlc:group-nav">
         <Pagination
            currentPage={activePage}
            totalPages={totalPages}
@@ -891,36 +877,32 @@ export default function Timeline(): JSX.Element {
       </div>
 
       {/* --- Progress Indicator --- */}
-        <AnimatePresence>
-         {/* Render indicator container if initial load attempted/done, not strictly totalCount > 0 */}
-         {/* Content inside will still depend on totalCount */}
+      <AnimatePresence>
          {(initialLoadDone.current || entries.length > 0 || loading) && nickname && (
             <motion.div
                 ref={progressIndicatorRef}
-                className={styles.progressIndicator} // Use CSS Modules
+                className="tlc:progress-indicator"
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.5 }}
                 transition={{ duration: 0.3 }}
-                 style={{
-                     position: 'fixed',
-                 }}
+                 style={{ position: 'fixed' }}
                  onMouseDown={handleProgressMouseDown}
                  onTouchStart={handleProgressMouseDown}
             >
-                 <div className={styles.progressCircle} style={{ '--progress-percent': `${progressPercent}%` } as React.CSSProperties}> {/* Use CSS Modules */}
-                   <div className={styles.progressInner}> {/* Use CSS Modules */}
-                       <div className={styles.progressCount}>{entries.length}/{totalCount > 0 ? totalCount : '--'}</div> {/* Use CSS Modules */}
-                       <div className={styles.progressPercent}>{progressPercent}%</div> {/* Use CSS Modules */}
+                 <div className="tlc:progress-circle" style={{ '--progress-percent': `${progressPercent}%` } as React.CSSProperties}>
+                   <div className="tlc:progress-inner">
+                       <div className="tlc:progress-count">{entries.length}/{totalCount > 0 ? totalCount : '--'}</div>
+                       <div className="tlc:progress-percent">{progressPercent}%</div>
                        {activeCardGlobalIndex !== null && (
                            <motion.div
-                               className={styles.progressActive} // Use CSS Modules
-                                key={activeCardGlobalIndex} // Key change triggers animation
+                               className="tlc:progress-active"
+                                key={activeCardGlobalIndex}
                                initial={{ opacity: 0, y: 5 }}
                                animate={{ opacity: 1, y: 0 }}
                                transition={{ duration: 0.2 }}
                            >
-                                <span className={styles.progressHighlight}>#{activeCardGlobalIndex}</span> {/* Use CSS Modules */}
+                                <span className="tlc:progress-highlight">#{activeCardGlobalIndex}</span>
                             </motion.div>
                         )}
       </div>
@@ -933,25 +915,25 @@ export default function Timeline(): JSX.Element {
        <AnimatePresence>
          {isModalOpen && modalContent && (
            <motion.div
-             className={`${styles.modalOverlay} ${styles.active}`} // Use CSS Modules (assuming active class is needed)
+             className="tlc:modal-overlay active"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
              exit={{ opacity: 0 }}
-             onClick={closeModal} // Close on overlay click
+             onClick={closeModal}
            >
              <motion.div
-               className={styles.contentModal} // Use CSS Modules
+               className="tlc:content-modal"
                initial={{ scale: 0.7, opacity: 0 }}
                animate={{ scale: 1, opacity: 1 }}
                exit={{ scale: 0.7, opacity: 0 }}
                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-               onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
+               onClick={(e) => e.stopPropagation()}
              >
-               <button className={styles.modalClose} onClick={closeModal}>&times;</button> {/* Use CSS Modules */}
-               <div className={styles.modalDate}>{modalContent.date}</div> {/* Use CSS Modules */}
-               <div className={styles.modalContent}> {/* Use CSS Modules */}
+               <button className="tlc:modal-close" onClick={closeModal}>&times;</button>
+               <div className="tlc:modal-date">{modalContent.date}</div>
+               <div className="tlc:modal-content">
                  {modalContent.content}
-        </div>
+               </div>
              </motion.div>
            </motion.div>
          )}

@@ -19,16 +19,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
 
-import dynamic from 'next/dynamic';
-
-
-// 动态导入Timeline组件，禁用SSR以避免水合不匹配
-const Timeline = dynamic(() => import('@/components/Timeline'), {
-  ssr: false,
-  loading: () => (
-    <div className="text-center text-gray-500">加载时间轴中...</div>
-  )
-});
+import Timeline from '@/components/Timeline';
 
 
 // 创建一个包含 useSearchParams 的客户端组件

@@ -4,7 +4,6 @@ import { Suspense, useCallback, useEffect, useRef, useState, forwardRef } from '
 import { useRouter } from 'next/navigation';
 import { Calendar as CalendarIconLucide, Loader2, Plus, Send, Trash2 } from 'lucide-react';
 import { Header } from '@/components/Header';
-import styles from '../../styles/batch-entry.module.css'; // 导入 CSS Modules
 import { NicknameProvider, useNickname } from '@/context/NicknameContext'; // <-- Import useNickname
 
 // Import shadcn/ui components
@@ -93,7 +92,7 @@ const EntryCard = forwardRef<HTMLDivElement, EntryCardProps>(({ // 添加 ref �
   return (
     <div
       ref={ref} // 将 ref 传递给根 div
-      className={`${styles.entryCard} ${isActive ? styles.active : ''}`} // Updated className
+      className={`bce:entry-card ${isActive ? 'active' : ''}`.trim()} // Updated className
       style={style} // 应用父组件传递的 transform, opacity, zIndex 等样式
       onClick={handleCardClick}
       aria-label={`体验 ${index + 1}`}
@@ -122,7 +121,7 @@ const EntryCard = forwardRef<HTMLDivElement, EntryCardProps>(({ // 添加 ref �
             variant={"outline"} // Use outline or a custom variant
             disabled={!isActive}
             onClick={(e) => e.stopPropagation()} // Prevent card click when clicking button
-            className={`${styles.datePickerTrigger} ${!isActive ? styles.disabled : ''}`} // Updated className
+            className={`bce:date-picker-trigger ${!isActive ? 'disabled' : ''}`.trim()} // Updated className
             // Add custom styling to resemble the purple pill
             style={{
                 position: 'absolute',
@@ -159,10 +158,11 @@ const EntryCard = forwardRef<HTMLDivElement, EntryCardProps>(({ // 添加 ref �
         </PopoverContent>
       </Popover>
 
-      <div className={styles.cardContent}> {/* Updated className */}
+      <div className="bce:card-content"> {/* Updated className */}
         {/* Textarea: 仅在激活时启用 */}
         <textarea
-          className={styles.contentTextarea} // Updated className
+          className="bce:content-textarea"
+          data-testid="bce-content-textarea"
           rows={4}
           placeholder="输入好体验、好事儿或成就..."
           aria-label="内容输入"
@@ -171,16 +171,16 @@ const EntryCard = forwardRef<HTMLDivElement, EntryCardProps>(({ // 添加 ref �
           onClick={(e) => e.stopPropagation()} // 防止触发卡片点击
           disabled={!isActive} // 禁用非激活卡片的文本输入
         />
-        <div className={styles.charCount}>{entry.content.length} 个字符</div> {/* Updated className */}
+        <div className="bce:char-count">{entry.content.length} 个字符</div> {/* Updated className */}
       </div>
-      <div className={styles.cardFooter}> {/* Updated className */}
+      <div className="bce:card-footer"> {/* Updated className */}
         {/* Conditionally apply 'valid' class based on content */}
-        <span className={`${styles.entryIndex} ${entry.content.trim() !== '' ? styles.valid : ''}`}> {/* Updated className */}
+        <span className={`bce:entry-index ${entry.content.trim() !== '' ? 'valid' : ''}`.trim()}> {/* Updated className */}
           体验 #{index + 1}
         </span>
         {/* Delete Button */}
         <button
-          className={`${styles.actionBtn} ${styles.deleteBtn}`} // Updated className
+          className={`bce:action-btn bce:delete-btn`} // Updated className
           title="删除此条目"
           onClick={handleDeleteClick}
         >
@@ -324,8 +324,8 @@ function NewEntryContent() {
             const focusTimeoutId = setTimeout(() => {
               const activeCardElement = cardElementsRef.current[activeCardIndex];
               if (activeCardElement) {
-                // Use CSS Modules class name for querySelector
-                const textarea = activeCardElement.querySelector<HTMLTextAreaElement>(`.${styles.contentTextarea}`);
+                // Use data-testid for selection instead of escaped class name
+                const textarea = activeCardElement.querySelector<HTMLTextAreaElement>('[data-testid="bce-content-textarea"]');
                 textarea?.focus();
               }
             }, 50); // 稍微延迟以等待 CSS 过渡和 DOM 更新
@@ -465,37 +465,37 @@ function NewEntryContent() {
   }
 
   return (
-    <div className={styles.pageContainer}> {/* Updated className */}
+    <div className="bce:page-container"> {/* Updated className */}
       {/* 居中头部 */}
-      <div className={styles.centeredContent}> {/* Updated className */}
-        <div className={styles.mainHeader}> {/* Updated className */}
-          <div className={styles.headerLeft}> {/* Updated className */}
+      <div className="bce:centered-content"> {/* Updated className */}
+        <div className="bce:main-header"> {/* Updated className */}
+          <div className="bce:header-left"> {/* Updated className */}
             <h1>
               <CalendarIconLucide className="icon h-6 w-6" /> {/* Tailwind class, not from batch-entry */}
               上报好体验、好事儿、成就
             </h1>
-            <div className={styles.entryCount}>{entries.length}/{MAX_ENTRIES} 组</div> {/* Updated className */}
+            <div className="bce:entry-count">{entries.length}/{MAX_ENTRIES} 组</div> {/* Updated className */}
           </div>
-          <div className={styles.headerRight}> {/* Updated className */}
+          <div className="bce:header-right"> {/* Updated className */}
             <button
               id="submit-btn" // ID remains unchanged
-              className={styles.submitBtn} // Updated className
+              className="bce:submit-btn" // Updated className
               onClick={handleSubmit}
               disabled={isSubmitting || entries.length === 0 || !entries.every(entry => entry.content.trim() !== '') || !nickname} // Add nickname check to disabled state
             >
-              <div className={styles.submitBtnInner}> {/* Updated className */}
+              <div className="bce:submit-btn-inner"> {/* Updated className */}
                 {isSubmitting ? (
                     <>
                       {/* Assuming loader-icon is defined in batch-entry.module.css */}
-                      <Loader2 className={`icon ${styles.loaderIcon} h-4 w-4`} /> {/* Combine Tailwind and Module */}
+                      <Loader2 className={`icon bce:loader-icon h-4 w-4`} /> {/* Combine Tailwind and Module */}
                       <span>提交中...</span>
                     </>
                 ) : (
                   <>
-                    <span className={`${styles.dot} ${styles.dotLeft}`}></span> {/* Updated className */}
+                    <span className="bce:dot bce:dot-left"></span> {/* Updated className */}
                     <Send className="icon h-4 w-4" /> {/* Tailwind class */}
                     <span>提交</span>
-                    <span className={`${styles.dot} ${styles.dotRight}`}></span> {/* Updated className */}
+                    <span className="bce:dot bce:dot-right"></span> {/* Updated className */}
                   </>
                 )}
               </div>
@@ -505,8 +505,8 @@ function NewEntryContent() {
       </div>
 
       {/* 轮播区域 */}
-      <div className={styles.carouselWrapper}> {/* Updated className */}
-        <div ref={entriesContainerRef} id="entries-container" className={styles.entriesContainer}> {/* Updated className */}
+      <div className="bce:carousel-wrapper"> {/* Updated className */}
+        <div ref={entriesContainerRef} id="entries-container" className="bce:entries-container"> {/* Updated className */}
           {entries.map((entry, index) => (
             <EntryCard
               key={entry.id}
@@ -526,14 +526,14 @@ function NewEntryContent() {
           {/* 活动指示器 / 添加按钮 (移到 container 内部) */}
           <div
             id="active-indicator" // ID remains unchanged
-            className={`${styles.activeIndicator} ${entries.length >= MAX_ENTRIES ? styles.hidden : ''}`} // Updated className
+            className={`bce:active-indicator ${entries.length >= MAX_ENTRIES ? 'hidden' : ''}`.trim()} // Updated className
             style={indicatorStyle} // 应用计算出的样式
             title="添加记录 / 当前选中"
             onClick={handleAddNewEntryClick}
           >
-            <div className={styles.indicatorCircle}> {/* Updated className */}
-              <div className={styles.indicatorInner}> {/* Updated className */}
-                <div className={styles.indicatorAction}> {/* Updated className */}
+            <div className="bce:indicator-circle"> {/* Updated className */}
+              <div className="bce:indicator-inner"> {/* Updated className */}
+                <div className="bce:indicator-action"> {/* Updated className */}
                   <Plus />
                 </div>
               </div>
