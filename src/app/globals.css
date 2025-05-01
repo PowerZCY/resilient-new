@@ -178,6 +178,14 @@
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; /* Consider using Tailwind's font utilities */
   }
+
+  /* Add specific h1 styles from the module file */
+  h1 {
+    text-align: center;
+    margin-bottom: 2rem; /* Consider using Tailwind margin utilities like mb-8 */
+    color: var(--gray-800, hsl(var(--foreground))); /* Fallback to foreground if --gray-800 not defined */
+    /* Ensure --gray-800 is defined in :root or via Tailwind config if used */
+  }
 }
 
 /* Keep custom utility classes */

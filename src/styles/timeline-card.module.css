@@ -118,26 +118,6 @@
   z-index: auto; /* 使用与普通卡片相同的z-index计算方式 */
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  background-color: #f9fafb;
-  padding: 1.5rem;
-  color: var(--gray-700);
-  line-height: 1.5;
-}
-
-h1 {
-  text-align: center;
-  margin-bottom: 2rem;
-  color: var(--gray-800);
-}
-
 .container {
   max-width: 1280px;
   margin: 0 auto;

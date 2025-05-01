@@ -11,7 +11,7 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo, type JSX } from 'react';
 import { motion, AnimatePresence } from 'framer-motion'; // Keep for modal/progress indicator animations
 import { Heart, Star } from 'lucide-react'; // Import icons
-import '../styles/timeline-card.css'; // Import the new CSS
+import styles from '../styles/timeline-card.module.css'; // Import the new CSS Module
 import { useNickname } from '@/context/NicknameContext'; // <-- Import useNickname
 
 interface Entry {
@@ -130,21 +130,28 @@ const Pagination: React.FC<PaginationProps> = ({
       const pageNum = page as number; // Cast for use, check isEllipsis first
       const isLoading = loadingPage === pageNum;
   
-  return (
-    <button
-      key={isEllipsis ? `ellipsis-${index}` : `page-${page}`}
-      className={`nav-btn ${currentPage === pageNum && !isEllipsis ? 'active' : ''} ${isEllipsis ? 'ellipsis' : ''}`}
-      onClick={() => !isEllipsis && onPageChange(pageNum)}
-      disabled={isEllipsis || isLoading}
-      style={isEllipsis ? { cursor: 'default', opacity: 0.5, border: 'none' } : {}}
-    >
-      {isLoading ? (
-         // Simple loading indicator
-         (<div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-purple-500 mx-auto"></div>)
-      ) : ( page )}
-    </button>
-  );
-});
+      const getButtonClasses = () => {
+        const baseClass = styles.navBtn;
+        const activeClass = currentPage === pageNum && !isEllipsis ? styles.active : '';
+        const ellipsisClass = isEllipsis ? styles.ellipsis : '';
+        return `${baseClass} ${activeClass} ${ellipsisClass}`.trim();
+      };
+
+      return (
+        <button
+          key={isEllipsis ? `ellipsis-${index}` : `page-${page}`}
+          className={getButtonClasses()} // Use CSS Modules
+          onClick={() => !isEllipsis && onPageChange(pageNum)}
+          disabled={isEllipsis || isLoading}
+          style={isEllipsis ? { cursor: 'default', opacity: 0.5, border: 'none' } : {}}
+        >
+          {isLoading ? (
+             // Simple loading indicator (Tailwind classes, keep as is)
+             (<div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-purple-500 mx-auto"></div>)
+          ) : ( page )}
+        </button>
+      );
+    });
   };
 
   return <>{renderPageButtons()}</>;
@@ -443,9 +450,9 @@ export default function Timeline(): JSX.Element {
 
         // Update active class (applies regardless of animation)
         if (index === currentTargetIndex && !entry.isPlaceholder) {
-            cardElement.classList.add('active');
+            cardElement.classList.add(styles.active); // Use CSS Module class
         } else {
-            cardElement.classList.remove('active');
+            cardElement.classList.remove(styles.active); // Use CSS Module class
         }
       }); // End forEach card
 
@@ -666,7 +673,7 @@ export default function Timeline(): JSX.Element {
         if (!indicator) return;
 
         indicator.style.transition = 'none'; // Disable transition during drag
-        indicator.classList.add('dragging');
+        indicator.classList.add(styles.dragging); // Use CSS Module class
         if(dragOverlayRef.current) dragOverlayRef.current.style.display = 'block'; // Show overlay
 
         const rect = indicator.getBoundingClientRect();
@@ -712,7 +719,7 @@ export default function Timeline(): JSX.Element {
 
         if (indicator) {
             indicator.style.transition = ''; // Re-enable transitions
-            indicator.classList.remove('dragging');
+            indicator.classList.remove(styles.dragging); // Use CSS Module class
             saveProgressPosition(indicator); // Save the final position using the element
         }
     }, [isDraggingProgress, saveProgressPosition]);
@@ -773,20 +780,24 @@ export default function Timeline(): JSX.Element {
   // --- Loading and Initial State Handling ---
   if (!isNicknameInitialized || loading) {
     // Show a loading indicator while context initializes or data is fetching
+    // Keep Tailwind classes here
     return <div className="text-center text-gray-500 p-10">Loading Timeline...</div>;
   }
 
   // Context initialized, not loading, but still no nickname
   if (!nickname) {
+    // Keep Tailwind classes here
     return <div className="text-center text-gray-500 p-10">No user selected or timeline available.</div>;
   }
 
   // Initialized, not loading, nickname exists, but no entries found (API returned 0 total)
   if (totalCount === 0 && initialLoadDone.current) {
+     // Keep Tailwind classes here
      return <div className="text-center text-gray-500 p-10">No entries found for {nickname}.</div>;
   }
 
   return (
+    // Keep Tailwind classes here
     <div className="container mx-auto px-4 py-2 relative">
         {/* Hidden overlay for smoother dragging - Ensure this is styled correctly */}
        <div ref={dragOverlayRef} id="progress-drag-overlay" style={{ display: 'none' }}></div>
@@ -795,70 +806,81 @@ export default function Timeline(): JSX.Element {
       {/* <h1 className="text-center text-3xl font-bold mb-8">时光轴</h1> */}
 
       {/* --- Carousel --- */}
-      <div className="carousel-container performance-boost">
-        {groupedEntries.map(({ page: pageNum, entries: entriesInGroup }) => (
-          <div
-            key={pageNum}
-            ref={el => { carouselGroupRefs.current[pageNum] = el; }}
-            className={`carousel-group ${pageNum === activePage ? 'active' : ''}`}
-            data-group={pageNum}
-          >
-            <div className="timeline">
-              {entriesInGroup.map((entry, indexInPage) => {
-                const isCardActive = pageNum === activePage && indexInPage === activeCardIndex;
-                // Placeholder check moved to data generation
-                const isPlaceholder = entry.isPlaceholder ?? false;
-                const needFade = !isPlaceholder && checkNeedFade(entry.content);
+      <div className={`${styles.carouselContainer} ${styles.performanceBoost}`}> {/* Use CSS Modules */}
+        {groupedEntries.map(({ page: pageNum, entries: entriesInGroup }) => {
+          const getGroupClasses = () => {
+            const baseClass = styles.carouselGroup;
+            const activeClass = pageNum === activePage ? styles.active : '';
+            return `${baseClass} ${activeClass}`.trim();
+          };
+          return (
+            <div
+              key={pageNum}
+              ref={el => { carouselGroupRefs.current[pageNum] = el; }}
+              className={getGroupClasses()} // Use CSS Modules
+              data-group={pageNum}
+            >
+              <div className={styles.timeline}> {/* Use CSS Modules */}
+                {entriesInGroup.map((entry, indexInPage) => {
+                  const isCardActive = pageNum === activePage && indexInPage === activeCardIndex;
+                  const isPlaceholder = entry.isPlaceholder ?? false;
+                  const needFade = !isPlaceholder && checkNeedFade(entry.content);
 
-                return (
-                  <div
-                    key={entry.id}
-                    ref={el => { cardRefs.current[entry.id] = el; }}
-                    className={`timeline-card ${isPlaceholder ? 'placeholder-card' : ''} ${isCardActive ? 'active' : ''}`}
-                    data-id={entry.id}
-                    data-index={indexInPage}
-                    onClick={() => handleCardClick(entry, indexInPage)}
-                    // Add hover effects if needed via CSS or state
-                  >
-                    <div className="card-date">{formatDate(entry.date)}</div>
-                    <div className="card-content">
-                      <div
-                         className="content-text"
-                         style={{
-                           // @ts-expect-error - CSS custom properties need to be asserted
-                           '--lines-to-show': LINES_TO_SHOW,
-                           '--line-height': LINE_HEIGHT,
-                           // max height calculation can be removed if pure CSS handles truncation well
-                          // maxHeight: `calc(var(--line-height) * var(--lines-to-show) * 1em)`
-                         }}
-                       >
-                         {entry.content}
-                       </div>
-                       {/* Fade element might not be needed if CSS gradient is applied directly on content-text overflow */}
-                       {needFade && !isPlaceholder && <div className="content-fade"></div>}
-                    </div>
-                    {!isPlaceholder && (
-                      <div className="card-footer">
-                        <div className="icon-holder" onClick={(e) => { e.stopPropagation(); alert('Like clicked!'); }}>
-                           <Heart size={18} />
+                  const getCardClasses = () => {
+                    const baseClass = styles.timelineCard;
+                    const placeholderClass = isPlaceholder ? styles.placeholderCard : '';
+                    // Note: active class is handled by classList.add/remove in useEffect now
+                    // const activeClass = isCardActive ? styles.active : '';
+                    return `${baseClass} ${placeholderClass}`.trim();
+                  };
+
+                  return (
+                    <div
+                      key={entry.id}
+                      ref={el => { cardRefs.current[entry.id] = el; }}
+                      className={getCardClasses()} // Use CSS Modules
+                      data-id={entry.id}
+                      data-index={indexInPage}
+                      onClick={() => handleCardClick(entry, indexInPage)}
+                      // Add hover effects if needed via CSS or state
+                    >
+                      <div className={styles.cardDate}>{formatDate(entry.date)}</div> {/* Use CSS Modules */}
+                      <div className={styles.cardContent}> {/* Use CSS Modules */}
+                        <div
+                           className={styles.contentText} // Use CSS Modules
+                           style={{
+                             // @ts-expect-error - CSS custom properties need to be asserted
+                             '--lines-to-show': LINES_TO_SHOW,
+                             '--line-height': LINE_HEIGHT,
+                           }}
+                         >
+                           {entry.content}
                          </div>
-                         <div className="icon-holder" onClick={(e) => { e.stopPropagation(); alert('Star clicked!'); }}>
-                           <Star size={18} />
-                         </div>
+                         {needFade && !isPlaceholder && <div className={styles.contentFade}></div>} {/* Use CSS Modules */}
                       </div>
-                    )}
-                     {/* Footer for placeholder - Ensure this is styled correctly in CSS */}
-                     {isPlaceholder && <div className="card-footer"></div>}
-                  </div>
-                );
-              })}
+                      {!isPlaceholder && (
+                        <div className={styles.cardFooter}> {/* Use CSS Modules */}
+                          <div className={styles.iconHolder} onClick={(e) => { e.stopPropagation(); alert('Like clicked!'); }}> {/* Use CSS Modules */}
+                             <Heart size={18} />
+                           </div>
+                           <div className={styles.iconHolder} onClick={(e) => { e.stopPropagation(); alert('Star clicked!'); }}> {/* Use CSS Modules */}
+                             <Star size={18} />
+                           </div>
+                        </div>
+                      )}
+                       {/* Footer for placeholder - Ensure this is styled correctly in CSS */}
+                       {isPlaceholder && <div className={styles.cardFooter}></div>} {/* Use CSS Modules */}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* --- Page Navigation --- */}
-      <div className="group-nav">
+      <div className={styles.groupNav}> {/* Use CSS Modules */}
         {/* Use the new Pagination component */}
         <Pagination
            currentPage={activePage}
@@ -875,31 +897,30 @@ export default function Timeline(): JSX.Element {
          {(initialLoadDone.current || entries.length > 0 || loading) && nickname && (
             <motion.div
                 ref={progressIndicatorRef}
-                className="progress-indicator"
+                className={styles.progressIndicator} // Use CSS Modules
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.5 }}
                 transition={{ duration: 0.3 }}
-                 style={{ // Initial position can be set here, but useEffect will override
-                     position: 'fixed', // Ensure it's fixed
-                    // Let useEffect handle position loading/setting
+                 style={{
+                     position: 'fixed',
                  }}
                  onMouseDown={handleProgressMouseDown}
                  onTouchStart={handleProgressMouseDown}
             >
-                 <div className="progress-circle" style={{ '--progress-percent': `${progressPercent}%` } as React.CSSProperties}>
-                   <div className="progress-inner">
-                       <div className="progress-count">{entries.length}/{totalCount > 0 ? totalCount : '--'}</div>
-                       <div className="progress-percent">{progressPercent}%</div>
+                 <div className={styles.progressCircle} style={{ '--progress-percent': `${progressPercent}%` } as React.CSSProperties}> {/* Use CSS Modules */}
+                   <div className={styles.progressInner}> {/* Use CSS Modules */}
+                       <div className={styles.progressCount}>{entries.length}/{totalCount > 0 ? totalCount : '--'}</div> {/* Use CSS Modules */}
+                       <div className={styles.progressPercent}>{progressPercent}%</div> {/* Use CSS Modules */}
                        {activeCardGlobalIndex !== null && (
                            <motion.div
-                               className="progress-active"
+                               className={styles.progressActive} // Use CSS Modules
                                 key={activeCardGlobalIndex} // Key change triggers animation
                                initial={{ opacity: 0, y: 5 }}
                                animate={{ opacity: 1, y: 0 }}
                                transition={{ duration: 0.2 }}
                            >
-                                <span className="progress-highlight">#{activeCardGlobalIndex}</span>
+                                <span className={styles.progressHighlight}>#{activeCardGlobalIndex}</span> {/* Use CSS Modules */}
                             </motion.div>
                         )}
       </div>
@@ -912,23 +933,23 @@ export default function Timeline(): JSX.Element {
        <AnimatePresence>
          {isModalOpen && modalContent && (
            <motion.div
-             className="modal-overlay active" // Use class to control display via CSS
+             className={`${styles.modalOverlay} ${styles.active}`} // Use CSS Modules (assuming active class is needed)
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
              exit={{ opacity: 0 }}
              onClick={closeModal} // Close on overlay click
            >
              <motion.div
-               className="content-modal"
+               className={styles.contentModal} // Use CSS Modules
                initial={{ scale: 0.7, opacity: 0 }}
                animate={{ scale: 1, opacity: 1 }}
                exit={{ scale: 0.7, opacity: 0 }}
                transition={{ type: "spring", stiffness: 300, damping: 30 }}
                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
              >
-               <button className="modal-close" onClick={closeModal}>&times;</button>
-               <div className="modal-date">{modalContent.date}</div>
-               <div className="modal-content">
+               <button className={styles.modalClose} onClick={closeModal}>&times;</button> {/* Use CSS Modules */}
+               <div className={styles.modalDate}>{modalContent.date}</div> {/* Use CSS Modules */}
+               <div className={styles.modalContent}> {/* Use CSS Modules */}
                  {modalContent.content}
         </div>
              </motion.div>
