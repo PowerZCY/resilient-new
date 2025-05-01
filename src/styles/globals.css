@@ -1,0 +1,262 @@
+@import "tailwindcss";
+@import './timeline-card.css';
+@import './batch-create-entry.css';
+
+*,
+::before,
+::after {
+  box-sizing: border-box;
+}
+
+/* 
+@keyframes 定义动画
+@layer 控制样式的优先级层级
+@theme 在 CSS 中配置 Tailwind 主题
+@utility 定义能自动使用 Tailwind 变体的自定义工具类
+.xx 定义普通的 CSS 类
+*/
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+@keyframes gradient-x {
+  0%,
+  100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+@keyframes shimmer {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 200% 0%;
+  }
+}
+@keyframes border-pulse {
+  0% {
+    border-color: rgba(139, 92, 246, 0.3);  /* violet-500 with 0.3 opacity */
+  }
+  50% {
+    border-color: rgba(139, 92, 246, 0.6);  /* violet-500 with 0.6 opacity */
+  }
+  100% {
+    border-color: rgba(139, 92, 246, 0.3);  /* violet-500 with 0.3 opacity */
+  }
+}
+
+@keyframes wave {
+  0% {
+    transform: translateX(-100%) translateY(10%) rotate(0deg);
+  }
+  50% {
+    transform: translateX(0%) translateY(-10%) rotate(180deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(10%) rotate(360deg);
+  }
+}
+
+@keyframes glow {
+  0% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.01);
+  }
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+}
+
+@keyframes gradient-xy {
+  0% {
+    background-position: 0% 50%;
+    transform: rotate(0deg) scale(0.95);
+  }
+  50% {
+    background-position: 100% 50%;
+    transform: rotate(180deg) scale(1.05);
+  }
+  100% {
+    background-position: 0% 50%;
+    transform: rotate(360deg) scale(0.95);
+  }
+}
+
+
+/* Apply base styles within @layer base */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --primary-color: #8B5CF6;
+    --primary-light: rgba(139, 92, 246, 0.2);
+    --primary-glow: rgba(139, 92, 246, 0.6);
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af; 
+    --gray-500: #6b7280;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --line-height: 1.6;
+    --lines-to-show: 6; 
+    --jetbrains-green: #4CAF50;
+    --jetbrains-green-light: rgba(76, 175, 80, 0.2);
+    --jetbrains-green-glow: rgba(76, 175, 80, 0.6);
+    --card-bg-color: #fffef0; 
+    --card-ornament-color: #8B5CF6; 
+    --card-glow-color: rgba(139, 92, 246, 0.5); 
+    --letter-font: 'LXGW WenKai Screen R', "华文楷体", "\534E\6587\6977\4F53", "汉仪悠然体简", "HYYouRanTiJ", "STKaiti", serif; /* Merged fonts */
+    --label-font: "Times New Roman", Times, serif; 
+    --letter-text-color: #543c2a; 
+    --letter-border-color: #d9b38c;
+    --ink-blue: #2c3e50; 
+    --stamp-color: #804a00;
+
+    --animate-accordion-down: accordion-down 0.2s ease-out;
+    --animate-accordion-up: accordion-up 0.2s ease-out;
+    --animate-gradient-x: gradient-x 10s ease infinite;
+    --animate-shimmer: shimmer 8s linear infinite;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+
+  * {
+    /* @apply border-border; */ /* Replaced with direct variable */
+    border-color: var(--border);
+    border-style: solid; /* This might be redundant with Tailwind base border utilities */
+  }
+  body {
+    /* @apply bg-background text-foreground; */ /* Replaced with direct variable */
+    background-color: var(--background);
+    color: var(--foreground);
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; /* Consider using Tailwind's font utilities */
+  }
+
+  /* Add specific h1 styles from the module file */
+  h1 {
+    text-align: center;
+    margin-bottom: 2rem; /* Consider using Tailwind margin utilities like mb-8 */
+    color: var(--gray-800, hsl(var(--foreground))); 
+  }
+  .container { /* Corrected custom container definition */
+    max-width: 1280px; 
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem; /* Consistent padding */
+    padding-right: 1rem; 
+    /* position: relative; */ /* Position relative might be better applied where needed */
+  }
+}
+
+/* Keep custom utility classes */
+.animate-border-pulse {
+  animation: border-pulse 3s ease-in-out infinite;
+}
+
+.wave-animation {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: linear-gradient(
+    45deg,
+    rgba(59, 130, 246, 0.1),
+    rgba(124, 58, 237, 0.1),
+    rgba(59, 130, 246, 0.1)
+  );
+  animation: wave 8s linear infinite;
+  pointer-events: none;
+}
+
+.wave-animation::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  animation: wave 8s linear infinite reverse;
+  animation-delay: -4s;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-gradient-xy {
+  animation: gradient-xy 15s ease infinite;
+  background-size: 400% 400%;
+}
+

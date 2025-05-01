@@ -1,0 +1,425 @@
+
+/* Batch Entry Styles (Moved from CSS Module with bce: prefix) */
+/* Original file: src/styles/batch-entry.module.css */
+
+.bce\:page-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 20px 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    min-height: calc(100vh - 64px);
+    overflow: hidden;
+  }
+  
+  .bce\:centered-content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 20px;
+      box-sizing: border-box;
+  }
+  
+  .bce\:main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    gap: 20px;
+  }
+  
+  .bce\:header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+  }
+  
+  .bce\:header-left h1 {
+    font-size: 1.3em;
+    font-weight: 600;
+    color: #4a4a4a;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    line-height: 1.3;
+  }
+  
+  .bce\:header-left h1 .icon {
+    margin-right: 10px;
+    color: var(--primary-color);
+  }
+  
+  .bce\:entry-count {
+    font-size: 0.9em;
+    color: var(--gray-400);
+    background-color: rgba(139, 92, 246, 0.1);
+    padding: 4px 10px;
+    border-radius: 15px;
+    white-space: nowrap;
+    line-height: 1.3;
+  }
+  
+  .bce\:carousel-wrapper {
+      margin-bottom: 25px;
+      overflow: hidden;
+      padding: 20px 0 30px 0;
+      position: relative;
+      perspective: 2500px;
+      min-height: 500px;
+      flex-grow: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 40px;
+  }
+  
+  .bce\:entries-container {
+    height: 400px;
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    transform-style: preserve-3d;
+    margin: 0 auto;
+  }
+  
+  .bce\:entry-card {
+    background-color: var(--card-bg-color);
+    border-radius: 12px;
+    border: 1px solid var(--primary-color);
+    box-shadow: 0 5px 15px rgba(139, 92, 246, 0.15);
+    width: 260px;
+    height: 360px;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    overflow: visible;
+    transition: box-shadow 0.3s ease, transform 0.6s ease-out, opacity 0.6s ease-out;
+    font-family: var(--letter-font);
+    backface-visibility: hidden;
+    transform-origin: center center;
+    cursor: pointer;
+  }
+  
+  .bce\:entry-card:hover {
+    transform: translate(-50%, -50%);
+    box-shadow: 0 8px 22px rgba(139, 92, 246, 0.2);
+  }
+  
+  .bce\:entry-card.active {
+      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+      border-color: #a78bfa;
+  }
+  
+  .bce\:date-display-label {
+    display: block;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .bce\:date-picker-trigger.disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  .bce\:card-content {
+    padding: 2.25rem 1.25rem 1rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    position: relative;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 29px,
+      rgba(217, 179, 140, 0.25) 29px,
+      rgba(217, 179, 140, 0.25) 30px,
+      transparent 30px
+    );
+    background-size: 100% 30px;
+    background-position: 0 2.25rem;
+    line-height: 30px;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+  }
+  
+  .bce\:card-content::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      width: 20px;
+      height: 20px;
+      background-color: #a0846c;
+      border: 1px solid #8a6e56;
+      box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+      z-index: 1;
+  }
+  
+  .bce\:content-textarea {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    border: none;
+    font-size: 1em;
+    box-sizing: border-box;
+    background-color: transparent;
+    resize: none;
+    flex-grow: 1;
+    outline: none;
+    font-family: var(--letter-font);
+    line-height: 30px;
+    color: var(--letter-text-color);
+    min-height: 90px;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .bce\:content-textarea::placeholder {
+    color: #b8ae9f;
+  }
+  
+  .bce\:char-count {
+    font-size: 0.75em;
+    color: #b8ae9f;
+    text-align: right;
+    margin-top: 5px;
+    flex-shrink: 0;
+    line-height: normal;
+    font-family: sans-serif;
+    user-select: none;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .bce\:card-footer {
+    padding: 0.6rem 1.25rem;
+    border-top: 1px dashed var(--letter-border-color);
+    background-color: var(--card-bg-color);
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    height: 43px;
+    border-bottom-left-radius: 11px;
+    border-bottom-right-radius: 11px;
+    box-sizing: border-box;
+  }
+  
+  .bce\:entry-index {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: #e60000;
+      font-family: sans-serif;
+      user-select: none;
+      margin-right: auto;
+  }
+  
+  .bce\:entry-index.valid {
+      color: var(--primary-color);
+  }
+  
+  .bce\:action-btn {
+    background: none;
+    border: none;
+    color: var(--gray-400);
+    cursor: pointer;
+    padding: 0;
+    font-size: 1.3rem;
+    line-height: 1;
+    transition: color 0.2s ease;
+  }
+  
+  .bce\:action-btn svg {
+    width: 1.1em;
+    height: 1.1em;
+  }
+  
+  .bce\:action-btn:hover:not(:disabled) {
+    color: var(--primary-color);
+  }
+  .bce\:action-btn.bce\:delete-btn:hover:not(:disabled) {
+      color: #ef4444;
+  }
+  
+  .bce\:action-btn:disabled {
+      color: #d1d5db;
+      cursor: not-allowed;
+  }
+  
+  .bce\:active-indicator {
+      position: absolute;
+      transform: translate(-50%, -50%) translateY(0);
+      z-index: 1000;
+      cursor: pointer;
+      touch-action: none;
+      transition: opacity 0.3s ease-out, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), top 0.6s ease-out, left 0.6s ease-out;
+      opacity: 1;
+      width: 84px;
+      height: 84px;
+      will-change: transform, opacity, top, left;
+  }
+  
+  .bce\:indicator-circle {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: inset 0 0 0 4px var(--primary-color),
+                  0 6px 20px rgba(139, 92, 246, 0.25);
+      background-color: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+  }
+  
+  .bce\:indicator-inner {
+      text-align: center;
+      color: #333;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+  }
+  
+  .bce\:indicator-action {
+      font-size: 1.8em;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+  }
+  
+  .bce\:indicator-action svg {
+      width: 1em;
+      height: 1em;
+  }
+  
+  .bce\:active-indicator.hidden {
+      opacity: 0 !important;
+      pointer-events: none;
+      transform: translate(-50%, -50%) translateY(30px) !important;
+  }
+  
+  .bce\:header-right .bce\:submit-btn {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    font-size: 0.95em;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    padding: 1px;
+    border: none;
+    background: white;
+    z-index: 1;
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .bce\:header-right .bce\:submit-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 9999px;
+      padding: 2px;
+      background: linear-gradient(to right, #a855f7, #ec4899);
+      -webkit-mask:
+          linear-gradient(#fff 0 0) content-box,
+          linear-gradient(#fff 0 0);
+      mask:
+          linear-gradient(#fff 0 0) content-box,
+          linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+              mask-composite: exclude;
+      z-index: -1;
+      transition: opacity 0.3s ease;
+      opacity: 1;
+  }
+  
+  .bce\:submit-btn-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      border-radius: 9999px;
+      padding: 6px 16px;
+      transition: background-color 0.3s ease;
+  }
+  
+  .bce\:header-right .bce\:submit-btn .icon {
+      margin-right: 6px;
+      color: #6b7280;
+      transition: color 0.3s ease, opacity 0.3s ease;
+      display: flex;
+      align-items: center;
+  }
+  .bce\:header-right .bce\:submit-btn .icon svg {
+      width: 1.1em;
+      height: 1.1em;
+  }
+  
+  .bce\:header-right .bce\:submit-btn .bce\:submit-btn-inner span:not(.bce\:dot) {
+      color: #374151;
+      line-height: 1.3;
+      transition: color 0.3s ease, opacity 0.3s ease;
+  }
+  
+  .bce\:header-right .bce\:submit-btn:disabled {
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  
+  .bce\:header-right .bce\:submit-btn:disabled::before {
+      opacity: 0;
+  }
+  
+  .bce\:header-right .bce\:submit-btn:disabled .bce\:submit-btn-inner {
+      background: #f3f4f6;
+  }
+  
+  .bce\:header-right .bce\:submit-btn:disabled .bce\:submit-btn-inner span:not(.bce\:dot),
+  .bce\:header-right .bce\:submit-btn:disabled .icon,
+  .bce\:header-right .bce\:submit-btn:disabled .bce\:dot {
+      opacity: 0.5;
+      color: #9ca3af;
+  }
+  
+  .bce\:header-right .bce\:submit-btn:disabled .bce\:dot-left { background-color: #d8b4fe; opacity: 0.5; }
+  .bce\:header-right .bce\:submit-btn:disabled .bce\:dot-right { background-color: #f9a8d4; opacity: 0.5; }
+  
+  .bce\:page-container h1 {
+      margin: 0;
+  }
+  
+  .bce\:loader-icon {
+      animation: bce\:spin 1s linear infinite; /* Prefixed animation name */
+  }
+  
+  /* Prefixed animation name */
+  @keyframes bce\:spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  .bce\:header-right .bce\:submit-btn:hover {
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .bce\:header-right .bce\:submit-btn .bce\:dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      transition: background-color 0.3s ease, opacity 0.3s ease;
+  }
+  .bce\:header-right .bce\:submit-btn .bce\:dot-left { background-color: #a855f7; margin-right: 8px; }
+  .bce\:header-right .bce\:submit-btn .bce\:dot-right { background-color: #ec4899; margin-left: 8px; }
+  

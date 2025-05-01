@@ -14,7 +14,7 @@ import {
 } from '@clerk/nextjs';
 // zh-CN locale is imported as zhCN
 import { zhCN } from '@clerk/localizations'
-import "./globals.css";
+import "../styles/globals.css";
 import BackToTop from "@/components/BackToTop";
 import { Footer } from "@/components/Footer";
 
