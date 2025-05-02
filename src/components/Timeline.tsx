@@ -658,13 +658,25 @@ export default function Timeline(): JSX.Element {
   // Load position effect - triggered when indicator ref is ready
   useEffect(() => {
     if (isIndicatorRefReady && progressIndicatorRef.current) {
-      console.log("Progress indicator ref is ready. Loading position.");
-      loadProgressPosition();
-    } else {
-      console.log(`Progress indicator position load deferred. isReady=${isIndicatorRefReady}, refExists=${!!progressIndicatorRef.current}`);
+        loadProgressPosition();
     }
-  }, [isIndicatorRefReady, loadProgressPosition]); // Depend on readiness state and the load function
+}, [isIndicatorRefReady, loadProgressPosition]); // Depend on readiness state and the load function
 
+  // Stable ref callback using useCallback and functional state update
+  const handleProgressRef = useCallback((el: HTMLDivElement | null) => {
+    console.log(`Ref callback fired. Element exists: ${!!el}`);
+    progressIndicatorRef.current = el; // Update the ref itself
+    const shouldBeReady = !!el;
+
+    // Use functional update to access the latest state and prevent loops/stale state issues
+    setIsIndicatorRefReady(currentReadyState => {
+        if (currentReadyState !== shouldBeReady) {
+            return shouldBeReady; // Return the new state
+        }
+        // If state already matches the desired state, return the current state to prevent re-render
+        return currentReadyState;
+    });
+}, []); // Empty dependency array ensures the callback function itself is stable
 
   const handleProgressMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     e.preventDefault(); // Prevent text selection/default drag behavior
@@ -880,18 +892,9 @@ export default function Timeline(): JSX.Element {
 
       {/* --- Progress Indicator --- */}
       <AnimatePresence>
-        {(initialLoadDone.current || entries.length > 0 || loading) && nickname && (
+        {(initialLoadDone.current && nickname && totalCount > 0) && (
           <motion.div
-            ref={el => {
-              progressIndicatorRef.current = el; // Assign to the ref
-              if (el && !isIndicatorRefReady) { // Set state only once when element appears
-                setIsIndicatorRefReady(true);
-                console.log("Progress indicator ref callback: Set ready state to true.");
-              } else if (!el && isIndicatorRefReady) { // Reset if element disappears
-                setIsIndicatorRefReady(false);
-                console.log("Progress indicator ref callback: Reset ready state to false.");
-              }
-            }}
+            ref={handleProgressRef}
             className="tlc:progress-indicator"
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
