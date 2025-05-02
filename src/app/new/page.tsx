@@ -147,7 +147,7 @@ const EntryCard = forwardRef<HTMLDivElement, EntryCardProps>(({ // 添加 ref �
             {currentDate ? format(currentDate, "yyyy年M月d日") : <span>选择日期</span>}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="center">
+        <PopoverContent className="w-auto p-0 bg-white border-none" align="center">
           <Calendar
             mode="single"
             selected={currentDate}

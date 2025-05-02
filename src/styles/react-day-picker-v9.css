@@ -1,0 +1,60 @@
+/* Force styles for react-day-picker v9 compatibility with Tailwind V4 */
+
+/* Selected day styles */
+.rdp-day[aria-selected="true"] > .rdp-button:not([disabled]),
+.rdp-day[aria-selected="true"]:hover > .rdp-button:not([disabled]),
+.rdp-day[aria-selected="true"]:focus > .rdp-button:not([disabled]) {
+  background-color: hsl(var(--primary)); /* Use primary color variable */
+  color: hsl(var(--primary-foreground)); /* Use primary foreground color variable */
+}
+
+/* Hovered day styles (ensure it doesn't override selected style) */
+.rdp-day:not([aria-selected="true"]) > .rdp-button:not([disabled]):hover {
+   background-color: hsl(var(--accent)); /* Use accent color variable */
+   color: hsl(var(--accent-foreground)); /* Use accent foreground color variable */
+}
+
+/* Today's date style (might already be working, but explicit rule helps) */
+.rdp-day_today:not([aria-selected="true"]) > .rdp-button:not([disabled]) {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+/* Force styles for react-day-picker v9 compatibility - Attempt 2 */
+
+/* Selected day styles - Target TD with aria-selected */
+td[role="gridcell"][aria-selected="true"] {
+  background-color: hsl(var(--primary)) !important; /* Force background */
+  border-radius: var(--radius) !important; /* Ensure rounding */
+}
+/* Style the button inside the selected TD */
+td[role="gridcell"][aria-selected="true"] > button {
+  color: hsl(var(--primary-foreground)) !important; /* Force text color */
+  font-weight: theme('fontWeight.medium') !important; /* Make text bolder */
+  /* Ensure button background doesn't override TD background */
+  background-color: transparent !important;
+}
+/* Remove default hover effect from selected button if needed */
+td[role="gridcell"][aria-selected="true"] > button:hover {
+   background-color: transparent !important;
+}
+
+
+/* Hovered day styles (Target button inside non-selected TD) */
+td[role="gridcell"]:not([aria-selected="true"]) > button:not([disabled]):hover {
+   background-color: hsl(var(--accent)) !important; /* Force hover background */
+   color: hsl(var(--accent-foreground)) !important; /* Force hover text color */
+   border-radius: var(--radius) !important; /* Add rounding on hover */
+}
+
+/* Today's date style - ensure consistent styling for the button */
+/* We assume 'today' styles might be applied to TD via calendar.tsx, let's style the button */
+td[data-today="true"]:not([aria-selected="true"]) > button:not([disabled]) {
+  background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+  border-radius: var(--radius) !important;
+}
+/* Remove hover conflicting with today's highlight */
+td[data-today="true"]:not([aria-selected="true"]) > button:not([disabled]):hover {
+  background-color: hsl(var(--accent)) !important; /* Keep accent color on hover for today */
+}

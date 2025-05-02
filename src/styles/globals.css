@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import './timeline-card.css';
 @import './batch-create-entry.css';
+@import './react-day-picker-v9.css';
 
 *,
 ::before,
