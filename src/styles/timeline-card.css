@@ -9,692 +9,758 @@
     background-repeat: repeat-x;
     padding-top: 3px;
     border-top: none !important;
-  }
-  
-  /* 占位卡片样式 */
-  .tlc\:placeholder-card {
-    position: relative;
-    background-color: var(--card-bg-color, #fffef0);
-    opacity: 0.9;
-    border-radius: 12px;
-    border: 1px solid var(--letter-border-color, #d9b38c);
-    overflow: visible;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-    /* 保留信件风格的背景纹理 */
-    background-image:
-      repeating-linear-gradient(0deg, transparent, transparent 20px, var(--letter-border-color, #d9b38c) 20px, var(--letter-border-color, #d9b38c) 21px),
-      repeating-linear-gradient(90deg, transparent, transparent 20px, var(--letter-border-color, #d9b38c) 20px, var(--letter-border-color, #d9b38c) 21px);
-    background-size: 21px 21px, 21px 21px;
-    background-position: 0 0, 0 0;
-    background-repeat: repeat-y, repeat-x;
-    background-blend-mode: overlay;
-  }
-  
-  /* 占位卡片悬停和激活状态 */
-  .tlc\:placeholder-card:hover,
-  .tlc\:placeholder-card.active {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-    border-color: var(--primary-color, #8B5CF6);
-  }
-  
-  .tlc\:placeholder-card.active {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-    border-color: var(--primary-color, #8B5CF6);
-    z-index: auto; /* Keep z-index rule associated with active state */
-  }
-  
-  /* 添加占位卡片内容居中样式 */
-  .tlc\:placeholder-card .tlc\:card-content {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    padding: 1.75rem 1.25rem 1rem;
-    border-radius: 12px 12px 0 0;
-    background-color: var(--card-bg-color, #fffef0);
-  }
-  
-  .tlc\:placeholder-card .tlc\:content-text {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    font-size: 1.5rem !important;
-    color: var(--gray-500, #6b7280);
-    text-align: center;
-    -webkit-line-clamp: unset;
-    -moz-line-clamp: unset;
-    line-clamp: unset;
-    max-height: none;
-    overflow: visible;
-    font-family: var(--label-font, "Times New Roman", Times, serif) !important;
-    letter-spacing: 0.03em;
-  }
-  
-  /* 显示占位卡片底部，使圆角效果完整 */
-  .tlc\:placeholder-card .tlc\:card-footer {
-    display: block;
-    padding: 0.6rem 1.25rem;
-    border-top: 1px dashed var(--letter-border-color, #d9b38c);
-    border-radius: 0 0 12px 12px;
-    background-color: var(--card-bg-color, #fffef0);
-    height: 43px;
-  }
-  
-  /* 修复占位卡片的层叠关系 */
-  .tlc\:carousel-group.active .tlc\:placeholder-card {
-    opacity: 1;
-    visibility: visible;
-    z-index: auto;
-  }
-  
-  /* Container defined globally, this might be redundant or specific to the module's needs */
-  .tlc\:container {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 1rem;
-    position: relative;
-  }
-  
-  /* 修改导航栏样式为现代居中设计 */
-  .tlc\:group-nav {
-    position: absolute;
-    left: 50%;
-    bottom: 1.0rem;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: row;
-    gap: 1rem;
-    z-index: 200;
-  }
-  
-  .tlc\:nav-btn {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    border: 2px solid var(--primary-color, #8B5CF6);
-    background: white;
-    color: var(--primary-color, #8B5CF6);
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 3px 10px rgba(139, 92, 246, 0.15);
-    font-size: 1.1rem;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .tlc\:nav-btn::before {
-    content: '';
-    position: absolute;
-    top: -1px;
-    left: -1px;
-    right: -1px;
-    bottom: -1px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(4px);
-    z-index: -1;
-  }
-  
-  .tlc\:nav-btn.active {
-    background: var(--primary-color, #8B5CF6);
-    color: white;
-    box-shadow: 0 0 15px var(--primary-glow, rgba(139, 92, 246, 0.6));
-    transform: scale(1.15);
-  }
-  
-  /* 活跃按钮发光效果 */
-  .tlc\:nav-btn.active::after {
-    content: '';
-    position: absolute;
-    top: -4px;
-    left: -4px;
-    right: -4px;
-    bottom: -4px;
-    border-radius: 50%;
-    background: radial-gradient(circle, var(--primary-glow, rgba(139, 92, 246, 0.6)) 0%, transparent 70%);
-    opacity: 0.6;
-    animation: tlc\:pulse 2s infinite; /* Prefixed animation name */
-    z-index: -1;
-  }
-  
-  /* Prefixed animation name */
-  @keyframes tlc\:pulse {
-    0% { transform: scale(0.95); opacity: 0.7; }
-    50% { transform: scale(1.1); opacity: 0.9; }
-    100% { transform: scale(0.95); opacity: 0.7; }
-  }
-  
-  /* 添加悬停效果 */
-  .tlc\:nav-btn:hover:not(.active) {
-    transform: scale(1.1);
-    box-shadow: 0 0 10px var(--primary-glow, rgba(139, 92, 246, 0.6));
-  }
-  
-  /* 3D环绕轮播样式 */
-  .tlc\:carousel-container {
-    perspective: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-    position: relative;
-    width: 100%;
-    height: 580px;
-  }
-  
-  /* Applied as .tlc:carousel-container.tlc:performance-boost ? Check usage */
-  .tlc\:carousel-container.tlc\:performance-boost {
-    backface-visibility: hidden;
-    transform-style: preserve-3d;
-    will-change: transform;
-  }
-  
-  .tlc\:carousel-group {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    transform-style: preserve-3d;
-    display: none;
-    backface-visibility: hidden;
-    will-change: transform, opacity;
-    perspective: 1200px;
-    opacity: 0;
-    pointer-events: none;
-  }
-  
-  .tlc\:carousel-group.active {
-    display: block;
-    opacity: 1;
-    pointer-events: auto;
-    transition: opacity 0.1s ease;
-  }
-  
-  /* 时间轴容器样式 */
-  .tlc\:timeline {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transform-style: preserve-3d;
-    will-change: transform;
-    transform: translateZ(0);
-    transform-origin: center center 0px;
-  }
-  
-  /* 时间轴卡片样式 - 信件风格 */
-  .tlc\:timeline-card {
-    background-color: var(--card-bg-color, #fffef0);
-    border-radius: 12px;
-    overflow: visible;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-    border: 1px solid var(--letter-border-color, #d9b38c);
-    display: flex;
-    flex-direction: column;
-    width: 180px;
-    height: 280px;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    margin-left: -90px;
-    margin-top: -140px;
-    backface-visibility: hidden;
-    transform-origin: center center;
-    cursor: pointer;
-    will-change: transform, opacity;
-    color: var(--letter-text-color, #543c2a);
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    background-image:
-      repeating-linear-gradient(0deg, transparent, transparent 20px, var(--letter-border-color, #d9b38c) 20px, var(--letter-border-color, #d9b38c) 21px),
-      repeating-linear-gradient(90deg, transparent, transparent 20px, var(--letter-border-color, #d9b38c) 20px, var(--letter-border-color, #d9b38c) 21px);
-    background-size: 21px 21px, 21px 21px;
-    background-position: 0 0, 0 0;
-    background-repeat: repeat-y, repeat-x;
-    background-blend-mode: overlay;
-  }
-  
-  /* 发牌动画效果 */
-  .tlc\:carousel-group.active .tlc\:timeline-card {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  
-  /* 波浪效果关键帧动画 */
-  /* Prefixed animation name */
-  @keyframes tlc\:wave-appear {
-    0% { transform: translate3d(0, 30px, -80px) scale(0.3) rotateY(5deg); opacity: 0; }
-    30% { opacity: 0.7; transform: translate3d(0, -15px, 20px) scale(1.08) rotateY(-2deg); }
-    50% { transform: translate3d(0, 7px, -5px) scale(0.95) rotateY(1deg); }
-    70% { transform: translate3d(0, -3px, 2px) scale(1.02) rotateY(-0.5deg); }
-    85% { transform: translate3d(0, 1px, 0px) scale(0.99) rotateY(0.2deg); }
-    100% { transform: translate3d(0, 0, 0) scale(1) rotateY(0); opacity: 1; }
-  }
-  
-  /* 中央卡片弹出并旋转动画 */
-  /* Prefixed animation name */
-  @keyframes tlc\:center-card-pop {
-    0% { transform: translate3d(0, 0, -200px) scale(0.1) rotateY(0deg); opacity: 0; }
-    20% { opacity: 0.9; transform: translate3d(0, 0, 100px) scale(0.6) rotateY(90deg); }
-    40% { transform: translate3d(0, -20px, 200px) scale(0.8) rotateY(180deg); }
-    60% { transform: translate3d(0, -10px, 150px) scale(1.2) rotateY(270deg); }
-    80% { transform: translate3d(0, 5px, 50px) scale(0.95) rotateY(330deg); }
-    95% { transform: translate3d(0, -2px, 20px) scale(1.02) rotateY(350deg); }
-    100% { transform: translate3d(0, 0, 0) scale(1) rotateY(360deg); opacity: 1; }
-  }
-  
-  /* 非激活组的卡片 */
-  .tlc\:carousel-group:not(.active) .tlc\:timeline-card {
-    opacity: 0;
-    transform: translate3d(0, 100px, 0) scale(0.5);
-    pointer-events: none;
-  }
-  
-  /* 优化中间卡片快速预加载的样式 */
-  .tlc\:carousel-group .tlc\:timeline-card.tlc\:preload { /* Prefixed preload */
-    visibility: visible !important;
-    opacity: 0 !important;
-    position: absolute !important;
-    z-index: 999 !important;
-    animation: tlc\:quick-flash 0.1s ease-in; /* Prefixed animation name */
-  }
-  
-  /* 快速闪烁动画，用于创造中间卡片即将出现的预期感 */
-  /* Prefixed animation name */
-  @keyframes tlc\:quick-flash {
-    0% { opacity: 0; }
-    50% { opacity: 0.1; }
-    100% { opacity: 0; }
-  }
-  
-  .tlc\:timeline-card:hover {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-    border-color: var(--primary-color, #8B5CF6);
-  }
-  
-  .tlc\:timeline-card.active {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-    border-color: var(--primary-color, #8B5CF6);
-  }
-  
-  /* 只允许激活卡片的内容可选择 */
-  .tlc\:timeline-card.active .tlc\:content-text {
-    user-select: text;
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-    cursor: auto;
-  }
-  
-  /* 简化光晕效果 */
-  /* Prefixed animation name */
-  @keyframes tlc\:glow-pulse {
-    0% { box-shadow: 0 0 5px var(--card-glow-color); border-color: var(--primary-color); }
-    50% { box-shadow: 0 0 15px var(--card-glow-color); border-color: var(--primary-color); }
-    100% { box-shadow: 0 0 5px var(--card-glow-color); border-color: var(--primary-color); }
-  }
-  
-  .tlc\:hover-scale { /* Prefixed */
-    animation: tlc\:glow-pulse 2s infinite; /* Prefixed */
-    transform: translateZ(0) scale(1);
-  }
-  
-  /* 移除过度的阴影效果 */
-  .tlc\:timeline-card::after {
-    display: none;
-  }
-  
-  .tlc\:card-date {
-    position: absolute;
-    top: -0.6rem;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: var(--primary-color, #8B5CF6);
-    color: white;
-    font-weight: bold;
-    padding: 0.3rem 0.8rem;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    box-shadow: 0 2px 5px rgba(139, 92, 246, 0.3);
-    z-index: 10;
-    white-space: nowrap;
-    font-family: var(--label-font, "Times New Roman", Times, serif) !important;
-    border: none;
-    opacity: 0.7;
-    transition: opacity 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  .tlc\:timeline-card:hover .tlc\:card-date,
-  .tlc\:timeline-card.active .tlc\:card-date {
-    background-color: #7c3aed;
-    box-shadow: 0 0 8px rgba(139, 92, 246, 0.5);
-    opacity: 1;
-  }
-  
-  .tlc\:card-content {
-    padding: 1.75rem 1.25rem 1rem;
-    flex-grow: 1;
-    overflow: hidden;
-    position: relative;
-    border-radius: 12px 12px 0 0;
-    display: flex;
-    flex-direction: column;
-    background-color: var(--card-bg-color, #fffef0);
-  }
-  
-  /* 添加信封装饰 */
-  .tlc\:card-content::before {
-    content: '';
-    position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
-    width: 20px;
-    height: 20px;
-    background: var(--stamp-color, #804a00);
-    opacity: 0.7;
-    border-radius: 2px;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    z-index: 1;
-  }
-  
-  /* 信件内容样式 */
-  .tlc\:content-text {
-    line-height: var(--line-height, 1.6);
-    text-overflow: ellipsis;
-    position: relative;
-    cursor: pointer;
-    font-family: var(--letter-font, "LXGW WenKai Screen R", "华文楷体", serif) !important;
-    font-size: 0.75rem !important;
-    color: var(--ink-blue, #2c3e50);
-    text-align: justify;
-    padding: 0.5rem;
-    background-image: linear-gradient(transparent 19px, var(--letter-border-color, #d9b38c) 20px);
-    background-size: 20px 20px;
-    background-position: 0 4px;
-    letter-spacing: 0.03em;
-    white-space: pre-wrap;
-    border-bottom: none;
-    display: -webkit-box;
-    -webkit-line-clamp: var(--lines-to-show, 6);
-    -moz-line-clamp: var(--lines-to-show, 6);
-    line-clamp: var(--lines-to-show, 6);
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    max-height: calc(var(--line-height, 1.6) * var(--lines-to-show, 6) * 1em);
-    opacity: 0.4;
-    transition: opacity 0.3s ease;
-  }
-  
-  /* 修改展开内容样式 */
-  .tlc\:content-text.tlc\:expanded { /* Prefixed */
-    display: block;
-    -webkit-line-clamp: unset;
-    -moz-line-clamp: unset;
-    line-clamp: unset;
-    max-height: none;
-    position: absolute;
-    top: 2rem;
-    left: 1.25rem;
-    right: 1.25rem;
-    background-color: var(--card-bg-color, #fffef0);
-    z-index: 20;
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 0 0 2px var(--letter-border-color, #d9b38c);
-    cursor: auto;
-    overflow-y: auto;
-    max-height: 400px;
-    font-family: var(--letter-font, "LXGW WenKai Screen R", "华文楷体", serif) !important;
-    font-size: 0.8rem !important;
-    color: var(--ink-blue, #2c3e50);
-    letter-spacing: 0.03em;
-    background-image: linear-gradient(transparent 19px, var(--letter-border-color, #d9b38c) 20px);
-    background-size: 20px 20px;
-    border: 1px solid var(--letter-border-color, #d9b38c);
-  }
-  
-  .tlc\:content-text.tlc\:expanded::after {
-    content: '点击空白处关闭';
-    display: block;
-    text-align: center;
-    font-size: 0.8rem;
-    color: var(--gray-500, #6b7280);
-    margin-top: 1rem;
-    font-style: italic;
-    background: none;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
-  
-  .tlc\:content-fade {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 40px;
-    background: linear-gradient(to bottom, rgba(255, 254, 240, 0), var(--card-bg-color, #fffef0));
-    pointer-events: none;
-    z-index: 3;
-    opacity: 1;
-    transition: opacity 0.3s ease;
-  }
-  
-  .tlc\:timeline-card.active .tlc\:content-fade,
-  .tlc\:timeline-card:hover .tlc\:content-fade {
-    opacity: 0;
-  }
-  
-  .tlc\:card-footer {
-    padding: 0.6rem 1.25rem;
-    border-top: 1px dashed var(--letter-border-color, #d9b38c);
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    background-color: var(--card-bg-color, #fffef0);
-    border-radius: 0 0 12px 12px;
-    overflow: hidden;
-    opacity: 0.5;
-    transition: opacity 0.3s ease;
-  }
-  
-  .tlc\:timeline-card.active .tlc\:card-footer,
-  .tlc\:timeline-card:hover .tlc\:card-footer {
-    opacity: 1;
-  }
-  
-  .tlc\:icon-holder {
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    color: var(--letter-text-color, #543c2a);
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .tlc\:icon-holder:hover {
-    background-color: var(--primary-light, rgba(139, 92, 246, 0.2));
-    color: var(--primary-color, #8B5CF6);
-  }
-  
-  /* 进度指示器样式 - 现代悬浮球设计 */
-  .tlc\:progress-indicator {
-    width: 100px;
-    height: 100px;
-    position: fixed;
-    cursor: grab;
-    z-index: 999;
-    background: transparent;
-    border: none;
-    outline: none;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-  }
-  
-  .tlc\:progress-circle {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
-    background: conic-gradient(
-      #3a86ff var(--progress-percent, 0%),
-      #e0e0e0 var(--progress-percent, 0%)
-    );
-    box-shadow: 0 4px 15px rgba(58, 134, 255, 0.3);
-  }
-  
-  .tlc\:progress-circle::before {
-    content: '';
-    position: absolute;
-    width: 85%;
-    height: 85%;
-    border-radius: 50%;
-    background: white;
-    z-index: 1;
-    display: block !important;
-  }
-  
-  .tlc\:progress-inner {
-    width: 80%;
-    height: 80%;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.9);
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    z-index: 2;
-  }
-  
-  .tlc\:progress-count {
-    font-size: 1.0rem;
-    font-weight: 700;
-    color: #333;
-    margin: 0;
-    line-height: 1;
-  }
-  
-  .tlc\:progress-percent {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: #3a86ff;
-    margin-top: 2px;
-  }
-  
-  .tlc\:progress-active {
-    position: absolute;
-    bottom: -10px;
-    background: #b066ff;
-    color: white;
-    font-size: 0.70rem;
-    padding: 2px 8px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(176, 102, 255, 0.4);
-    font-weight: 500;
-    z-index: 5;
-  }
-  
-  .tlc\:progress-indicator.tlc\:dragging { /* Prefixed */
-    cursor: grabbing;
-    transform: scale(1.05);
-  }
-  
-  .tlc\:progress-indicator.tlc\:dragging .tlc\:progress-circle {
-    box-shadow: 0 8px 25px rgba(58, 134, 255, 0.5);
-    animation: tlc\:pulse-border 1s infinite; /* Prefixed */
-  }
-  
-  /* 添加模态框和遮罩层样式 */
-  .tlc\:modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.6);
-    z-index: 1000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .tlc\:content-modal {
-    background-color: white;
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    position: relative;
-    overflow-y: auto;
-    border: 2px solid var(--primary-color, #8B5CF6);
-  }
-  
-  .tlc\:modal-close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 30px;
-    height: 30px;
-    background-color: var(--gray-200, #e5e7eb);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 20px;
-    color: var(--gray-700, #374151);
-    border: none;
-  }
-  
-  .tlc\:modal-close:hover {
-    background-color: var(--gray-300, #d1d5db);
-  }
-  
-  .tlc\:modal-date {
-    color: var(--primary-color, #8B5CF6);
-    font-weight: bold;
-    margin-bottom: 15px;
-    font-size: 1.1rem;
-    border-bottom: 1px solid var(--gray-200, #e5e7eb);
-    padding-bottom: 10px;
-  }
-  
-  .tlc\:modal-content {
-    white-space: pre-wrap;
-    line-height: 1.6;
-    font-family: var(--letter-font, "LXGW WenKai Screen R", "华文楷体", serif) !important;
-    font-size: 1.0rem !important;
-    color: var(--ink-blue, #2c3e50);
-    letter-spacing: 0.03em;
-    padding: 0.5rem;
-    background-color: var(--card-bg-color, #fffef0);
-    border-radius: 8px;
-    background-image: linear-gradient(transparent 19px, var(--letter-border-color, #d9b38c) 20px);
-    background-size: 20px 20px;
-    min-height: 200px;
-    padding-bottom: 2rem;
-  }
-  
-  /* 添加拖动时的动画效果 */
-  /* Prefixed animation name */
-  @keyframes tlc\:pulse-border {
-    0% { border-color: rgba(139, 92, 246, 0.2); }
-    50% { border-color: rgba(139, 92, 246, 0.5); }
-    100% { border-color: rgba(139, 92, 246, 0.2); }
-  }
+}
+
+/* --- Placeholder Card Styles (Based on .tlc:timeline-card) --- */
+
+/* Base placeholder card style - Copied from .tlc:timeline-card */
+.tlc\:placeholder-card {
+  background-color: var(--card-bg-color, #fffef0);
+  border-radius: 12px;
+  overflow: visible; /* Important for date positioning */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--letter-border-color, #d9b38c);
+  display: flex;
+  flex-direction: column;
+  width: 180px;
+  height: 280px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -90px;
+  margin-top: -140px;
+  backface-visibility: hidden;
+  transform-origin: center center;
+  cursor: default; /* Placeholder not clickable in the same way */
+  will-change: transform, opacity;
+  color: var(--letter-text-color, #543c2a);
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  opacity: 0.9; /* Slightly different opacity for placeholder */
+  visibility: hidden; /* Default state copied, managed by .active group */
+  pointer-events: none; /* Default state copied */
+  background-image: /* Keep the letter background */
+    repeating-linear-gradient(0deg, transparent, transparent 20px, var(--letter-border-color, #d9b38c) 20px, var(--letter-border-color, #d9b38c) 21px),
+    repeating-linear-gradient(90deg, transparent, transparent 20px, var(--letter-border-color, #d9b38c) 20px, var(--letter-border-color, #d9b38c) 21px);
+  background-size: 21px 21px, 21px 21px;
+  background-position: 0 0, 0 0;
+  background-repeat: repeat-y, repeat-x;
+  background-blend-mode: overlay;
+}
+
+/* Placeholder hover/active state - Copied from original placeholder style */
+.tlc\:placeholder-card:hover,
+.tlc\:placeholder-card.active {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  border-color: var(--primary-color, #8B5CF6);
+}
+
+.tlc\:placeholder-card.active {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  /* z-index is handled by the carousel logic/group active state */
+}
+
+/* Placeholder Date - Copied from .tlc:card-date */
+.tlc\:placeholder-card .tlc\:card-date {
+  position: absolute;
+  top: -0.6rem; /* Same positioning as normal card */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--primary-color, #8B5CF6); /* Same style */
+  color: white;
+  font-weight: bold;
+  padding: 0.3rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  box-shadow: 0 2px 5px rgba(139, 92, 246, 0.3);
+  z-index: 10; /* Same z-index */
+  white-space: nowrap;
+  font-family: var(--label-font, "Times New Roman", Times, serif) !important;
+  border: none;
+  opacity: 0.7; /* Base opacity */
+  transition: opacity 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+  pointer-events: none; /* Ensure date text itself isn't interactive */
+}
+
+/* Placeholder Date hover/active (match parent card state) - Copied */
+.tlc\:placeholder-card:hover .tlc\:card-date,
+.tlc\:placeholder-card.active .tlc\:card-date {
+  background-color: #7c3aed;
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.5);
+  opacity: 1;
+}
+
+/* Placeholder Content Area - Copied from .tlc:card-content, adjusted */
+.tlc\:placeholder-card .tlc\:card-content {
+  padding: 1.75rem 1.25rem 1rem; /* Same padding */
+  flex-grow: 1;
+  overflow: hidden; /* Content area can hide overflow */
+  position: relative;
+  border-radius: 12px 12px 0 0; /* Keep top radius */
+  display: flex; /* Use flex to center the text container */
+  flex-direction: column; /* Align text container vertically */
+  justify-content: center; /* Center text container vertically */
+  align-items: center; /* Center text container horizontally */
+  background-color: var(--card-bg-color, #fffef0); /* Restore background */
+}
+
+/* Placeholder Content Text - Specific styles */
+.tlc\:placeholder-card .tlc\:content-text {
+  /* Inherits display:flex, justify/align:center from parent now */
+  width: 100%; /* Take full width */
+  height: 100%; /* Take full height */
+  display: flex; /* Added */
+  justify-content: center; /* Added */
+  align-items: center; /* Added */
+  font-size: 1.5rem !important;
+  color: var(--gray-500, #6b7280);
+  text-align: center;
+  line-clamp: unset;
+  max-height: none;
+  overflow: visible;
+  font-family: var(--label-font, "Times New Roman", Times, serif) !important;
+  letter-spacing: 0.03em;
+  /* Remove text-specific background/lines */
+  background-image: none;
+}
+
+/* Placeholder Footer - Copied from .tlc:card-footer, adjusted */
+.tlc\:placeholder-card .tlc\:card-footer {
+  padding: 0.6rem 1.25rem; /* Same padding */
+  border-top: none;
+  display: block; /* Use block as it's just an empty spacer */
+  /* align-items: center; */ /* Not needed */
+  /* justify-content: flex-end; */ /* Not needed */
+  /* gap: 0.5rem; */ /* Not needed */
+  background-color: var(--card-bg-color, #fffef0); /* Restore background */
+  border-radius: 0 0 12px 12px; /* Keep bottom radius */
+  /* overflow: hidden; */ /* Removed - let parent handle overflow */
+  opacity: 1; /* Keep footer visible */
+  height: 43px; /* Match normal footer height */
+}
+
+/* --- End Placeholder Card Styles --- */
+
+
+/* --- Normal Timeline Card Styles (Keep Existing) --- */
+
+/* Container defined globally, this might be redundant or specific to the module's needs */
+.tlc\:container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  position: relative;
+}
+
+/* 修改导航栏样式为现代居中设计 */
+.tlc\:group-nav {
+  position: absolute;
+  left: 50%;
+  bottom: 1.0rem;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  z-index: 200;
+}
+
+.tlc\:nav-btn {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  border: 2px solid var(--primary-color, #8B5CF6);
+  background: white;
+  color: var(--primary-color, #8B5CF6);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(139, 92, 246, 0.15);
+  font-size: 1.1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.tlc\:nav-btn::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: -1;
+}
+
+.tlc\:nav-btn.active {
+  background: var(--primary-color, #8B5CF6);
+  color: white;
+  box-shadow: 0 0 15px var(--primary-glow, rgba(139, 92, 246, 0.6));
+  transform: scale(1.15);
+}
+
+/* 活跃按钮发光效果 */
+.tlc\:nav-btn.active::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--primary-glow, rgba(139, 92, 246, 0.6)) 0%, transparent 70%);
+  opacity: 0.6;
+  animation: tlc\:pulse 2s infinite; /* Prefixed animation name */
+  z-index: -1;
+}
+
+/* Prefixed animation name */
+@keyframes tlc\:pulse {
+  0% { transform: scale(0.95); opacity: 0.7; }
+  50% { transform: scale(1.1); opacity: 0.9; }
+  100% { transform: scale(0.95); opacity: 0.7; }
+}
+
+/* 添加悬停效果 */
+.tlc\:nav-btn:hover:not(.active) {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px var(--primary-glow, rgba(139, 92, 246, 0.6));
+}
+
+/* 3D环绕轮播样式 */
+.tlc\:carousel-container {
+  perspective: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  width: 100%;
+  height: 580px;
+}
+
+/* Applied as .tlc:carousel-container.tlc:performance-boost ? Check usage */
+.tlc\:carousel-container.tlc\:performance-boost {
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.tlc\:carousel-group {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  display: none;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+  perspective: 1200px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tlc\:carousel-group.active {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.1s ease;
+}
+
+/* 时间轴容器样式 */
+.tlc\:timeline {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transform: translateZ(0);
+  transform-origin: center center 0px;
+}
+
+/* 时间轴卡片样式 - 信件风格 */
+.tlc\:timeline-card {
+  background-color: var(--card-bg-color, #fffef0);
+  border-radius: 12px;
+  overflow: visible;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--letter-border-color, #d9b38c);
+  display: flex;
+  flex-direction: column;
+  width: 180px;
+  height: 280px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -90px;
+  margin-top: -140px;
+  backface-visibility: hidden;
+  transform-origin: center center;
+  cursor: pointer;
+  will-change: transform, opacity;
+  color: var(--letter-text-color, #543c2a);
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 20px, var(--letter-border-color, #d9b38c) 20px, var(--letter-border-color, #d9b38c) 21px),
+    repeating-linear-gradient(90deg, transparent, transparent 20px, var(--letter-border-color, #d9b38c) 20px, var(--letter-border-color, #d9b38c) 21px);
+  background-size: 21px 21px, 21px 21px;
+  background-position: 0 0, 0 0;
+  background-repeat: repeat-y, repeat-x;
+  background-blend-mode: overlay;
+}
+
+/* 发牌动画效果 */
+.tlc\:carousel-group.active .tlc\:timeline-card {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+/* 波浪效果关键帧动画 */
+/* Prefixed animation name */
+@keyframes tlc\:wave-appear {
+  0% { transform: translate3d(0, 30px, -80px) scale(0.3) rotateY(5deg); opacity: 0; }
+  30% { opacity: 0.7; transform: translate3d(0, -15px, 20px) scale(1.08) rotateY(-2deg); }
+  50% { transform: translate3d(0, 7px, -5px) scale(0.95) rotateY(1deg); }
+  70% { transform: translate3d(0, -3px, 2px) scale(1.02) rotateY(-0.5deg); }
+  85% { transform: translate3d(0, 1px, 0px) scale(0.99) rotateY(0.2deg); }
+  100% { transform: translate3d(0, 0, 0) scale(1) rotateY(0); opacity: 1; }
+}
+
+/* 中央卡片弹出并旋转动画 */
+/* Prefixed animation name */
+@keyframes tlc\:center-card-pop {
+  0% { transform: translate3d(0, 0, -200px) scale(0.1) rotateY(0deg); opacity: 0; }
+  20% { opacity: 0.9; transform: translate3d(0, 0, 100px) scale(0.6) rotateY(90deg); }
+  40% { transform: translate3d(0, -20px, 200px) scale(0.8) rotateY(180deg); }
+  60% { transform: translate3d(0, -10px, 150px) scale(1.2) rotateY(270deg); }
+  80% { transform: translate3d(0, 5px, 50px) scale(0.95) rotateY(330deg); }
+  95% { transform: translate3d(0, -2px, 20px) scale(1.02) rotateY(350deg); }
+  100% { transform: translate3d(0, 0, 0) scale(1) rotateY(360deg); opacity: 1; }
+}
+
+/* 非激活组的卡片 */
+.tlc\:carousel-group:not(.active) .tlc\:timeline-card {
+  opacity: 0;
+  transform: translate3d(0, 100px, 0) scale(0.5);
+  pointer-events: none;
+}
+
+/* 优化中间卡片快速预加载的样式 */
+.tlc\:carousel-group .tlc\:timeline-card.tlc\:preload { /* Prefixed preload */
+  visibility: visible !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  z-index: 999 !important;
+  animation: tlc\:quick-flash 0.1s ease-in; /* Prefixed animation name */
+}
+
+/* 快速闪烁动画，用于创造中间卡片即将出现的预期感 */
+/* Prefixed animation name */
+@keyframes tlc\:quick-flash {
+  0% { opacity: 0; }
+  50% { opacity: 0.1; }
+  100% { opacity: 0; }
+}
+
+.tlc\:timeline-card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  border-color: var(--primary-color, #8B5CF6);
+}
+
+.tlc\:timeline-card.active {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  border-color: var(--primary-color, #8B5CF6);
+}
+
+/* 只允许激活卡片的内容可选择 */
+.tlc\:timeline-card.active .tlc\:content-text {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  cursor: auto;
+}
+
+/* 简化光晕效果 */
+/* Prefixed animation name */
+@keyframes tlc\:glow-pulse {
+  0% { box-shadow: 0 0 5px var(--card-glow-color); border-color: var(--primary-color); }
+  50% { box-shadow: 0 0 15px var(--card-glow-color); border-color: var(--primary-color); }
+  100% { box-shadow: 0 0 5px var(--card-glow-color); border-color: var(--primary-color); }
+}
+
+.tlc\:hover-scale { /* Prefixed */
+  animation: tlc\:glow-pulse 2s infinite; /* Prefixed */
+  transform: translateZ(0) scale(1);
+}
+
+/* 移除过度的阴影效果 */
+.tlc\:timeline-card::after {
+  display: none;
+}
+
+.tlc\:card-date {
+  position: absolute;
+  top: -0.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--primary-color, #8B5CF6);
+  color: white;
+  font-weight: bold;
+  padding: 0.3rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  box-shadow: 0 2px 5px rgba(139, 92, 246, 0.3);
+  z-index: 10;
+  white-space: nowrap;
+  font-family: var(--label-font, "Times New Roman", Times, serif) !important;
+  border: none;
+  opacity: 0.7;
+  transition: opacity 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tlc\:timeline-card:hover .tlc\:card-date,
+.tlc\:timeline-card.active .tlc\:card-date {
+  background-color: #7c3aed;
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.5);
+  opacity: 1;
+}
+
+.tlc\:card-content {
+  padding: 1.75rem 1.25rem 1rem;
+  flex-grow: 1;
+  overflow: hidden;
+  position: relative;
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--card-bg-color, #fffef0);
+}
+
+/* 添加信封装饰 */
+.tlc\:card-content::before {
+  content: '';
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  width: 20px;
+  height: 20px;
+  background: var(--stamp-color, #804a00);
+  opacity: 0.7;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+/* 信件内容样式 */
+.tlc\:content-text {
+  line-height: var(--line-height, 1.6);
+  text-overflow: ellipsis;
+  position: relative;
+  cursor: pointer;
+  font-family: var(--letter-font, "LXGW WenKai Screen R", "华文楷体", serif) !important;
+  font-size: 0.75rem !important;
+  color: var(--ink-blue, #2c3e50);
+  text-align: justify;
+  padding: 0.5rem;
+  background-image: linear-gradient(transparent 19px, var(--letter-border-color, #d9b38c) 20px);
+  background-size: 20px 20px;
+  background-position: 0 4px;
+  letter-spacing: 0.03em;
+  white-space: pre-wrap;
+  border-bottom: none;
+  display: -webkit-box;
+  -webkit-line-clamp: var(--lines-to-show, 6);
+  -moz-line-clamp: var(--lines-to-show, 6);
+  line-clamp: var(--lines-to-show, 6);
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-height: calc(var(--line-height, 1.6) * var(--lines-to-show, 6) * 1em);
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+/* 修改展开内容样式 */
+.tlc\:content-text.tlc\:expanded { /* Prefixed */
+  display: block;
+  -webkit-line-clamp: unset;
+  -moz-line-clamp: unset;
+  line-clamp: unset;
+  max-height: none;
+  position: absolute;
+  top: 2rem;
+  left: 1.25rem;
+  right: 1.25rem;
+  background-color: var(--card-bg-color, #fffef0);
+  z-index: 20;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 0 0 2px var(--letter-border-color, #d9b38c);
+  cursor: auto;
+  overflow-y: auto;
+  max-height: 400px;
+  font-family: var(--letter-font, "LXGW WenKai Screen R", "华文楷体", serif) !important;
+  font-size: 0.8rem !important;
+  color: var(--ink-blue, #2c3e50);
+  letter-spacing: 0.03em;
+  background-image: linear-gradient(transparent 19px, var(--letter-border-color, #d9b38c) 20px);
+  background-size: 20px 20px;
+  border: 1px solid var(--letter-border-color, #d9b38c);
+}
+
+.tlc\:content-text.tlc\:expanded::after {
+  content: '点击空白处关闭';
+  display: block;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--gray-500, #6b7280);
+  margin-top: 1rem;
+  font-style: italic;
+  background: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.tlc\:content-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  background: linear-gradient(to bottom, rgba(255, 254, 240, 0), var(--card-bg-color, #fffef0));
+  pointer-events: none;
+  z-index: 3;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.tlc\:timeline-card.active .tlc\:content-fade,
+.tlc\:timeline-card:hover .tlc\:content-fade {
+  opacity: 0;
+}
+
+.tlc\:card-footer {
+  padding: 0.6rem 1.25rem;
+  border-top: 1px dashed var(--letter-border-color, #d9b38c);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  background-color: var(--card-bg-color, #fffef0);
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.tlc\:timeline-card.active .tlc\:card-footer,
+.tlc\:timeline-card:hover .tlc\:card-footer {
+  opacity: 1;
+}
+
+.tlc\:icon-holder {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--letter-text-color, #543c2a);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tlc\:icon-holder:hover {
+  background-color: var(--primary-light, rgba(139, 92, 246, 0.2));
+  color: var(--primary-color, #8B5CF6);
+}
+
+/* 进度指示器样式 - 现代悬浮球设计 */
+.tlc\:progress-indicator {
+  width: 100px;
+  height: 100px;
+  position: fixed;
+  cursor: grab;
+  z-index: 999;
+  background: transparent;
+  border: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.tlc\:progress-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  background: conic-gradient(
+    #3a86ff var(--progress-percent, 0%),
+    #e0e0e0 var(--progress-percent, 0%)
+  );
+  box-shadow: 0 4px 15px rgba(58, 134, 255, 0.3);
+}
+
+.tlc\:progress-circle::before {
+  content: '';
+  position: absolute;
+  width: 85%;
+  height: 85%;
+  border-radius: 50%;
+  background: white;
+  z-index: 1;
+  display: block !important;
+}
+
+.tlc\:progress-inner {
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.tlc\:progress-count {
+  font-size: 1.0rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+  line-height: 1;
+}
+
+.tlc\:progress-percent {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #3a86ff;
+  margin-top: 2px;
+}
+
+.tlc\:progress-active {
+  position: absolute;
+  bottom: -10px;
+  background: #b066ff;
+  color: white;
+  font-size: 0.70rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(176, 102, 255, 0.4);
+  font-weight: 500;
+  z-index: 5;
+}
+
+.tlc\:progress-indicator.tlc\:dragging { /* Prefixed */
+  cursor: grabbing;
+  transform: scale(1.05);
+}
+
+.tlc\:progress-indicator.tlc\:dragging .tlc\:progress-circle {
+  box-shadow: 0 8px 25px rgba(58, 134, 255, 0.5);
+  animation: tlc\:pulse-border 1s infinite; /* Prefixed */
+}
+
+/* 添加模态框和遮罩层样式 */
+.tlc\:modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tlc\:content-modal {
+  background-color: white;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow-y: auto;
+  border: 2px solid var(--primary-color, #8B5CF6);
+}
+
+.tlc\:modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  background-color: var(--gray-200, #e5e7eb);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--gray-700, #374151);
+  border: none;
+}
+
+.tlc\:modal-close:hover {
+  background-color: var(--gray-300, #d1d5db);
+}
+
+.tlc\:modal-date {
+  color: var(--primary-color, #8B5CF6);
+  font-weight: bold;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  border-bottom: 1px solid var(--gray-200, #e5e7eb);
+  padding-bottom: 10px;
+}
+
+.tlc\:modal-content {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  font-family: var(--letter-font, "LXGW WenKai Screen R", "华文楷体", serif) !important;
+  font-size: 1.0rem !important;
+  color: var(--ink-blue, #2c3e50);
+  letter-spacing: 0.03em;
+  padding: 0.5rem;
+  background-color: var(--card-bg-color, #fffef0);
+  border-radius: 8px;
+  background-image: linear-gradient(transparent 19px, var(--letter-border-color, #d9b38c) 20px);
+  background-size: 20px 20px;
+  min-height: 200px;
+  padding-bottom: 2rem;
+}
+
+/* 添加拖动时的动画效果 */
+/* Prefixed animation name */
+@keyframes tlc\:pulse-border {
+  0% { border-color: rgba(139, 92, 246, 0.2); }
+  50% { border-color: rgba(139, 92, 246, 0.5); }
+  100% { border-color: rgba(139, 92, 246, 0.2); }
+}
+
+/* Make placeholder cards visible in active group */
+.tlc\:carousel-group.active .tlc\:placeholder-card {
+  opacity: 0.9; /* Use placeholder base opacity */
+  visibility: visible;
+  pointer-events: default; /* Allow hover styles but maybe not clicks */
+  /* Add transitions matching timeline-card if needed, or keep simple show/hide */
+}
