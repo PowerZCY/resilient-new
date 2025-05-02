@@ -387,6 +387,7 @@
   -moz-user-select: text;
   -ms-user-select: text;
   cursor: auto;
+  opacity: 1; /* 新增：确保激活时文字完全不透明 */
 }
 
 /* 简化光晕效果 */
