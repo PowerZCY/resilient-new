@@ -54,7 +54,7 @@ export function Header() {
                   appearance={{
                     elements: {
                       organizationSwitcherTrigger:
-                        "relative z-10 px-4 py-3 h-10 !rounded-full text-sm font-medium bg-white text-purple-900 border border-gray-200 hover:bg-gray-50 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition flex items-center justify-between box-border",
+                        "relative z-10 px-4 py-3 h-10 !rounded-full text-sm font-medium bg-white text-purple-900 border border-gray-200 hover:bg-gray-50 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition flex items-center justify-between box-border w-40",
                       organizationSwitcherTriggerIcon: "text-purple-900 shrink-0",
                     },
                   }}

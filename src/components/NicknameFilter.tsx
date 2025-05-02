@@ -30,7 +30,7 @@ export default function NicknameFilter(): JSX.Element {
               afterSignOutUrl='/'
               appearance={{
                 elements: {
-                  userButtonAvatarBox: "w-10 h-10",
+                  userButtonAvatarBox: "w-8 h-8",
                 }
               }}
             >
@@ -50,7 +50,7 @@ export default function NicknameFilter(): JSX.Element {
               </UserButton.MenuItems>
             </UserButton>
           ) : (
-            <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
+            <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
           )}
         </div>
         
