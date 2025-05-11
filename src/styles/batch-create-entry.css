@@ -1,4 +1,3 @@
-
 /* Batch Entry Styles (Moved from CSS Module with bce: prefix) */
 /* Original file: src/styles/batch-entry.module.css */
 
@@ -142,8 +141,6 @@
     background-size: 100% 30px;
     background-position: 0 2.25rem;
     line-height: 30px;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
   }
   
   .bce\:card-content::before {
