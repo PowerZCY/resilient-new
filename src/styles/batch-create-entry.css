@@ -1,7 +1,23 @@
 /* Batch Entry Styles (Moved from CSS Module with bce: prefix) */
 /* Original file: src/styles/batch-entry.module.css */
 
-.bce\:page-container {
+/* Moved variables from globals.css specific to batch-create-entry */
+.bce\:page-container { /* Scoped variables to the page container */
+    --primary-color: #8B5CF6;
+    --primary-light: rgba(139, 92, 246, 0.2);
+    --primary-glow: rgba(139, 92, 246, 0.6);
+    --gray-100: #f3f4f6;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-700: #374151;
+    --card-bg-color: #fffef0;
+    --card-ornament-color: #8B5CF6; /* Moved but unused? */
+    --card-glow-color: rgba(139, 92, 246, 0.5); /* Moved but unused? */
+    --letter-font: 'LXGW WenKai Screen R', "华文楷体", "\534E\6587\6977\4F53", "汉仪悠然体简", "HYYouRanTiJ", "STKaiti", serif;
+    --label-font: "Times New Roman", Times, serif;
+    --letter-text-color: #543c2a;
+    --letter-border-color: #d9b38c;
     display: flex;
     flex-direction: column;
     flex-grow: 1;

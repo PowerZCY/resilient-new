@@ -469,10 +469,10 @@ function NewEntryContent() {
       <div className="bce:centered-content"> {/* Updated className */}
         <div className="bce:main-header"> {/* Updated className */}
           <div className="bce:header-left"> {/* Updated className */}
-            <h1>
               <CalendarIconLucide className="icon h-6 w-6" /> {/* Tailwind class, not from batch-entry */}
+              <span className="font-medium [.uwu_&]:hidden [header_&]:text-[15px]">
               上报好体验、好事儿、成就
-            </h1>
+              </span>
             <div className="bce:entry-count">{entries.length}/{MAX_ENTRIES} 组</div> {/* Updated className */}
           </div>
           <div className="bce:header-right"> {/* Updated className */}
