@@ -23,7 +23,6 @@ import { Footer } from "@/components/Footer";
 import { showBanner } from '@/lib/appConfig';
 import { baseOptions } from './layout.config';
 import { homeNavLinks } from './layout.config';
-import { levelNavLinks } from './layout.config';
 import { NicknameProvider } from '@/context/NicknameContext';
 import { auth } from '@clerk/nextjs/server';
 import ClerkOrganization from '@/components/ClerkOrganization';

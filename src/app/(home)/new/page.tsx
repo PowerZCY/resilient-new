@@ -3,7 +3,6 @@
 import { Suspense, useCallback, useEffect, useRef, useState, forwardRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Calendar as CalendarIconLucide, Loader2, Plus, Send, Trash2 } from 'lucide-react';
-import { Header } from '@/components/Header';
 import { useNickname } from '@/context/NicknameContext'; // <-- Import useNickname
 
 // Import shadcn/ui components
