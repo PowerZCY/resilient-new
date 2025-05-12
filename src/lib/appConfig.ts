@@ -7,14 +7,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-// 菜单项类型定义
-export type MenuItem = {
-  key: string;        // 唯一标识，也用作国际化翻译键
-  href: string;       // 链接地址
-  children?: MenuItem[]; // 子菜单项
-  external?: boolean; // 是否为外部链接
-};
-
 // Define the structure of your user data
 export type UserData ={
   name: string;
@@ -35,32 +27,6 @@ const admin: UserData[] = [
   }
 ]
 
-// 菜单配置
-const menu: MenuItem[] = [
-  {
-    key: '征途',
-    href: '/blog',
-  },
-  // {
-  //   key: 'docs',
-  //   href: '/docs',
-  //   children: [
-  //     {
-  //       key: 'gettingStarted',
-  //       href: '/docs/getting-started',
-  //     },
-  //     {
-  //       key: 'guides',
-  //       href: '/docs/guides',
-  //     },
-  //     {
-  //       key: 'apiReference',
-  //       href: '/docs/api',
-  //     },
-  //   ],
-  // }
-];
-
 /**
  * 应用配置对象，集中管理所有环境变量和配置项
  */
@@ -75,25 +41,6 @@ export const appConfig = {
       en: "English"
     },
   },
-  // 博客配置
-  blog: {
-    // 博客相关路径
-    dir: 'public/md',
-    config: 'public/md/blog-config.json',
-    // 图片资源路径
-    images: {
-      default: '/images/default.webp',
-      defaultAvatar: '/images/avatars/default.webp'
-    },
-    getTagDisplayCount: (_locale: string) => {
-      return 2;
-    },
-    pageConfig: {
-      size: 4
-    }
-  },
-  // 菜单配置
-  menu: menu,
 
   clerk: {
     debug: process.env.CLERK_DEBUG === 'true',

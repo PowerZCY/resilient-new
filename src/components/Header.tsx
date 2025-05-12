@@ -2,9 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
-import { NavigationMenu } from '@/components/NavigationMenu';
 import NicknameFilter from '@/components/NicknameFilter';
-import { appConfig } from '@/lib/appConfig';
 import Link from 'next/link';
 import { OrganizationSwitcher, useAuth } from '@clerk/nextjs';
 import ClerkLogoIcon from '@/components/icons/ClerkLogoIcon';
@@ -32,11 +30,6 @@ export function Header() {
               突破消极偏见♾️
             </h1>  
           </Link>
-
-          {/* 左侧导航菜单 */}
-          <div className="hidden md:flex">
-            <NavigationMenu items={appConfig.menu} />
-          </div>
 
           {/* 中间标语 */}
           <div className="hidden md:flex flex-1 items-center justify-center mx-2 lg:mx-4 overflow-hidden">
