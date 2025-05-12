@@ -29,7 +29,7 @@ export function baseOptions(): BaseLayoutProps {
         <>
           <SiteIcon/>
           <span className="font-medium [.uwu_&]:hidden [header_&]:text-[15px]">
-            突破消极偏见♾️
+            突破消极偏见
           </span>
         </>
       ),

@@ -21,8 +21,8 @@ export default function NicknameFilter(): JSX.Element {
   );
 
   return (
-    <div className="flex items-center">
-      <div className="relative flex items-center rounded-full px-2 py-1 bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500 shadow-lg">
+    <div className="flex items-center h-10">
+      <div className="relative flex items-center rounded-full px-2 bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500 shadow-lg h-10">
         <div className="absolute inset-0 bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500 rounded-full blur-xs opacity-50"></div>
         <div className="relative z-10 mr-2 flex items-center">
           {isLoaded && isSignedIn ? (
@@ -61,7 +61,7 @@ export default function NicknameFilter(): JSX.Element {
             <motion.button
               key={user.name}
               onClick={() => handleFilter(user.name)}
-              className={`relative z-10 px-4 h-10 rounded-full text-sm font-medium transition-all duration-200 flex items-center justify-center min-w-[120px] box-border ${
+              className={`relative z-10 px-3 h-8 w-24 rounded-full transition-all duration-200 flex items-center justify-center box-border ${
                 isActive 
                   ? 'bg-white text-purple-900 shadow-md' 
                   : 'bg-transparent text-white hover:bg-white/10'
@@ -77,7 +77,7 @@ export default function NicknameFilter(): JSX.Element {
                   transition={{ type: "spring", duration: 0.5 }}
                 />
               )}
-              <span className={isActive ? "" : ""}>{user.name}</span>
+              <span>{user.name}</span>
             </motion.button>
           );
         })}

@@ -84,6 +84,6 @@ export const globalLucideIcons = {
 
 // Define the site icon as a functional component
 export const SiteIcon = () => (
-  <globalLucideIcons.Resilient className="h-8 w-8 shadow-lg ring-0.5 ring-purple-500/20" />
+  <globalLucideIcons.Resilient className="h-8 w-8 rounded-full shadow-lg ring-0.5 ring-purple-500/20" />
 );
 

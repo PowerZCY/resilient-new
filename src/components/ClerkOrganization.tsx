@@ -17,14 +17,14 @@ export default function ClerkOrganization({
   }
 
   return (
-    <div className={`flex items-center shrink-0 ${className}`}>
-      <div className="flex items-center gap-x-4">
+    <div className={`flex items-center h-10 bg-linear-to-r from-pink-400 via-purple-400 to-indigo-400 rounded-full shadow-lg ${className}`}>
+      <div className="flex items-center gap-x-4 w-full">
         <OrganizationSwitcher
           appearance={{
             elements: {
               organizationSwitcherTrigger:
-                "relative z-10 px-4 py-3 h-10 !rounded-full text-sm font-medium bg-white text-purple-900 border border-gray-200 hover:bg-gray-50 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition flex items-center justify-between box-border w-40",
-              organizationSwitcherTriggerIcon: "text-purple-900 shrink-0",
+                "w-40 h-10 !rounded-full bg-transparent flex items-center justify-between box-border",
+              organizationSwitcherTriggerIcon: "",
             },
           }}
         >
