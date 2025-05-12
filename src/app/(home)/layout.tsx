@@ -26,6 +26,7 @@ import { homeNavLinks } from './layout.config';
 import { NicknameProvider } from '@/context/NicknameContext';
 import { auth } from '@clerk/nextjs/server';
 import ClerkOrganization from '@/components/ClerkOrganization';
+import NProgressBar from '../nProgressBar';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -95,6 +96,10 @@ export default async function RootLayout({
 }>) {
   const { userId } = await auth();
   const isLoaded = userId !== null;
+  // 在这里添加人工延迟
+  // console.log('Starting 5-second delay for testing loading animation...');
+  // await new Promise(resolve => setTimeout(resolve, 5000)); // 5秒延迟
+  // console.log('Delay finished. Rendering page.');
   return (
     <ClerkProvider 
       localization={customLocalization}
@@ -119,6 +124,7 @@ export default async function RootLayout({
     >
       <html lang="en" suppressHydrationWarning>
         <body className={`${inter.className} flex flex-col min-h-screen`}>
+          <NProgressBar />
           <NicknameProvider>
             <RootProvider >
               {showBanner ? 

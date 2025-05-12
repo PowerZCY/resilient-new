@@ -99,9 +99,6 @@ function HomeContent() {
             </ErrorBoundary>
           )}
         </div>
-
-
-      
       </main>
     </div>
   );

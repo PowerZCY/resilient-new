@@ -794,7 +794,7 @@ export default function Timeline(): JSX.Element {
   if (!isNicknameInitialized || loading) {
     // Show a loading indicator while context initializes or data is fetching
     // Keep Tailwind classes here
-    return <div className="text-center text-gray-500 p-10">Loading Timeline...</div>;
+    // return <div className="text-center text-gray-500 p-10">Loading Timeline...</div>;
   }
 
   // Context initialized, not loading, but still no nickname

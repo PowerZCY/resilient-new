@@ -2,6 +2,7 @@
 @import './timeline-card.css';
 @import './batch-create-entry.css';
 @import './react-day-picker-v9.css';
+@import 'nprogress/nprogress.css'; 
 
 /* 
  * 文档主题皮肤, 参考https://fumadocs.dev/docs/ui/theme
@@ -171,4 +172,28 @@ header#fd-nav {
 .animate-gradient-xy {
   animation: gradient-xy 15s ease infinite;
   background-size: 400% 400%;
+}
+
+
+@layer utilities {
+  /* 页面加载时的炫彩波浪球形动画样式 */
+  /* Loading Animation Keyframes */
+  @keyframes loading-dot-pulse {
+    0% {
+      transform: scale(0.2);
+      opacity: 0;
+    }
+    25% { /* Peak of the pulse, more prominent */
+      transform: scale(1.2);
+      opacity: 1;
+    }
+    50% { /* Start to fade and shrink */
+        transform: scale(0.8);
+        opacity: 0.7;
+    }
+    100% { /* Fully faded and shrunk back */
+      transform: scale(0.2);
+      opacity: 0;
+    }
+  }
 }
