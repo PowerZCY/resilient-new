@@ -7,8 +7,8 @@ import Link from 'next/link';
 import { OrganizationSwitcher, useAuth } from '@clerk/nextjs';
 import ClerkLogoIcon from '@/components/icons/ClerkLogoIcon';
 import UserIcon from '@/components/icons/UserIcon';
-import TermsPage from '@/app/legal/terms/page';
-import PrivacyPage from '@/app/legal/privacy/page';
+import TermsPage from '@/app/(home)/legal/terms/page';
+import PrivacyPage from '@/app/(home)/legal/privacy/page';
 export function Header() {
   const { isLoaded } = useAuth();
 
