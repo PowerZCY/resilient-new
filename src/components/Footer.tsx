@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import MicrosoftClarity from "@/components/MicrosoftClarity";
 import Link from 'next/link';
-import { showBanner } from '@/lib/appConfig';
 
 // 定义 SVG 图标组件
 const HomeIcon = () => (
@@ -25,10 +24,6 @@ const LockIcon = () => (
 );
 
 export function Footer() {
-  useEffect(() => {
-    // 如果设置了banner, 就需要调节header的高度
-    document.documentElement.style.setProperty('--fd-banner-height', showBanner ? '2.5rem' : '-0.5rem');
-  }, []);
   return (
     <footer className="bg-gray-50 dark:bg-gray-950 border-t border-slate-200 dark:border-slate-700 py-6 mt-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

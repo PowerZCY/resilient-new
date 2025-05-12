@@ -20,7 +20,6 @@ import { zhCN } from '@clerk/localizations'
 import "@/styles/globals.css";
 import BackToTop from "@/components/BackToTop";
 import { Footer } from "@/components/Footer";
-import { showBanner } from '@/lib/appConfig';
 import { baseOptions } from './layout.config';
 import { homeNavLinks } from './layout.config';
 import { NicknameProvider } from '@/context/NicknameContext';
@@ -127,19 +126,19 @@ export default async function RootLayout({
           <NProgressBar />
           <NicknameProvider>
             <RootProvider >
-              {showBanner ? 
-              (<Banner variant="rainbow" changeLayout={false}>
-                <p className="text-xl">每天都有好体验、好事儿、成就 ✔</p>
-              </Banner>)
-              : (<></>)
-              }
+              
+              <div className="fixed top-0 left-0 w-full z-50">
+                <Banner variant="rainbow" changeLayout={false}>
+                  <p className="text-xl">每天都有好体验、好事儿、成就 ✔</p>
+                </Banner>
+              </div>
 
               <HomeLayout
                 {...homeOptions(isLoaded)}
                 searchToggle={{
                   enabled: false,
                 }}
-                className="dark:bg-neutral-950 dark:[--color-fd-background:var(--color-neutral-950)]"
+                className="dark:bg-neutral-950 dark:[--color-fd-background:var(--color-neutral-950)] pt-25"
               >
                 {children}
                 <Footer />

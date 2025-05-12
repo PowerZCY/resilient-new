@@ -62,12 +62,10 @@ export const appConfig = {
       // 所有图标默认颜色, 注意在SVG中fill参数填充色映射为#AC62FD
       uniformColor: "text-purple-500"
     },
-    showBanner: true,
   }
 } as const;
 
 export const iconColor = appConfig.style.icon.uniformColor
-export const showBanner = appConfig.style.showBanner
 
 // 辅助函数：检查是否为支持的语言
 function isSupportedLocale(locale: string): locale is typeof appConfig.i18n.locales[number] {
