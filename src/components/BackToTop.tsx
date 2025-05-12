@@ -33,7 +33,7 @@ export default function BackToTop() {
       {isVisible && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all z-50"
+          className="fixed bottom-6 right-6 p-3 bg-neutral-800 text-neutral-100 hover:bg-neutral-700 dark:bg-neutral-300 dark:text-neutral-900 dark:hover:bg-neutral-400 rounded-full shadow-lg transition-all z-50"
           aria-label="回到顶部"
         >
           <ArrowUp size={20} />

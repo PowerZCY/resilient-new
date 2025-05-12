@@ -7,6 +7,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import { RootProvider } from 'fumadocs-ui/provider';
+import { HomeLayout, type HomeLayoutProps } from 'fumadocs-ui/layouts/home';
+import { Banner } from 'fumadocs-ui/components/banner';
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import {
@@ -17,6 +20,13 @@ import { zhCN } from '@clerk/localizations'
 import "@/styles/globals.css";
 import BackToTop from "@/components/BackToTop";
 import { Footer } from "@/components/Footer";
+import { showBanner } from '@/lib/appConfig';
+import { baseOptions } from './layout.config';
+import { homeNavLinks } from './layout.config';
+import { levelNavLinks } from './layout.config';
+import { NicknameProvider } from '@/context/NicknameContext';
+import { auth } from '@clerk/nextjs/server';
+import ClerkOrganization from '@/components/ClerkOrganization';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -65,11 +75,27 @@ export const metadata: Metadata = {
   ]
 };
 
-export default function RootLayout({
+function homeOptions(isLoaded: boolean): HomeLayoutProps{
+  return {
+    ...baseOptions(),
+    links: [
+      ...homeNavLinks(),
+      {
+        type: 'custom',
+        secondary: false,
+        children: <ClerkOrganization isLoaded={isLoaded} />
+      }
+      ]
+  };
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { userId } = await auth();
+  const isLoaded = userId !== null;
   return (
     <ClerkProvider 
       localization={customLocalization}
@@ -92,13 +118,30 @@ export default function RootLayout({
         },
       }}
     >
-      <html lang="en" className="h-full">
+      <html lang="en" suppressHydrationWarning>
         <body className={`${inter.className} flex flex-col min-h-screen`}>
-          <main className="grow">
-            {children}
-          </main>
-          <Footer />
-          <BackToTop />
+          <NicknameProvider>
+            <RootProvider >
+              {showBanner ? 
+              (<Banner variant="rainbow" changeLayout={false}>
+                <p className="text-xl">每天都有好体验、好事儿、成就 ✔</p>
+              </Banner>)
+              : (<></>)
+              }
+
+              <HomeLayout
+                {...homeOptions(isLoaded)}
+                searchToggle={{
+                  enabled: false,
+                }}
+                className="dark:bg-neutral-950 dark:[--color-fd-background:var(--color-neutral-950)]"
+              >
+                {children}
+                <Footer />
+                <BackToTop />
+              </HomeLayout>
+            </RootProvider>
+          </NicknameProvider>
         </body>
       </html>
     </ClerkProvider>

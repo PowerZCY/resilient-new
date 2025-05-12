@@ -57,8 +57,17 @@ export const appConfig = {
 
   // API配置
   API_DEFAULT_PAGE_SIZE: parseInt(process.env.API_DEFAULT_PAGE_SIZE || '20', 10),
-  
+  style: {
+    icon: {
+      // 所有图标默认颜色, 注意在SVG中fill参数填充色映射为#AC62FD
+      uniformColor: "text-purple-500"
+    },
+    showBanner: true,
+  }
 } as const;
+
+export const iconColor = appConfig.style.icon.uniformColor
+export const showBanner = appConfig.style.showBanner
 
 // 辅助函数：检查是否为支持的语言
 function isSupportedLocale(locale: string): locale is typeof appConfig.i18n.locales[number] {

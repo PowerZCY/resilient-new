@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useRef, useState, forwardRef } from '
 import { useRouter } from 'next/navigation';
 import { Calendar as CalendarIconLucide, Loader2, Plus, Send, Trash2 } from 'lucide-react';
 import { Header } from '@/components/Header';
-import { NicknameProvider, useNickname } from '@/context/NicknameContext'; // <-- Import useNickname
+import { useNickname } from '@/context/NicknameContext'; // <-- Import useNickname
 
 // Import shadcn/ui components
 import { Button } from "@/components/ui/button"
@@ -563,11 +563,7 @@ export default function NewEntryPage() {
   return (
     // Suspense 用于处理 Next.js 的 useSearchParams
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center">加载中...</div>}>
-      {/* 可能需要调整 Header 的样式以避免与新布局冲突 */}
-      <NicknameProvider>
-        <Header />
-        <NewEntryContent />
-      </NicknameProvider>
+      <NewEntryContent />
     </Suspense>
   );
 }

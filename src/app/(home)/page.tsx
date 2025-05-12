@@ -11,8 +11,6 @@
 
 import AnimatedCard from '@/components/AnimatedCard';
 import CalendarHeatmap from '@/components/CalendarHeatmap';
-import { Header } from '@/components/Header';
-import { NicknameProvider } from '@/context/NicknameContext';
 import { motion } from 'framer-motion';
 import { Calendar, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
@@ -150,10 +148,7 @@ export default function Home() {
 
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center">加载中...</div>}>
-      <NicknameProvider>
-        <Header />
-        <HomeContent />
-      </NicknameProvider>
+      <HomeContent />
     </Suspense>
   );
 }
