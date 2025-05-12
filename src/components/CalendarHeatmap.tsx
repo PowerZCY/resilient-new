@@ -99,51 +99,69 @@ export default function ContributionHeatmap() {
   const today = new Date();
   const oneYearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
 
-  if (!isNicknameInitialized || isComponentLoading) {
+  // Logic for rendering the title
+  const renderTitle = () => {
+    if (isNicknameInitialized && nickname) {
+      return <h2 className="text-2xl font-semibold mb-2">{nickname}&apos;s Contributions</h2>;
+    }
+    // Return a placeholder div with the same height and margin as the h2 to prevent layout shift
+    // Adjust h-8 if the actual height of the h2 is different.
+    return <div className="h-8 mb-2" />; 
+  };
+
+  // Logic for rendering the content (heatmap or its loading/empty states)
+  const renderContent = () => {
+    if (!isNicknameInitialized) {
+      // Nickname context is still initializing
+      return (
+        <div className="relative group">
+          <div className="absolute -inset-0.5 bg-linear-to-r from-blue-600 to-violet-600 rounded-lg opacity-0 group-hover:opacity-75 transition duration-500 blur-xs animate-pulse" />
+          <Card className="relative border border-[#509863] p-4 rounded-lg bg-white dark:bg-slate-800 min-h-40 flex items-center justify-center">
+            <div className="text-center text-gray-500">Loading user...</div>
+          </Card>
+        </div>
+      );
+    }
+
+    if (!nickname) {
+      // Nickname initialized, but it's empty/null
+      return (
+        <div className="relative group">
+          <Card className="relative border border-gray-300 p-4 rounded-lg bg-white dark:bg-slate-800 min-h-40 flex items-center justify-center">
+            <div className="text-center text-gray-500">No user selected or data available.</div>
+          </Card>
+        </div>
+      );
+    }
+
+    // Nickname is initialized and present, now check for heatmap data loading
+    if (isComponentLoading) {
+      return (
+        <div className="relative group">
+          <div className="absolute -inset-0.5 bg-linear-to-r from-blue-600 to-violet-600 rounded-lg opacity-0 group-hover:opacity-75 transition duration-500 blur-xs animate-pulse" />
+          <Card className="relative border border-[#509863] p-4 rounded-lg bg-white dark:bg-slate-800 min-h-40 flex items-center justify-center">
+            <div className="text-center text-gray-500">Loading contributions...</div>
+          </Card>
+        </div>
+      );
+    }
+
+    // Nickname present, data loaded (or fetch failed resulting in empty data for heatmap)
     return (
       <div className="relative group">
-        <div className="absolute -inset-0.5 bg-linear-to-r from-blue-600 to-violet-600 rounded-lg opacity-0 group-hover:opacity-75 transition duration-500 blur-xs animate-pulse" />
-        <Card className="relative border border-[#509863] p-4 rounded-lg bg-white dark:bg-slate-800">
-          <div className="text-center text-gray-500">
-            Loading...
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!nickname) {
-    return (
-      <div className="relative group">
-        <Card className="relative border border-gray-300 p-4 rounded-lg bg-white dark:bg-slate-800">
-          <div className="text-center text-gray-500">
-            No user selected or data available.
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <h2 className="text-2xl font-semibold mb-2">{nickname}&apos;s Contributions</h2>
-      <div className="relative group">
-        {/* 发光边框效果 */}
         <div className="absolute -inset-0.5 bg-linear-to-r from-blue-600 to-violet-600 rounded-lg opacity-0 group-hover:opacity-75 transition duration-500 blur-xs animate-glow" />
-        
-        {/* 主卡片内容 */}
-        <Card className="relative border border-[#509863] p-4 rounded-lg bg-white dark:bg-slate-800">
+        <Card className="relative border border-[#509863] p-4 rounded-lg bg-white dark:bg-slate-800 min-h-40">
           <CalendarHeatmap
             startDate={oneYearAgo}
             endDate={today}
             values={data}
             classForValue={(value) => {
               if (!value) {
-                return 'color-empty'
+                return 'color-empty';
               }
-              return `color-scale-${Math.min(value.count, 4)}`
+              return `color-scale-${Math.min(value.count, 4)}`;
             }}
-            titleForValue={(value) => value ? `${value.date}: ${value.count} 条记录` : '无记录'}
+            titleForValue={(value) => (value ? `${value.date}: ${value.count} 条记录` : '无记录')}
           />
           <style jsx global>{`
             .react-calendar-heatmap .color-scale-1 { fill: #9BE9A8; }
@@ -153,6 +171,13 @@ export default function ContributionHeatmap() {
           `}</style>
         </Card>
       </div>
+    );
+  };
+
+  return (
+    <>
+      {renderTitle()}
+      {renderContent()}
     </>
   );
 }

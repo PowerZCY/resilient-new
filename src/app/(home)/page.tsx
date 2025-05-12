@@ -33,9 +33,10 @@ function HomeContent() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 第一行：热力图(左)和记录今日(右) */}
         <div className="flex flex-col lg:flex-row gap-8 mb-8">
-          {/* 左侧 - 热力图 (占据3/4宽度) */}
+          {/* 左侧 - 热力图 (占据3/4宽度) - 添加最小高度 */}
           <div className="lg:w-3/4">
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs border border-slate-200 dark:border-slate-700 p-4">
+            {/* Add min-height to the direct container of the heatmap */}
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs border border-slate-200 dark:border-slate-700 p-4 min-h-50"> 
               <CalendarHeatmap />
             </div>
           </div>
@@ -69,7 +70,7 @@ function HomeContent() {
           </div>
         </div>
       
-        {/* 第二行：时间轴 */}
+        {/* 第二行：时间轴 - 添加最小高度 */}
         <div className="pt-8">
           {timelineError ? (
             <div className="p-4 bg-red-50 border border-red-200 rounded-md">
