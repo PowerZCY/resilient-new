@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import MicrosoftClarity from "@/components/MicrosoftClarity";
 import Link from 'next/link';
 
