@@ -22,7 +22,7 @@ export default async function RootLayout({
   
   return (
     <NicknameProvider>
-      <HomeLayoutClientBoundary isClerkLoaded={isClerkLoaded}>
+      <HomeLayoutClientBoundary>
         {children}
       </HomeLayoutClientBoundary>
     </NicknameProvider>
