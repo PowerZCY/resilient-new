@@ -24,7 +24,7 @@ const LockIcon = () => (
 
 export function Footer() {
   return (
-    <footer className="bg-gray-50 dark:bg-gray-950 border-t border-slate-200 dark:border-slate-700 py-6 mt-12">
+    <footer className="border-t-purple-700/80 border-t-1">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center text-sm text-slate-500 dark:text-slate-400">
           <div className="mt-2 space-x-4">

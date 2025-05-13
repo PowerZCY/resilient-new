@@ -30,6 +30,7 @@
   
   .bce\:centered-content {
       max-width: 900px;
+      max-height: 40px;
       margin: 0 auto;
       padding: 0 20px;
       box-sizing: border-box;
@@ -75,9 +76,9 @@
   }
   
   .bce\:carousel-wrapper {
-      margin-bottom: 25px;
+      margin-bottom: 5px;
       overflow: hidden;
-      padding: 20px 0 30px 0;
+      padding: 10px 0 10px 0;
       position: relative;
       perspective: 2500px;
       min-height: 500px;
@@ -85,7 +86,6 @@
       display: flex;
       align-items: flex-start;
       justify-content: center;
-      padding-top: 40px;
   }
   
   .bce\:entries-container {
