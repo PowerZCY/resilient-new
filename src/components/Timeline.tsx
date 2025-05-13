@@ -68,6 +68,7 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
   loadingPage: number | null;
   maxVisibleButtons?: number;
+  loadedPages: Set<number>;
 }
 
 const Pagination: React.FC<PaginationProps> = ({
@@ -76,6 +77,7 @@ const Pagination: React.FC<PaginationProps> = ({
   onPageChange,
   loadingPage,
   maxVisibleButtons = 11, // Default to 11 visible buttons
+  loadedPages,
 }) => {
   const renderPageButtons = () => {
     if (totalPages <= 0) return null;
@@ -107,7 +109,7 @@ const Pagination: React.FC<PaginationProps> = ({
 
       // Add start ellipsis if needed
       if (startPage > 2) {
-        buttons.push('...');
+        buttons.push('···');
       }
 
       // Add middle page numbers
@@ -117,7 +119,7 @@ const Pagination: React.FC<PaginationProps> = ({
 
       // Add end ellipsis if needed
       if (endPage < totalPages - 1) {
-        buttons.push('...');
+        buttons.push('···');
       }
 
       // Show last page
@@ -131,9 +133,17 @@ const Pagination: React.FC<PaginationProps> = ({
 
       const getButtonClasses = () => {
         const baseClass = "tlc:nav-btn";
-        const activeClass = currentPage === pageNum && !isEllipsis ? "active" : '';
+        let statusClass = ''; // Will hold 'active' or 'loaded-inactive'
+
+        if (currentPage === pageNum && !isEllipsis) {
+          statusClass = "active";
+        } else if (!isEllipsis && loadedPages.has(pageNum)) { // Check if pageNum is in loadedPages
+          statusClass = "loaded-inactive"; // Apply new class if loaded and not active
+        }
+        // If not active and not loaded-inactive, it takes the default .tlc:nav-btn style
+
         const ellipsisClass = isEllipsis ? "tlc:ellipsis" : '';
-        return `${baseClass} ${activeClass} ${ellipsisClass}`.trim();
+        return `${baseClass} ${statusClass} ${ellipsisClass}`.trim();
       };
 
       return (
@@ -887,6 +897,7 @@ export default function Timeline(): JSX.Element {
           totalPages={totalPages}
           onPageChange={handleNavClick}
           loadingPage={loadingPage}
+          loadedPages={loadedPages.current}
         />
       </div>
 

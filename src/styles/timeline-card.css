@@ -765,3 +765,57 @@
   pointer-events: default; /* Allow hover styles but maybe not clicks */
   /* Add transitions matching timeline-card if needed, or keep simple show/hide */
 }
+
+/* Styles for loaded but inactive pagination buttons */
+.tlc\:nav-btn.loaded-inactive {
+  background: #87CEFA; /* LightSkyBlue */
+  color: white;
+  border-color: #6495ED; /* CornflowerBlue */
+  box-shadow: 0 3px 10px rgba(100, 149, 237, 0.2); /* Blueish shadow */
+}
+
+/* Hover effect for loaded-inactive buttons */
+.tlc\:nav-btn.loaded-inactive:hover:not(.active) {
+  transform: scale(1.1); /* Keep existing hover scale */
+  box-shadow: 0 0 10px rgba(100, 149, 237, 0.6); /* Light blue glow */
+  /* Optionally, slightly darken background/border on hover if desired */
+  /* background-color: #75b9e7; */
+  /* border-color: #5785d3; */
+}
+
+/* --- Ellipsis Button Styles (Unified Look) --- */
+.tlc\:nav-btn.tlc\:ellipsis {
+  background-color: var(--gray-300, #D1D5DB) !important; /* Consistent light grey background */
+  color: var(--primary-color, #8B5CF6) !important;       /* Purple dots, matching border */
+  border: 2px solid var(--primary-color-light, #a78bfa) !important; /* Border consistent with other buttons, slightly lighter purple */
+  box-shadow: none !important;
+  opacity: 0.7 !important;      /* Slight transparency to differentiate */
+  cursor: default !important;
+  transform: none !important;   /* No transform */
+}
+
+/* Ensure no hover effects apply to the ellipsis button */
+.tlc\:nav-btn.tlc\:ellipsis:hover {
+  background-color: var(--gray-300, #D1D5DB) !important; /* Keep same background on hover */
+  color: var(--primary-color, #8B5CF6) !important;       /* Keep same text color on hover */
+  border-color: var(--primary-color-light, #a78bfa) !important; /* Keep same border color on hover */
+  opacity: 0.7 !important;      /* Keep same opacity on hover */
+  transform: none !important;   /* Keep no transform on hover */
+  box-shadow: none !important;   /* Keep no shadow on hover */
+}
+
+/* Remove pseudo-elements for ellipsis */
+.tlc\:nav-btn.tlc\:ellipsis::before,
+.tlc\:nav-btn.tlc\:ellipsis::after {
+  display: none !important;
+}
+
+/* --- Loaded-Inactive Button Adjustment --- */
+/* If the ::before pseudo-element of tlc:nav-btn is making loaded-inactive buttons appear white */
+.tlc\:nav-btn.loaded-inactive::before {
+  /* Option 1: Tint the ::before background to match the blue */
+  /* background: rgba(135, 206, 250, 0.6); */ /* LightSkyBlue with alpha, if ::before has backdrop-filter */
+  
+  /* Option 2: Hide it entirely for loaded-inactive buttons if it causes issues */
+  display: none; 
+}
