@@ -27,7 +27,6 @@ export default function NicknameFilter(): JSX.Element {
         <div className="relative z-10 mr-2 flex items-center">
           {isLoaded && isSignedIn ? (
             <UserButton
-              afterSignOutUrl='/'
               appearance={{
                 elements: {
                   userButtonAvatarBox: "w-8 h-8",

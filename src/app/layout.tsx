@@ -11,20 +11,18 @@ import { RootProvider } from 'fumadocs-ui/provider';
 import { Banner } from 'fumadocs-ui/components/banner';
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import {
-  ClerkProvider,
-} from '@clerk/nextjs';
-// zh-CN locale is imported as zhCN
-import { zhCN } from '@clerk/localizations'
+// ClerkProvider is no longer directly used here, zhCN and dark theme are used in ClerkProviderClient
+import { zhCN } from '@clerk/localizations';
+// import { dark } from '@clerk/themes'; // Moved to client component
 import "@/styles/globals.css";
-import NProgressBar from '@/components/NProgressBar'
+import NProgressBar from '@/components/NProgressBar';
 import { appConfig } from '@/lib/appConfig';
+import { ClerkProviderClient } from '@/components/ClerkProviderClient'; // Import the new client component
 
 const inter = Inter({ subsets: ["latin"] });
 
 // https://github.com/clerk/javascript/blob/main/packages/localizations/src/en-US.ts#L492
 // https://clerk.com/docs/customization/localization
-
 const customLocalization = {
   // Use the default zhCN localization
   ...zhCN,
@@ -53,7 +51,25 @@ const customLocalization = {
       title: '感谢加入候选列表！',
     },
   }
-}
+};
+
+// These will be passed to ClerkProviderClient
+const clerkVariables = { 
+  colorPrimary: "#6366F1",
+};
+const clerkElements = {
+  formButtonPrimary:
+    "bg-linear-to-r from-indigo-500 to-purple-600 text-white border-none hover:opacity-90 transition-opacity",
+  socialButtonsBlockButton:
+    "bg-white border-gray-200 hover:bg-transparent hover:border-black text-gray-600 hover:text-black dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700",
+  socialButtonsBlockButtonText: "font-semibold",
+  formButtonReset:
+    "bg-white border border-solid border-gray-200 hover:bg-transparent hover:border-black text-gray-500 hover:text-black dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700",
+  membersPageInviteButton:
+    "bg-linear-to-r from-indigo-500 to-purple-600 text-white border-none hover:opacity-90 transition-opacity",
+  // card styling is now handled by baseTheme (light/dark)
+};
+
 
 export const metadata: Metadata = {
   title: "WindRun·Huaiin",
@@ -72,46 +88,26 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  // 在这里添加人工延迟
-  // console.log('Starting 5-second delay for testing loading animation...');
-  // await new Promise(resolve => setTimeout(resolve, 5000)); // 5秒延迟
-  // console.log('Delay finished. Rendering page.');
   return (
-    <ClerkProvider 
-      localization={customLocalization}
-      waitlistUrl="/waitlist"
-      appearance={{
-        variables: { 
-          colorPrimary: "#6366F1",
-        },
-        elements: {
-          formButtonPrimary:
-            "bg-linear-to-r from-indigo-500 to-purple-600 text-white border-none hover:opacity-90 transition-opacity",
-          socialButtonsBlockButton:
-            "bg-white border-gray-200 hover:bg-transparent hover:border-black text-gray-600 hover:text-black",
-          socialButtonsBlockButtonText: "font-semibold",
-          formButtonReset:
-            "bg-white border border-solid border-gray-200 hover:bg-transparent hover:border-black text-gray-500 hover:text-black",
-          membersPageInviteButton:
-            "bg-linear-to-r from-indigo-500 to-purple-600 text-white border-none hover:opacity-90 transition-opacity",
-          card: "bg-[#fafafa]",
-        },
-      }}
-    >
-      <html lang="en" suppressHydrationWarning>
-        <body className={`${inter.className} flex flex-col min-h-screen`}>
-          <NProgressBar />
-          <RootProvider >
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.className} flex flex-col min-h-screen`}>
+        <RootProvider> {/* RootProvider from fumadocs-ui provides theme context */}
+          <ClerkProviderClient
+            localization={customLocalization}
+            waitlistUrl="/waitlist" // Pass existing props
+            variables={clerkVariables}
+            elements={clerkElements}
+          >
+            <NProgressBar />
             <div className="fixed top-0 left-0 w-full z-50">
               <Banner variant="rainbow" changeLayout={false}>
                 <p className="text-xl"> {appConfig.style.siteSlogan} </p>
               </Banner>
             </div>
             {children}
-          </RootProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+          </ClerkProviderClient>
+        </RootProvider>
+      </body>
+    </html>
   );
 }
