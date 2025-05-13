@@ -18,7 +18,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const { userId } = await auth();
-  const isClerkLoaded = userId !== null;
   
   return (
     <NicknameProvider>
