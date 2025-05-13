@@ -9,7 +9,6 @@
 
 import "@/styles/globals.css";
 import { NicknameProvider } from '@/context/NicknameContext';
-import { auth } from '@clerk/nextjs/server';
 import HomeLayoutClientBoundary from '@/app/(home)/HomeLayoutClientBoundary';
 
 export default async function RootLayout({
@@ -17,7 +16,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { userId } = await auth();
   
   return (
     <NicknameProvider>
