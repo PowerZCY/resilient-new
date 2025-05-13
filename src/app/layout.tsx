@@ -11,65 +11,12 @@ import { RootProvider } from 'fumadocs-ui/provider';
 import { Banner } from 'fumadocs-ui/components/banner';
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-// ClerkProvider is no longer directly used here, zhCN and dark theme are used in ClerkProviderClient
-import { zhCN } from '@clerk/localizations';
-// import { dark } from '@clerk/themes'; // Moved to client component
 import "@/styles/globals.css";
 import NProgressBar from '@/components/NProgressBar';
 import { appConfig } from '@/lib/appConfig';
 import { ClerkProviderClient } from '@/components/ClerkProviderClient'; // Import the new client component
 
 const inter = Inter({ subsets: ["latin"] });
-
-// https://github.com/clerk/javascript/blob/main/packages/localizations/src/en-US.ts#L492
-// https://clerk.com/docs/customization/localization
-const customLocalization = {
-  // Use the default zhCN localization
-  ...zhCN,
-  // Override specific fields here
-  formFieldInputPlaceholder__emailAddress: '请输入邮箱地址',
-  formFieldInputPlaceholder__emailAddress_username: '请输入邮箱或用户名',
-  signIn: {
-    start: {
-      actionLink__join_waitlist: '加入候选列表',
-      actionText__join_waitlist: '想要提前接入？',
-      subtitle: '欢迎回来！请登录',
-      title: '登录·{{applicationName}}·',
-    }
-  },
-  waitlist: {
-    start: {
-      actionLink: '登录',
-      actionText: '已经注册？',
-      formButton: '加入候选列表',
-      subtitle: '输入你的邮箱地址，我们会尽快通知你',
-      title: '加入候选列表',
-    },
-    success: {
-      message: '你将被重定向...',
-      subtitle: '我们会尽快通知你',
-      title: '感谢加入候选列表！',
-    },
-  }
-};
-
-// These will be passed to ClerkProviderClient
-const clerkVariables = { 
-  colorPrimary: "#6366F1",
-};
-const clerkElements = {
-  formButtonPrimary:
-    "bg-linear-to-r from-indigo-500 to-purple-600 text-white border-none hover:opacity-90 transition-opacity",
-  socialButtonsBlockButton:
-    "bg-white border-gray-200 hover:bg-transparent hover:border-black text-gray-600 hover:text-black dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700",
-  socialButtonsBlockButtonText: "font-semibold",
-  formButtonReset:
-    "bg-white border border-solid border-gray-200 hover:bg-transparent hover:border-black text-gray-500 hover:text-black dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700",
-  membersPageInviteButton:
-    "bg-linear-to-r from-indigo-500 to-purple-600 text-white border-none hover:opacity-90 transition-opacity",
-  // card styling is now handled by baseTheme (light/dark)
-};
-
 
 export const metadata: Metadata = {
   title: "WindRun·Huaiin",
@@ -92,12 +39,7 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} flex flex-col min-h-screen`}>
         <RootProvider> {/* RootProvider from fumadocs-ui provides theme context */}
-          <ClerkProviderClient
-            localization={customLocalization}
-            waitlistUrl="/waitlist" // Pass existing props
-            variables={clerkVariables}
-            elements={clerkElements}
-          >
+          <ClerkProviderClient>
             <NProgressBar />
             <div className="fixed top-0 left-0 w-full z-50">
               <Banner variant="rainbow" changeLayout={false}>

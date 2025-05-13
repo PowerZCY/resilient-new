@@ -11,10 +11,10 @@ import { clerkMiddleware, ClerkMiddlewareAuth, createRouteMatcher } from "@clerk
 import { NextRequest, NextResponse } from 'next/server';
 import { appConfig } from '@/lib/appConfig';
 
-const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)',  '/waitlist(.*)'])
+const allowPassWhitelist = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)',  '/waitlist(.*)'])
 
 export default clerkMiddleware(async (auth: ClerkMiddlewareAuth, req: NextRequest) => {
-    if (!isPublicRoute(req)) {
+    if (!allowPassWhitelist(req)) {
         const { userId, redirectToSignIn } = await auth()
         if (!userId) {
             return redirectToSignIn()

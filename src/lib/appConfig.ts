@@ -44,7 +44,8 @@ export const appConfig = {
 
   clerk: {
     debug: process.env.CLERK_DEBUG === 'true',
-    user: admin
+    user: admin,
+    waitlistUrl: '/waitlist'
   },
 
   // 数据库配置
