@@ -17,7 +17,7 @@ export default function ClerkOrganization({
   }
 
   return (
-    <div className={`flex items-center h-10 bg-linear-to-r from-pink-400 via-purple-400 to-indigo-400 rounded-full shadow-lg ${className}`}>
+    <div className={` ms-3 me-2 flex items-center h-10 bg-linear-to-r from-pink-400 via-purple-400 to-indigo-400 rounded-full shadow-lg ${className}`}>
       <div className="flex items-center gap-x-4 w-full">
         <OrganizationSwitcher
           appearance={{

@@ -21,7 +21,7 @@ export default function NicknameFilter(): JSX.Element {
   );
 
   return (
-    <div className="flex items-center h-10">
+    <div className="ms-1.5 flex items-center h-10">
       <div className="relative flex items-center rounded-full px-2 bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500 shadow-lg h-10">
         <div className="absolute inset-0 bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500 rounded-full blur-xs opacity-50"></div>
         <div className="relative z-10 mr-2 flex items-center">

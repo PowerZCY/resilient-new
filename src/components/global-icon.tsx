@@ -14,6 +14,7 @@ import { iconColor } from '@/lib/appConfig';
 // Define all custom image-based icons in this object
 const customImageIcons = {
   Resilient: iconFromSVG("/logo.svg", "Resilient"),
+  Github: iconFromSVG("/github.svg", "Github"),
 };
 
 // Helper function to create SVG-based icon components, now accepting LucideProps

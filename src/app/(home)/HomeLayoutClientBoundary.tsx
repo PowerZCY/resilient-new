@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { HomeLayout, type HomeLayoutProps } from 'fumadocs-ui/layouts/home';
-import { baseOptions } from '@/app/layout.config';
+import { baseOptions, injectGithubLink } from '@/app/layout.config';
 import { useNickname } from '@/context/NicknameContext';
 import ClerkOrganization from '@/components/ClerkOrganization';
 import NicknameFilter from '@/components/NicknameFilter';
@@ -30,15 +30,16 @@ function getHomeLayoutProps(
   return {
     ...baseOptions(`/?nickname=${effectiveNickname}`),
     links: [
+      ...injectGithubLink(),
       {
         type: 'custom',
-        secondary: false,
+        secondary: true,
         // NicknameFilter 假设在其内部也使用了 useNickname
         children: <NicknameFilter />
       },
       {
         type: 'custom',
-        secondary: false,
+        secondary: true,
         children: <ClerkOrganization isLoaded={isClerkLoaded} />
       }
     ]

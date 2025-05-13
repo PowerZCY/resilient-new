@@ -1,6 +1,19 @@
 import { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { SiteIcon } from '@/components/global-icon';
 import { appConfig } from '@/lib/appConfig';
+import { globalLucideIcons as icons } from '@/components/global-icon';
+import { IconItemType } from 'fumadocs-ui/layouts/links';
+
+export function injectGithubLink() : IconItemType[] {
+  return !appConfig.style.showGithub ? [] : [{ 
+    type: 'icon',
+    icon: <icons.Github />,
+    url: appConfig.style.siteGithub,
+    label: 'GitHub',
+    text: 'GitHub',
+    on: 'nav'
+  }]
+}
 
 export function baseOptions(indexUrl: string): BaseLayoutProps {
   return {
@@ -19,8 +32,6 @@ export function baseOptions(indexUrl: string): BaseLayoutProps {
       // https://fumadocs.dev/docs/ui/layouts/docs#transparent-mode
       transparentMode: 'none',
     },
-    // 导航Header, Github链接
-    githubUrl: appConfig.style.showGithub ? appConfig.style.siteGithub : undefined,
   };
 }
 
