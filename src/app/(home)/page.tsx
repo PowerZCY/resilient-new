@@ -32,7 +32,7 @@ function HomeContent() {
       {/* 主要内容区 */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 第一行：热力图(左)和记录今日(右) */}
-        <div className="flex flex-col lg:flex-row gap-8 mb-8">
+        <div className="flex flex-col lg:flex-row gap-8 mb-0">
           {/* 左侧 - 热力图 (占据3/4宽度) - 添加最小高度 */}
           <div className="lg:w-3/4">
             {/* Add min-height to the direct container of the heatmap */}
@@ -71,7 +71,7 @@ function HomeContent() {
         </div>
       
         {/* 第二行：时间轴 - 添加最小高度 */}
-        <div className="pt-8">
+        <div className="pt-1">
           {timelineError ? (
             <div className="p-4 bg-red-50 border border-red-200 rounded-md">
               <h2 className="text-lg font-medium text-red-800">加载时间轴时出现问题</h2>

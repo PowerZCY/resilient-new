@@ -57,7 +57,13 @@ export const appConfig = {
 
   // API配置
   API_DEFAULT_PAGE_SIZE: parseInt(process.env.API_DEFAULT_PAGE_SIZE || '20', 10),
+
+  // 网站配置
   style: {
+    siteName: '突破消极偏见',
+    siteSlogan: '每天都有好体验、好事儿、成就 ✔',
+    showGithub: true,
+    siteGithub: 'https://github.com/PowerZCY/resilient-new',
     icon: {
       // 所有图标默认颜色, 注意在SVG中fill参数填充色映射为#AC62FD
       uniformColor: "text-purple-500"
