@@ -36,7 +36,7 @@ function HomeContent() {
           {/* 左侧 - 热力图 (占据3/4宽度) - 添加最小高度 */}
           <div className="lg:w-3/4">
             {/* Add min-height to the direct container of the heatmap */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs border border-slate-200 dark:border-slate-700 p-4 min-h-50"> 
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xs border border-slate-200 dark:border-slate-700 p-4 min-h-40"> 
               <CalendarHeatmap />
             </div>
           </div>
