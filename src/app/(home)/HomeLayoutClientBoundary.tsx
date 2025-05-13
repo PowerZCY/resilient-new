@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { HomeLayout, type HomeLayoutProps } from 'fumadocs-ui/layouts/home';
-import { baseOptions, injectGithubLink } from '@/app/layout.config';
+import { baseOptions } from '@/app/layout.config';
 import { useNickname } from '@/context/NicknameContext';
 import ClerkOrganization from '@/components/ClerkOrganization';
 import NicknameFilter from '@/components/NicknameFilter';
@@ -12,7 +12,6 @@ import BackToTop from "@/components/BackToTop";
 
 // 此函数现在在此客户端组件内部或可被其调用
 function getHomeLayoutProps(
-  isClerkLoaded: boolean,
   nicknameFromContext: string,
   isNicknameReady: boolean
 ): HomeLayoutProps {
@@ -30,9 +29,9 @@ function getHomeLayoutProps(
   return {
     ...baseOptions(`/?nickname=${effectiveNickname}`),
     links: [
-      ...injectGithubLink(),
       {
         type: 'custom',
+        // false就先排左边的菜单, true就先排右边的按钮
         secondary: true,
         // NicknameFilter 假设在其内部也使用了 useNickname
         children: <NicknameFilter />
@@ -40,7 +39,7 @@ function getHomeLayoutProps(
       {
         type: 'custom',
         secondary: true,
-        children: <ClerkOrganization isLoaded={isClerkLoaded} />
+        children: <ClerkOrganization />
       }
     ]
   };
@@ -48,10 +47,8 @@ function getHomeLayoutProps(
 
 export default function HomeLayoutClientBoundary({
   children,
-  isClerkLoaded, // 从服务器组件传递的 prop
 }: Readonly<{
   children: React.ReactNode;
-  isClerkLoaded: boolean;
 }>) {
   const { nickname, isNicknameInitialized } = useNickname();
 
@@ -62,7 +59,7 @@ export default function HomeLayoutClientBoundary({
   //   console.log("HomeLayoutClientBoundary: Nickname not yet initialized. Using default for options.");
   // }
 
-  const homeLayoutProps = getHomeLayoutProps(isClerkLoaded, nickname, isNicknameInitialized);
+  const homeLayoutProps = getHomeLayoutProps(nickname, isNicknameInitialized);
 
   return (
     <HomeLayout

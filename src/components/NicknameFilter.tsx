@@ -23,13 +23,13 @@ export default function NicknameFilter(): JSX.Element {
   return (
     <div className="ms-1.5 flex items-center h-10">
       <div className="relative flex items-center rounded-full px-2 bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500 shadow-lg h-10">
-        <div className="absolute inset-0 bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500 rounded-full blur-xs opacity-50"></div>
+        <div className="absolute inset-0 border bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500 rounded-full blur-xs opacity-50"></div>
         <div className="relative z-10 mr-2 flex items-center">
           {isLoaded && isSignedIn ? (
             <UserButton
               appearance={{
                 elements: {
-                  userButtonAvatarBox: "w-8 h-8",
+                  userButtonAvatarBox: "w-8 h-8 border",
                 }
               }}
             >
@@ -49,7 +49,7 @@ export default function NicknameFilter(): JSX.Element {
               </UserButton.MenuItems>
             </UserButton>
           ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
+            <div className="w-8 h-8 rounded-full border bg-gray-200 animate-pulse"></div>
           )}
         </div>
         
@@ -70,7 +70,7 @@ export default function NicknameFilter(): JSX.Element {
             >
               {isActive && (
                 <motion.div 
-                  className="w-3 h-3 rounded-full mr-2 shrink-0"
+                  className="w-3 h-3 rounded-full mr-1 shrink-0"
                   style={{ backgroundColor: user.color }}
                   layoutId="activeUserDot"
                   transition={{ type: "spring", duration: 0.5 }}
