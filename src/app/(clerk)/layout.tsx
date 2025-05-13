@@ -28,7 +28,7 @@ export default async function RootLayout({
     <HomeLayout
         {...homeOptions()}
         searchToggle={{
-          enabled: true,
+          enabled: false,
         }}
       className="dark:bg-neutral-950 dark:[--color-fd-background:var(--color-neutral-950)] pt-25"
       >
