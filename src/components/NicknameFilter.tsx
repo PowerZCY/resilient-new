@@ -24,7 +24,7 @@ export default function NicknameFilter(): JSX.Element {
     <div className="ms-1.5 flex items-center h-10">
       <div className="relative flex items-center rounded-full px-2 bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500 shadow-lg h-10">
         <div className="absolute inset-0 border bg-linear-to-r from-pink-500 via-purple-500 to-indigo-500 rounded-full blur-xs opacity-50"></div>
-        <div className="relative z-10 mr-2 flex items-center">
+        <div className="relative z-10 mr-2 flex items-center w-8 h-8 overflow-hidden">
           {isLoaded && isSignedIn ? (
             <UserButton
               appearance={{
@@ -49,7 +49,7 @@ export default function NicknameFilter(): JSX.Element {
               </UserButton.MenuItems>
             </UserButton>
           ) : (
-            <div className="w-8 h-8 rounded-full border bg-gray-200 animate-pulse"></div>
+            <div className="w-full h-full rounded-full border bg-gray-200 animate-pulse"></div>
           )}
         </div>
         
