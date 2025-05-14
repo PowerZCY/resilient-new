@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ArrowUp } from 'lucide-react';
+import { globalLucideIcons as icons } from '@/components/global-icon';
 
 export default function BackToTop() {
   const [isVisible, setIsVisible] = useState(false);
@@ -36,7 +36,7 @@ export default function BackToTop() {
           className="fixed bottom-6 right-6 p-3 bg-neutral-800 text-neutral-100 hover:bg-neutral-700 dark:bg-neutral-300 dark:text-neutral-900 dark:hover:bg-neutral-400 rounded-full shadow-lg transition-all z-50"
           aria-label="回到顶部"
         >
-          <ArrowUp size={20} />
+          <icons.ArrowUp size={20} />
         </button>
       )}
     </>

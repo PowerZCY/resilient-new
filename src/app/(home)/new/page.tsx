@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useRef, useState, forwardRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar as CalendarIconLucide, Loader2, Plus, Send, Trash2 } from 'lucide-react';
+import { globalLucideIcons as icons } from '@/components/global-icon';
 import { useNickname } from '@/context/NicknameContext'; // <-- Import useNickname
 
 // Import shadcn/ui components
@@ -183,7 +183,7 @@ const EntryCard = forwardRef<HTMLDivElement, EntryCardProps>(({ // 添加 ref �
           title="删除此条目"
           onClick={handleDeleteClick}
         >
-          <Trash2 />
+          <icons.Trash2 />
         </button>
       </div>
     </div>
@@ -469,7 +469,7 @@ function NewEntryContent() {
       <div className="bce:centered-content"> {/* Updated className */}
         <div className="bce:main-header"> {/* Updated className */}
           <div className="bce:header-left"> {/* Updated className */}
-              <CalendarIconLucide className="icon h-6 w-6" /> {/* Tailwind class, not from batch-entry */}
+              <icons.Calendar className="icon h-6 w-6" /> {/* Tailwind class, not from batch-entry */}
               <span className="font-medium [.uwu_&]:hidden [header_&]:text-[15px]">
               上报好体验、好事儿、成就
               </span>
@@ -486,13 +486,13 @@ function NewEntryContent() {
                 {isSubmitting ? (
                     <>
                       {/* Assuming loader-icon is defined in batch-entry.module.css */}
-                      <Loader2 className={`icon bce:loader-icon h-4 w-4`} /> {/* Combine Tailwind and Module */}
+                      <icons.Loader2 className={`icon bce:loader-icon h-4 w-4`} /> {/* Combine Tailwind and Module */}
                       <span>提交中...</span>
                     </>
                 ) : (
                   <>
                     <span className="bce:dot bce:dot-left"></span> {/* Updated className */}
-                    <Send className="icon h-4 w-4" /> {/* Tailwind class */}
+                    <icons.Send className="icon h-4 w-4" /> {/* Tailwind class */}
                     <span>提交</span>
                     <span className="bce:dot bce:dot-right"></span> {/* Updated className */}
                   </>
@@ -533,7 +533,7 @@ function NewEntryContent() {
             <div className="bce:indicator-circle"> {/* Updated className */}
               <div className="bce:indicator-inner"> {/* Updated className */}
                 <div className="bce:indicator-action"> {/* Updated className */}
-                  <Plus />
+                  <icons.Plus />
                 </div>
               </div>
             </div>

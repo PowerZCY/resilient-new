@@ -12,7 +12,7 @@
 import AnimatedCard from '@/components/AnimatedCard';
 import CalendarHeatmap from '@/components/CalendarHeatmap';
 import { motion } from 'framer-motion';
-import { Calendar, PlusCircle } from 'lucide-react';
+import { globalLucideIcons as icons } from '@/components/global-icon';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
@@ -45,7 +45,7 @@ function HomeContent() {
           <div className="lg:w-1/4 flex">
             <AnimatedCard>
               <h2 className="text-lg font-medium mb-4 flex items-center">
-                <Calendar className="h-5 w-5 text-blue-500 mr-2" />
+                <icons.Calendar className="h-5 w-5 text-blue-500 mr-2" />
                 <span>今日发条</span>
               </h2>
 
@@ -55,7 +55,7 @@ function HomeContent() {
                   whileTap={{ scale: 0.98 }}
                   className="w-full py-2.5 px-4 bg-linear-to-r from-blue-600 to-violet-600 text-white rounded-full font-medium flex items-center justify-center shadow-xs hover:shadow-md transition-all"
                 >
-                  <PlusCircle className="h-5 w-5 mr-2" />
+                  <icons.PlusCircle className="h-5 w-5 mr-2" />
                   <span>上报体验</span>
                 </motion.button>
               </Link>

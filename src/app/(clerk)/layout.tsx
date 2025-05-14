@@ -8,7 +8,6 @@
  */
 
 import { baseOptions } from '@/app/layout.config';
-import { Footer } from "@/components/Footer";
 import "@/styles/globals.css";
 import { HomeLayout, type HomeLayoutProps } from 'fumadocs-ui/layouts/home';
 
@@ -33,7 +32,6 @@ export default async function RootLayout({
       className="dark:bg-neutral-950 dark:[--color-fd-background:var(--color-neutral-950)] pt-25"
       >
         {children}
-        <Footer />
       </HomeLayout>
   );
 }

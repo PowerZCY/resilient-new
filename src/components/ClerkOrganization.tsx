@@ -1,7 +1,7 @@
 import { OrganizationSwitcher } from '@clerk/nextjs';
-import { FileText, Shield } from 'lucide-react';
 import TermsPage from '@/app/(home)/legal/terms/page';
 import PrivacyPage from '@/app/(home)/legal/privacy/page';
+import { globalLucideIcons as icons } from '@/components/global-icon';
 
 interface ClerkOrganizationProps {
   className?: string;
@@ -24,7 +24,7 @@ export default function ClerkOrganization({
           }}
         >
           <OrganizationSwitcher.OrganizationProfilePage
-            labelIcon={<FileText className="h-4 w-4" />}
+            labelIcon={<icons.ReceiptText className="size-4 fill-none stroke-[var(--clerk-icon-stroke-color)]" />}
             label="服务"
             url="/legal/terms"
           >
@@ -32,7 +32,7 @@ export default function ClerkOrganization({
           </OrganizationSwitcher.OrganizationProfilePage>
 
           <OrganizationSwitcher.OrganizationProfilePage
-            labelIcon={<Shield className="h-4 w-4" />}
+            labelIcon={<icons.ShieldUser className="size-4 fill-none stroke-[var(--clerk-icon-stroke-color)]" />}
             label="隐私"
             url="/legal/privacy"
           >

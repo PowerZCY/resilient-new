@@ -10,11 +10,11 @@
 
 import React, { useEffect, useState, useRef, useCallback, useMemo, type JSX } from 'react';
 import { motion, AnimatePresence } from 'framer-motion'; // Keep for modal/progress indicator animations
-import { Heart, Star } from 'lucide-react'; // Import icons
 import { useNickname } from '@/context/NicknameContext'; // <-- Import useNickname
+import { globalLucideIcons as icons } from '@/components/global-icon';
 
 interface Entry {
-  id: string;
+  id: string; 
   date: string;
   content: string;
   page: number;
@@ -873,10 +873,10 @@ export default function Timeline(): JSX.Element {
                       {!isPlaceholder && (
                         <div className="tlc:card-footer">
                           <div className="tlc:icon-holder" onClick={(e) => { e.stopPropagation(); alert('Like clicked!'); }}>
-                            <Heart size={18} />
+                            <icons.Heart size={18} />
                           </div>
                           <div className="tlc:icon-holder" onClick={(e) => { e.stopPropagation(); alert('Star clicked!'); }}>
-                            <Star size={18} />
+                            <icons.Star size={18} />
                           </div>
                         </div>
                       )}

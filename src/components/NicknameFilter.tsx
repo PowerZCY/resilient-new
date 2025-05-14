@@ -4,9 +4,8 @@ import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { UserButton, useUser } from "@clerk/nextjs";
 import { useNickname } from '@/context/NicknameContext';
-import ClerkLogoIcon from '@/components/icons/ClerkLogoIcon';
-import UserIcon from '@/components/icons/UserIcon';
 import { type JSX } from 'react';
+import { globalLucideIcons as icons } from '@/components/global-icon';
 
 export default function NicknameFilter(): JSX.Element {
   const { nickname, setAndPushNickname, availableUsers } = useNickname();
@@ -36,12 +35,12 @@ export default function NicknameFilter(): JSX.Element {
               <UserButton.MenuItems>
                 <UserButton.Action label="manageAccount" />
                 {<UserButton.Link 
-                  labelIcon={<ClerkLogoIcon />}
+                  labelIcon={<icons.ReceiptText className="size-4 fill-none stroke-[var(--clerk-icon-stroke-color)]" />}
                   label="服务条款"
                   href="/legal/terms">
                 </UserButton.Link>}
                 {<UserButton.Link 
-                  labelIcon={<UserIcon />}
+                  labelIcon={<icons.ShieldUser className="size-4 fill-none stroke-[var(--clerk-icon-stroke-color)]" />}
                   label="隐私政策"
                   href="/legal/privacy">
                 </UserButton.Link>}

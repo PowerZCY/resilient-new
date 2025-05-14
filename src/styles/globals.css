@@ -40,6 +40,17 @@ header#fd-nav {
   height: 1px !important;
 }
 
+/* Icon stroke colors for light/dark themes */
+:root {
+  --clerk-icon-stroke-color: #616161; /* Light theme */
+}
+
+.dark {
+  --clerk-icon-stroke-color: #AAAAAA; /* Dark theme */
+}
+
+
+
 *,
 ::before,
 ::after {
