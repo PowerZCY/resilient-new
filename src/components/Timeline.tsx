@@ -200,7 +200,7 @@ export default function Timeline(): JSX.Element {
     async (pageNum: number): Promise<void> => {
       // Guard against fetching if context isn't ready, nickname is missing, already loading, or page is loaded
       if (!isNicknameInitialized || !nickname || isLoadingRef.current || loadedPages.current.has(pageNum)) {
-        console.log(`Timeline: Skipping fetch: page=${pageNum}, initialized=${isNicknameInitialized}, nickname=${nickname}, loading=${isLoadingRef.current}, loaded=${loadedPages.current.has(pageNum)}`);
+        // console.log(`Timeline: Skipping fetch: page=${pageNum}, initialized=${isNicknameInitialized}, nickname=${nickname}, loading=${isLoadingRef.current}, loaded=${loadedPages.current.has(pageNum)}`);
         // If context is initialized but no nickname, ensure loading state is false
         if (isNicknameInitialized && !nickname) {
           setLoading(false); // Stop loading if there's no user to fetch for
@@ -218,7 +218,7 @@ export default function Timeline(): JSX.Element {
         return;
       }
 
-      console.log(`Timeline: Fetching data: page=${pageNum}, nickname=${nickname}`);
+      // console.log(`Timeline: Fetching data: page=${pageNum}, nickname=${nickname}`);
       isLoadingRef.current = true;
       setLoading(true); // Keep original loading state for skeleton/indicator
 
@@ -236,11 +236,11 @@ export default function Timeline(): JSX.Element {
         // Ensure totalCount is always set after a successful API call metadata retrieval,
         // even if entry fetching part is skipped later.
         setTotalCount(total);
-        console.log(`Data received: page=${pageNum}, count=${data.entries.length}, total=${total}`);
+        // console.log(`Data received: page=${pageNum}, count=${data.entries.length}, total=${total}`);
 
         // Now check if we actually need to process entries (if page wasn't loaded before)
         if (loadedPages.current.has(pageNum)) {
-          console.log(`Page ${pageNum} already loaded, skipping entry processing but ensuring totalCount is set.`);
+          // console.log(`Page ${pageNum} already loaded, skipping entry processing but ensuring totalCount is set.`);
           isLoadingRef.current = false; // Ensure loading state is reset
           setLoading(false);
           if (pageNum === 1) initialLoadDone.current = true; // Ensure initial load flag is set
@@ -273,7 +273,7 @@ export default function Timeline(): JSX.Element {
           // Calculate middle index - CHANGE: Set index to 0 for the first card
           const targetIndex = 0; // Activate the first card
           setActiveCardIndex(targetIndex);
-          console.log(`Initial load done. Active page: 1, Active card index: ${targetIndex}`);
+          // console.log(`Initial load done. Active page: 1, Active card index: ${targetIndex}`);
         }
 
       } catch (error: unknown) {
@@ -290,7 +290,7 @@ export default function Timeline(): JSX.Element {
 
   // --- Initial Load & Nickname Change ---
   useEffect(() => {
-    console.log('Nickname changed or initial mount:', nickname);
+    // console.log('Nickname changed or initial mount:', nickname);
     // Reset state on nickname change
     setEntries([]);
     setActivePage(1);
@@ -304,14 +304,14 @@ export default function Timeline(): JSX.Element {
 
     // If context is initialized but nickname is missing (e.g., user not matched)
     if (!nickname) {
-      console.log('Timeline: NicknameContext initialized, but no nickname available.');
+      // console.log('Timeline: NicknameContext initialized, but no nickname available.');
       setLoading(false); // Not loading data
       // State reset already happened above
       return;
     }
 
     // Context initialized and nickname exists, proceed with fetch
-    console.log('Timeline: NicknameContext initialized, fetching data for', nickname);
+    // console.log('Timeline: NicknameContext initialized, fetching data for', nickname);
     isPageNavigatingRef.current = true;
     setLoading(true);
     fetchEntries(1);
@@ -368,10 +368,10 @@ export default function Timeline(): JSX.Element {
 
   // --- 3D Carousel Logic ---
   useEffect(() => {
-    console.log(`Carousel Effect: ActivePage=${activePage}, ActiveCardIndex=${activeCardIndex}`);
+    // console.log(`Carousel Effect: ActivePage=${activePage}, ActiveCardIndex=${activeCardIndex}`);
     const activeGroupData = groupedEntries.find(g => g.page === activePage);
     if (!activeGroupData || activeGroupData.entries.length === 0) {
-      console.log("Carousel Effect: No active group data or empty group.");
+      // console.log("Carousel Effect: No active group data or empty group.");
       return; // No group or no cards in the active group
     }
 
@@ -381,7 +381,7 @@ export default function Timeline(): JSX.Element {
     // --- Apply Transforms with Delay ---
     const animationFrameId = requestAnimationFrame(() => {
       const playEntryAnimation = isPageNavigatingRef.current;
-      console.log(`Carousel Effect (apply): Play entry animation: ${playEntryAnimation}`);
+      // console.log(`Carousel Effect (apply): Play entry animation: ${playEntryAnimation}`);
 
       cardsInGroup.forEach((entry, index) => {
         const cardElement = cardRefs.current[entry.id];
@@ -485,12 +485,12 @@ export default function Timeline(): JSX.Element {
   const handleNavClick = useCallback(async (pageNumber: number) => {
     if (pageNumber === activePage || loadingPage === pageNumber) return;
 
-    console.log(`Navigating to page: ${pageNumber}`);
+    // console.log(`Navigating to page: ${pageNumber}`);
     isPageNavigatingRef.current = true; // Set flag before fetching/setting state
 
     // --- Step 1: Fetch data if necessary ---
     if (!loadedPages.current.has(pageNumber)) {
-      console.log(`Page ${pageNumber} not loaded. Fetching...`);
+      // console.log(`Page ${pageNumber} not loaded. Fetching...`);
       setLoadingPage(pageNumber);
       try {
         // Modify fetchEntries slightly to return new entries or indicate success?
@@ -501,7 +501,9 @@ export default function Timeline(): JSX.Element {
         // or pass a callback to fetchEntries.
         // Let's try a simpler approach first: set activePage and let useEffects handle it,
         // but we need to be sure the calculation uses updated data.
-        console.log(`Page ${pageNumber} fetch initiated.`);
+        
+
+        // console.log(`Page ${pageNumber} fetch initiated.`);
       } catch (error) {
         console.error(`Error fetching page ${pageNumber}:`, error);
         setLoadingPage(null); // Clear loading state on error
@@ -513,8 +515,6 @@ export default function Timeline(): JSX.Element {
       }
       // At this point, fetchEntries has been called and likely updated the 'entries' state,
       // triggering a future re-render where groupedEntries will be updated.
-    } else {
-      console.log(`Page ${pageNumber} already loaded.`);
     }
 
     // --- Step 2: Set Active Page (triggers re-render) ---
@@ -537,7 +537,7 @@ export default function Timeline(): JSX.Element {
   // --- Effect to Update Card Index and ID after Page Change or Data Load ---
   useEffect(() => {
     // This effect runs when activePage changes or when groupedEntries is recalculated (due to entries changing)
-    console.log(`Effect: Updating index/ID for activePage: ${activePage}`);
+    // console.log(`Effect: Updating index/ID for activePage: ${activePage}`);
 
     const targetGroup = groupedEntries.find(g => g.page === activePage);
     // Use the padded entries from the current groupedEntries memo
@@ -555,7 +555,7 @@ export default function Timeline(): JSX.Element {
     // This check might be redundant if dependencies are correct, but can prevent loops
     // if (activeCardIndex !== middleIndex) { // Let's remove this check for now to ensure update
     setActiveCardIndex(targetIndex);
-    console.log(`Effect: Set active card index: ${targetIndex}`);
+    // console.log(`Effect: Set active card index: ${targetIndex}`);
     // }
 
     // Only update if the ID actually changes
@@ -573,18 +573,16 @@ export default function Timeline(): JSX.Element {
       setActiveCardIndex(indexInPage);
     } else if (indexInPage !== activeCardIndex) {
       // If clicking a card on the active page but not the center one
-      console.log(`Focusing card index ${indexInPage} on page ${activePage}`);
+      // console.log(`Focusing card index ${indexInPage} on page ${activePage}`);
       setActiveCardIndex(indexInPage);
     } else {
       // Clicking the already active card - potentially open modal
       // Only open modal for non-placeholder cards
       if (!entry.isPlaceholder) {
-        console.log(`Clicked active card: ${entry.id}. Opening modal.`);
+        // console.log(`Clicked active card: ${entry.id}. Opening modal.`);
         setModalContent({ date: formatDate(entry.date), content: entry.content });
         setIsModalOpen(true);
         document.body.style.overflow = 'hidden'; // Prevent background scroll
-      } else {
-        console.log(`Clicked active placeholder card: ${entry.id}. Doing nothing.`);
       }
     }
   };
@@ -617,7 +615,7 @@ export default function Timeline(): JSX.Element {
             progressIndicatorRef.current.style.top = `${pos.y}px`;
             progressIndicatorRef.current.style.right = 'auto';
             progressIndicatorRef.current.style.bottom = 'auto';
-            console.log("Progress indicator position loaded (left/top):", pos);
+            // console.log("Progress indicator position loaded (left/top):", pos);
             positionLoaded = true;
           }
         } else if (pos && pos.right && pos.bottom) {
@@ -630,7 +628,7 @@ export default function Timeline(): JSX.Element {
             progressIndicatorRef.current.style.bottom = pos.bottom; // Use loaded bottom
             progressIndicatorRef.current.style.left = 'auto'; // Use auto for left
             progressIndicatorRef.current.style.top = 'auto'; // Use auto for top
-            console.log("Progress indicator position loaded (right/bottom from storage):", pos);
+            // console.log("Progress indicator position loaded (right/bottom from storage):", pos);
             positionLoaded = true;
           }
         }
@@ -641,7 +639,7 @@ export default function Timeline(): JSX.Element {
 
     // Default position if loading fails or no position saved
     if (!positionLoaded && progressIndicatorRef.current) {
-      console.log("Setting default progress indicator position (left/bottom).");
+      // console.log("Setting default progress indicator position (left/bottom).");
       // Ensure default position is set using left/bottom
       progressIndicatorRef.current.style.left = '2rem'; // Change from right to left
       progressIndicatorRef.current.style.bottom = '2rem';
@@ -659,7 +657,7 @@ export default function Timeline(): JSX.Element {
     const positionToSave = { x: element.offsetLeft, y: element.offsetTop };
     try {
       localStorage.setItem('progressIndicatorPosition', JSON.stringify(positionToSave));
-      console.log("Progress indicator position saved:", positionToSave);
+      // console.log("Progress indicator position saved:", positionToSave);
     } catch (e) {
       console.warn('Failed to save progress indicator position:', e);
     }
@@ -674,7 +672,7 @@ export default function Timeline(): JSX.Element {
 
   // Stable ref callback using useCallback and functional state update
   const handleProgressRef = useCallback((el: HTMLDivElement | null) => {
-    console.log(`Ref callback fired. Element exists: ${!!el}`);
+    // console.log(`Ref callback fired. Element exists: ${!!el}`);
     progressIndicatorRef.current = el; // Update the ref itself
     const shouldBeReady = !!el;
 

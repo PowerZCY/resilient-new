@@ -13,7 +13,7 @@ export default function NicknameFilter(): JSX.Element {
 
   const handleFilter = useCallback(
     (value: string): void => {
-      console.log('User manually selected nickname:', value);
+      // console.log('User manually selected nickname:', value);
       setAndPushNickname(value);
     },
     [setAndPushNickname]

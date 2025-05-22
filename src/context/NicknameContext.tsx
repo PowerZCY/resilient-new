@@ -39,47 +39,47 @@ export const NicknameProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    console.log("NicknameContext Initial Load Effect Triggered");
+    // console.log("NicknameContext Initial Load Effect Triggered");
 
     const urlNickname = searchParams.get('nickname');
     let determinedNickname = nickname; // Start with current state (URL or default)
     let needsUrlUpdate = false;
 
     if (urlNickname) {
-      console.log("Initial load: Respecting URL nickname:", urlNickname);
+      // console.log("Initial load: Respecting URL nickname:", urlNickname);
       if (urlNickname !== nickname) {
          setNickname(urlNickname);
          determinedNickname = urlNickname; // Update determined for consistency
       }
     } else if (isSignedIn && user) {
       const userEmail = user.primaryEmailAddress?.emailAddress;
-      console.log("Initial load: User email:", userEmail);
-      console.log("Initial load: Users:", users);
+      // console.log("Initial load: User email:", userEmail);
+      // console.log("Initial load: Users:", users);
       const matchedUser = userEmail ? users.find(u => u.email?.toLowerCase() === userEmail.toLowerCase()) : undefined;
       if (matchedUser && matchedUser.name !== nickname) {
          determinedNickname = matchedUser.name;
-         console.log("Initial load: Matched logged-in user:", determinedNickname);
+         // console.log("Initial load: Matched logged-in user:", determinedNickname);
          setNickname(determinedNickname); // Update state
          needsUrlUpdate = true; // Need to add nickname to URL
       } else if (matchedUser) {
-          console.log("Initial load: Matched user same as initial, no state change needed.");
+          // console.log("Initial load: Matched user same as initial, no state change needed.");
           determinedNickname = matchedUser.name; // Keep determined consistent
           needsUrlUpdate = true; // Still need to sync URL if it was missing
       } else {
-         console.log("Initial load: Logged-in user not matched, using current state:", determinedNickname);
+         // console.log("Initial load: Logged-in user not matched, using current state:", determinedNickname);
          if (determinedNickname === defaultNickname) {
             needsUrlUpdate = true;
          }
       }
     } else {
-       console.log("Initial load: User not logged in, using current state:", determinedNickname);
+       // console.log("Initial load: User not logged in, using current state:", determinedNickname);
        if (determinedNickname === defaultNickname) {
          needsUrlUpdate = true;
        }
     }
 
     if (needsUrlUpdate) {
-       console.log("Initial load: Syncing URL to:", determinedNickname);
+       // console.log("Initial load: Syncing URL to:", determinedNickname);
        router.replace(`/?nickname=${encodeURIComponent(determinedNickname)}`, { scroll: false });
     }
 

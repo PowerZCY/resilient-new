@@ -25,7 +25,7 @@ export default function ContributionHeatmap() {
 
   useEffect(() => {
     if (!isNicknameInitialized || !nickname) {
-      console.log(`CalendarHeatmap: Skip fetch, initialized: ${isNicknameInitialized}, nickname: ${nickname}`);
+      // console.log(`CalendarHeatmap: Skip fetch, initialized: ${isNicknameInitialized}, nickname: ${nickname}`);
       if (isNicknameInitialized) {
         setIsComponentLoading(false);
         setData([]);
@@ -33,18 +33,18 @@ export default function ContributionHeatmap() {
       return;
     }
 
-    console.log(`CalendarHeatmap: Fetching data for ${nickname}`);
+    // console.log(`CalendarHeatmap: Fetching data for ${nickname}`);
     setIsComponentLoading(true);
 
     if (dataCache.current[nickname]) {
       setData(dataCache.current[nickname]);
       setIsComponentLoading(false);
-      console.log('CalendarHeatmap: Using cached data for', nickname);
+      // console.log('CalendarHeatmap: Using cached data for', nickname);
       return;
     }
 
     if (isLoadingRef.current) {
-      console.log('CalendarHeatmap: Fetch already in progress for', nickname);
+      // console.log('CalendarHeatmap: Fetch already in progress for', nickname);
       return;
     }
 
@@ -59,7 +59,7 @@ export default function ContributionHeatmap() {
         const processedData = processDataForHeatmap(entries);
         dataCache.current[nickname] = processedData;
         setData(processedData);
-        console.log('CalendarHeatmap: Data loaded for', nickname);
+        // console.log('CalendarHeatmap: Data loaded for', nickname);
       })
       .catch(err => {
         console.error('Failed to fetch heatmap data:', err);
