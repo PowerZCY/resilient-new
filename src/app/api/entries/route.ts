@@ -55,8 +55,14 @@ export async function GET(request: Request) {
     }),
   ]);
 
+  const safeEntries = entries.map(entry => ({
+    ...entry,
+    id: entry.id.toString(), // BigInt 转字符串
+    // 其他字段如果也是 BigInt，也要转
+  }));
+
   return NextResponse.json({
-    entries,
+    entries: safeEntries,
     total,
   });
 }

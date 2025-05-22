@@ -14,7 +14,7 @@ import { useNickname } from '@/context/NicknameContext'; // <-- Import useNickna
 import { globalLucideIcons as icons } from '@/components/global-icon';
 
 interface Entry {
-  id: number; 
+  id: string; 
   date: string;
   content: string;
   page: number;
@@ -23,7 +23,7 @@ interface Entry {
 }
 
 interface ApiResponse {
-  entries: { id: number; date: string; content: string }[];
+  entries: { id: string; date: string; content: string }[];
   total: number;
 }
 
@@ -325,7 +325,7 @@ export default function Timeline(): JSX.Element {
       return entriesInGroup;
     }
     const placeholders: Entry[] = Array.from({ length: placeholdersNeeded }, (_, i) => ({
-      id: pageNum * 100 + i,
+      id: `PlaceHolder-${pageNum}-${entriesInGroup.length + i}`,
       date: "Z年C月Y日", // Placeholder date
       content: "Coming Soon...", // Placeholder content
       page: pageNum,
