@@ -1011,6 +1011,13 @@ export default function Timeline(): JSX.Element {
                                 setModalEditing(false);
                                 setModalLastContent(modalEditContent);
                                 setModalContent({ ...modalContent, content: modalEditContent });
+                                setEntries(prev =>
+                                  prev.map(e =>
+                                    e.id === modalContent.id
+                                      ? { ...e, content: modalEditContent }
+                                      : e
+                                  )
+                                );
                               } catch {
                                 alert(`Update record failed: ${modalContent.id}`);
                               }
