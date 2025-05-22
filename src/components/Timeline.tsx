@@ -182,6 +182,7 @@ export default function Timeline(): JSX.Element {
   const [modalEditing, setModalEditing] = useState(false);
   const [modalEditContent, setModalEditContent] = useState('');
   const [modalLastContent, setModalLastContent] = useState('');
+  const [modalEditLoading, setModalEditLoading] = useState(false);
 
   // --- Refs ---
   const loadedPages = useRef<Set<number>>(new Set()); // Keep track of loaded pages
@@ -992,37 +993,55 @@ export default function Timeline(): JSX.Element {
                 {modalEditing
                   ? (modalEditContent.trim() && modalEditContent !== modalLastContent
                       ? (
-                          <icons.Check
-                            size={22}
-                            className="text-green-600 cursor-pointer"
-                            style={{ marginLeft: 8 }}
-                            onClick={async () => {
-                              try {
-                                const res = await fetch('/api/entries', {
-                                  method: 'PUT',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({
-                                    id: modalContent.id,
-                                    content: modalEditContent,
-                                    date: modalContent.date,
-                                  }),
-                                });
-                                if (!res.ok) throw new Error(`Update record failed: ${modalContent.id}`);
-                                setModalEditing(false);
-                                setModalLastContent(modalEditContent);
-                                setModalContent({ ...modalContent, content: modalEditContent });
-                                setEntries(prev =>
-                                  prev.map(e =>
-                                    e.id === modalContent.id
-                                      ? { ...e, content: modalEditContent }
-                                      : e
-                                  )
-                                );
-                              } catch {
-                                alert(`Update record failed: ${modalContent.id}`);
-                              }
-                            }}
-                          />
+                          <span style={{ position: 'relative', marginLeft: 8 }}>
+                            <icons.Check
+                              size={22}
+                              className={modalEditLoading ? 'text-green-400 animate-spin-slow cursor-not-allowed' : 'text-green-600 cursor-pointer'}
+                              style={{ pointerEvents: modalEditLoading ? 'none' : 'auto' }}
+                              onClick={async () => {
+                                if (modalEditLoading) return;
+                                setModalEditLoading(true);
+                                try {
+                                  const res = await fetch('/api/entries', {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      id: modalContent.id,
+                                      content: modalEditContent,
+                                      date: modalContent.date,
+                                    }),
+                                  });
+                              
+                                  if (!res.ok) throw new Error(`Update record failed: ${modalContent.id}`);
+                                  setModalEditing(false);
+                                  setModalLastContent(modalEditContent);
+                                  setModalContent({ ...modalContent, content: modalEditContent });
+                                  setEntries(prev =>
+                                    prev.map(e =>
+                                      e.id === modalContent.id
+                                        ? { ...e, content: modalEditContent }
+                                        : e
+                                    )
+                                  );
+                                } catch {
+                                  alert(`Update record failed: ${modalContent.id}`);
+                                } finally {
+                                  setModalEditLoading(false);
+                                }
+                              }}
+                            />
+                            {modalEditLoading && (
+                              <span style={{
+                                position: 'absolute',
+                                right: -28,
+                                top: 2,
+                                fontSize: 16,
+                                color: '#aaa',
+                              }}>
+                                <svg className="animate-spin" width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#aaa" strokeWidth="3" fill="none" strokeDasharray="60" strokeDashoffset="20"/></svg>
+                              </span>
+                            )}
+                          </span>
                         )
                       : null)
                   : (
