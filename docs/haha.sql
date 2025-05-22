@@ -32,7 +32,7 @@ ALTER TABLE detail ALTER COLUMN id SET DEFAULT nextval('detail_id_seq');
 -- 8. 设置序列起始值为最大 id + 1
 SELECT MAX(id) FROM detail;
 -- 假设最大 id 是 1000010
-ALTER SEQUENCE detail_id_seq RESTART WITH 1000011;
+ALTER SEQUENCE detail_id_seq RESTART WITH 1000518;
 
 -- 9. 设 id 为主键
 ALTER TABLE detail ADD PRIMARY KEY (id);
