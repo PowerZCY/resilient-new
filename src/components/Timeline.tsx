@@ -175,10 +175,13 @@ export default function Timeline(): JSX.Element {
   const [activePage, setActivePage] = useState<number>(1); // Currently displayed page/group in carousel
   const [activeCardIndex, setActiveCardIndex] = useState<number>(0); // Index of the focused card *within the active page*
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // Modal state
-  const [modalContent, setModalContent] = useState<{ date: string; content: string } | null>(null);
+  const [modalContent, setModalContent] = useState<{ date: string; content: string; id?: string } | null>(null);
   const [isDraggingProgress, setIsDraggingProgress] = useState<boolean>(false);
   const [loadingPage, setLoadingPage] = useState<number | null>(null); // Track page being loaded via button click
   const [isIndicatorRefReady, setIsIndicatorRefReady] = useState<boolean>(false); // Track if progress indicator ref is ready
+  const [modalEditing, setModalEditing] = useState(false);
+  const [modalEditContent, setModalEditContent] = useState('');
+  const [modalLastContent, setModalLastContent] = useState('');
 
   // --- Refs ---
   const loadedPages = useRef<Set<number>>(new Set()); // Keep track of loaded pages
@@ -190,6 +193,7 @@ export default function Timeline(): JSX.Element {
   const dragOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 }); // For progress drag offset
   const dragOverlayRef = useRef<HTMLDivElement | null>(null); // Ref for drag overlay
   const isPageNavigatingRef = useRef<boolean>(false); // Ref to track if navigation triggered the effect
+  const modalEditTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   // --- Hooks ---
   const { nickname, isNicknameInitialized } = useNickname(); // <-- Get nickname and initialized status
@@ -579,10 +583,7 @@ export default function Timeline(): JSX.Element {
       // Clicking the already active card - potentially open modal
       // Only open modal for non-placeholder cards
       if (!entry.isPlaceholder) {
-        // console.log(`Clicked active card: ${entry.id}. Opening modal.`);
-        setModalContent({ date: formatDate(entry.date), content: entry.content });
-        setIsModalOpen(true);
-        document.body.style.overflow = 'hidden'; // Prevent background scroll
+        openModal(entry);
       }
     }
   };
@@ -591,7 +592,10 @@ export default function Timeline(): JSX.Element {
   const closeModal = () => {
     setIsModalOpen(false);
     setModalContent(null);
-    document.body.style.overflow = ''; // Restore background scroll
+    setModalEditing(false);
+    setModalEditContent('');
+    setModalLastContent('');
+    document.body.style.overflow = '';
   };
 
   // --- Progress Indicator Drag Logic ---
@@ -768,6 +772,26 @@ export default function Timeline(): JSX.Element {
     };
   }, [isDraggingProgress, handleProgressMouseMove, handleProgressMouseUp]);
 
+  // --- New Modal Editing Logic ---
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (isModalOpen && modalEditing && e.key === 'Escape') {
+        setModalEditing(false);
+        setModalEditContent(modalLastContent);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isModalOpen, modalEditing, modalLastContent]);
+
+  // 2. 编辑状态切换时自动聚焦并将光标移到末尾（放到所有return语句之前）
+  useEffect(() => {
+    if (modalEditing && modalEditTextareaRef.current) {
+      const textarea = modalEditTextareaRef.current;
+      textarea.focus();
+      textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+    }
+  }, [modalEditing]);
 
   // --- Render ---
 
@@ -816,6 +840,16 @@ export default function Timeline(): JSX.Element {
     // Keep Tailwind classes here
     return <div className="text-center text-gray-500 p-10">No entries found for {nickname}.</div>;
   }
+
+  // --- New Modal Open Logic ---
+  const openModal = (entry: Entry) => {
+    setModalContent({ date: formatDate(entry.date), content: entry.content, id: entry.id });
+    setIsModalOpen(true);
+    setModalEditing(false);
+    setModalEditContent(entry.content);
+    setModalLastContent(entry.content);
+    document.body.style.overflow = 'hidden';
+  };
 
   return (
     // Keep Tailwind classes here
@@ -953,9 +987,84 @@ export default function Timeline(): JSX.Element {
               onClick={(e) => e.stopPropagation()}
             >
               <button className="tlc:modal-close" onClick={closeModal}>&times;</button>
-              <div className="tlc:modal-date">{modalContent.date}</div>
+              <div className="tlc:modal-date" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span>{modalContent.date}</span>
+                {modalEditing
+                  ? (modalEditContent.trim() && modalEditContent !== modalLastContent
+                      ? (
+                          <icons.Check
+                            size={22}
+                            className="text-green-600 cursor-pointer"
+                            style={{ marginLeft: 8 }}
+                            onClick={async () => {
+                              try {
+                                const res = await fetch('/api/entries', {
+                                  method: 'PUT',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    id: modalContent.id,
+                                    content: modalEditContent,
+                                    date: modalContent.date,
+                                  }),
+                                });
+                                if (!res.ok) throw new Error(`Update record failed: ${modalContent.id}`);
+                                setModalEditing(false);
+                                setModalLastContent(modalEditContent);
+                                setModalContent({ ...modalContent, content: modalEditContent });
+                              } catch {
+                                alert(`Update record failed: ${modalContent.id}`);
+                              }
+                            }}
+                          />
+                        )
+                      : null)
+                  : (
+                    <icons.SquarePen
+                      size={22}
+                      className="text-blue-600 cursor-pointer"
+                      style={{ marginLeft: 8 }}
+                      onClick={() => {
+                        setModalEditing(true);
+                        setModalEditContent(modalContent.content);
+                        setModalLastContent(modalContent.content);
+                      }}
+                    />
+                  )}
+              </div>
               <div className="tlc:modal-content">
-                {modalContent.content}
+                {modalEditing ? (
+                  <div style={{ position: 'relative' }}>
+                    <textarea
+                      ref={modalEditTextareaRef}
+                      value={modalEditContent}
+                      onChange={e => setModalEditContent(e.target.value)}
+                      rows={6}
+                      className="w-full"
+                      style={{
+                        fontSize: '1.1em',
+                        minHeight: 120,
+                        border: 'none',
+                        outline: 'none',
+                        background: 'transparent',
+                        resize: 'none',
+                        boxShadow: 'none',
+                        padding: 0,
+                        color: 'inherit',
+                        lineHeight: 'inherit',
+                      }}
+                    />
+                    <span style={{
+                      position: 'absolute',
+                      right: 8,
+                      bottom: 4,
+                      fontSize: '0.95em',
+                      color: '#bcb7a2',
+                      userSelect: 'none',
+                    }}>{modalEditContent.length} 个字符</span>
+                  </div>
+                ) : (
+                  modalContent.content
+                )}
               </div>
             </motion.div>
           </motion.div>

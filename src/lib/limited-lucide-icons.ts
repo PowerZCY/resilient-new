@@ -9,5 +9,5 @@ export {
   Loader2, Plus, Send, 
   Trash2, ArrowUp, Heart, Star,
   ShieldUser, ReceiptText,
-  HousePlus
+  HousePlus, SquarePen, Check
 } from 'lucide-react'; 

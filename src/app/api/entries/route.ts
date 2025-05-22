@@ -66,3 +66,22 @@ export async function GET(request: Request) {
     total,
   });
 }
+
+export async function PUT(request: Request) {
+  // 解析 body
+  const body = await request.json();
+  const { id, content } = body;
+  if (!id || !content) {
+    return NextResponse.json({ error: 'id and content cannot be empty' }, { status: 400 });
+  }
+  try {
+    await prisma.detail.update({
+      where: { id: BigInt(id) },
+      data: { content },
+    });
+    return NextResponse.json({ success: true });
+  } catch (e) {
+    Logger.error('Error updating entry:', e as Error, { id });
+    return NextResponse.json({ error: 'Update record failed' }, { status: 500 });
+  }
+}
