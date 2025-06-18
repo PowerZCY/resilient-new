@@ -10,13 +10,18 @@
 import { RootProvider } from 'fumadocs-ui/provider';
 import { Banner } from 'fumadocs-ui/components/banner';
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import "@/styles/globals.css";
 import NProgressBar from '@/components/NProgressBar';
 import { appConfig } from '@/lib/appConfig';
-import { ClerkProviderClient } from '@/components/ClerkProviderClient'; // Import the new client component
+import { ClerkProviderClient } from '@/components/ClerkProviderClient';
+import { cn } from '@/lib/utils';
 
-const inter = Inter({ subsets: ["latin"] });
+const montserrat = Montserrat({
+  weight: ['400'], // 400 是 Regular
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: "WindRun·Huaiin",
@@ -37,7 +42,7 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} flex flex-col min-h-screen`}>
+      <body className={cn(montserrat.className, 'flex flex-col min-h-screen')}>
         <RootProvider> {/* RootProvider from fumadocs-ui provides theme context */}
           <ClerkProviderClient>
             <NProgressBar />
