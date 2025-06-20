@@ -59,7 +59,7 @@ export default function NicknameFilter(): JSX.Element {
             <motion.button
               key={user.name}
               onClick={() => handleFilter(user.name)}
-              className={`relative z-10 px-3 h-8 w-24 rounded-full transition-all duration-200 flex items-center justify-center box-border ${
+              className={`relative z-10 px-3 h-8 w-28 rounded-full transition-all duration-200 flex items-center justify-center box-border ${
                 isActive 
                   ? 'bg-white text-purple-900 shadow-md' 
                   : 'bg-transparent text-white hover:bg-white/10'
