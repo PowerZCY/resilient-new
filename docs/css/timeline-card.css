@@ -92,7 +92,6 @@
   line-clamp: unset;
   max-height: none;
   overflow: visible;
-  font-family: var(--label-font) !important; /* 使用Times New字体 */
   letter-spacing: 0.03em;
 }
 
@@ -125,7 +124,6 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   background-color: #f9fafb;
   padding: 1.5rem;
   color: var(--gray-700);
@@ -457,7 +455,6 @@ h1 {
   box-shadow: 0 2px 5px rgba(139, 92, 246, 0.3);
   z-index: 10;
   white-space: nowrap;
-  font-family: var(--label-font) !important; /* 使用Times New字体 */
   border: none; /* 移除虚线边框 */
 }
 
@@ -502,7 +499,6 @@ h1 {
   transition: all 0.3s ease;
   position: relative;
   cursor: pointer;
-  font-family: var(--letter-font) !important; /* 使用汉仪悠然体或华文楷体 */
   font-size: 0.75rem !important; /* 字体大小 */
   color: var(--ink-blue);
   text-align: justify;
@@ -544,7 +540,6 @@ h1 {
   cursor: auto;
   overflow-y: auto;
   max-height: 400px;
-  font-family: var(--letter-font) !important; /* 使用汉仪悠然体或华文楷体 */
   font-size: 0.8rem !important; /* 字体大小 */
   color: var(--ink-blue);
   letter-spacing: 0.03em;
@@ -562,7 +557,6 @@ h1 {
   margin-top: 1rem;
   font-style: italic;
   background: none;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .content-fade {
@@ -774,7 +768,6 @@ h1 {
 .modal-content {
   white-space: pre-wrap;
   line-height: 1.6;
-  font-family: var(--letter-font) !important; /* 使用汉仪悠然体或华文楷体 */
   font-size: 1.0rem !important; /* 字体大小 */
   color: var(--ink-blue);
   letter-spacing: 0.03em;

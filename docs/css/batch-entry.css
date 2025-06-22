@@ -13,7 +13,6 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background-color: #f4f6f8; /* Slightly cooler gray background */
   margin: 0;
   color: #333;
@@ -114,7 +113,6 @@ body {
   overflow: visible;
   /* Use JS-driven transition for transform/opacity */
   transition: box-shadow 0.3s ease, transform 0.6s ease-out, opacity 0.6s ease-out;
-  font-family: var(--letter-font);
   backface-visibility: hidden; /* ADDED */
   transform-origin: center center; /* ADDED */
   cursor: pointer; /* ADDED - Make cards clickable */
@@ -150,7 +148,6 @@ body {
   z-index: 10;
   cursor: pointer;
   white-space: nowrap;
-  font-family: var(--label-font); /* Use label font */
   transition: background-color 0.2s ease;
 }
 
@@ -209,12 +206,12 @@ body {
   padding: 0;
   border: none;
   font-size: 1em;
+  font-family: inherit; /* 继承父元素的字体 */
   box-sizing: border-box;
   background-color: transparent;
   resize: none;
   flex-grow: 1;
   outline: none;
-  font-family: var(--letter-font);
   line-height: 30px; /* Match background size */
   color: var(--letter-text-color);
   min-height: 60px; /* Adjust min-height based on line height */
@@ -231,7 +228,6 @@ body {
   margin-top: 5px; /* Adjust margin */
   flex-shrink: 0;
   line-height: normal;
-  font-family: sans-serif; /* Use default sans-serif for count */
 }
 
 /* Footer - Layout and Index Style */
@@ -255,7 +251,6 @@ body {
     font-size: 0.9rem;
     font-weight: bold;
     color: #e60000; /* Red color as per screenshot */
-    font-family: sans-serif; /* Use a standard font for the index */
 }
 
 .action-btn {
@@ -380,6 +375,7 @@ body {
   border-radius: 9999px; /* Pill shape */
   font-size: 0.95em;
   font-weight: 500;
+  font-family: inherit; /* 继承父元素的字体 */
   cursor: pointer;
   position: relative; /* Enable relative positioning */
   top: -6px; /* Nudge button up slightly (adjust value as needed) */
@@ -417,6 +413,7 @@ body {
     background: white;
     border-radius: 9999px; /* Match outer shape */
     padding: 6px 16px; /* Actual inner padding */
+    font-family: inherit; /* 确保内部容器也继承字体 */
 }
 
 .header-right .submit-btn:hover::before {
@@ -491,6 +488,7 @@ body {
   border-radius: 8px;
   font-size: 1em;
   font-weight: 500;
+  font-family: inherit; /* 确保所有按钮都继承字体 */
   cursor: pointer;
   border: none;
   display: flex;
