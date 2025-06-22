@@ -88,3 +88,8 @@ export const SiteIcon = () => (
   <globalLucideIcons.Resilient className="h-8 w-8 rounded-full shadow-lg ring-0.5 ring-purple-500/20" />
 );
 
+// Define 404 not found icon as a functional component
+export const NotFoundIcon = () => (
+  <globalLucideIcons.SquareTerminal className={`h-8 w-8 rounded-full p-1 shadow-lg ring-0.5 border border-purple-500 ring-purple-500/20 ${iconColor}`} />
+);
+

@@ -5,9 +5,19 @@
  * in globalLucideIcons.
  */
 export {
-  Calendar, PlusCircle, 
-  Loader2, Plus, Send, 
-  Trash2, ArrowUp, Heart, Star,
-  ShieldUser, ReceiptText,
-  HousePlus, SquarePen, Check
+  ArrowUp, 
+  Calendar, 
+  Check,
+  Heart, 
+  HousePlus, 
+  Loader2, 
+  Plus, 
+  PlusCircle, 
+  ReceiptText,
+  Send, 
+  ShieldUser,
+  SquarePen, 
+  SquareTerminal, 
+  Star,
+  Trash2,
 } from 'lucide-react'; 

@@ -55,7 +55,7 @@ const TermsPage = () => {
             <p className="text-sm text-gray-500 dark:text-gray-400">最后更新：2025年4月29日</p>
 
             <p>
-              本网站使用条款（&quot;使用条款&quot;）由您与 巽川·怀因（&quot;巽川·怀因&quot;、&quot;我们&quot;或&quot;我们的&quot;）签订，管辖您对 <a href="https://d8ger.com">https://d8ger.com</a> （&quot;本网站&quot;）的访问和使用，以及我们结合本网站提供的所有服务、材料、工具和功能。本使用条款中使用的&quot;您&quot;指任何访问或使用本网站的个人或实体。
+              本网站使用条款（&quot;使用条款&quot;）由您与 巽川·怀因（&quot;巽川·怀因&quot;、&quot;我们&quot;或&quot;我们的&quot;）签订，管辖您对 <Link href="https://d8ger.com">https://d8ger.com</Link> （&quot;本网站&quot;）的访问和使用，以及我们结合本网站提供的所有服务、材料、工具和功能。本使用条款中使用的&quot;您&quot;指任何访问或使用本网站的个人或实体。
             </p>
 
             <p>
@@ -125,7 +125,7 @@ const TermsPage = () => {
 
             <h2 id="privacy">7. 隐私</h2>
             <p>
-              我们的隐私政策位于 <a href="/legal/privacy">/legal/privacy</a>（&quot;隐私政策&quot;），描述了我们针对<strong>已登录用户</strong>收集、使用和披露与本网站相关的个人信息。我们的隐私政策明确纳入本使用条款，使用本网站即表示您同意我们隐私政策中的收集、使用和披露实践。
+              我们的隐私政策位于 <Link href="/legal/privacy">/legal/privacy</Link>（&quot;隐私政策&quot;），描述了我们针对<strong>已登录用户</strong>收集、使用和披露与本网站相关的个人信息。我们的隐私政策明确纳入本使用条款，使用本网站即表示您同意我们隐私政策中的收集、使用和披露实践。
             </p>
 
             <h2 id="third-party-links">8. 第三方网站链接和其他信息；社交媒体</h2>

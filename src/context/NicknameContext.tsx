@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { appConfig, UserData } from '@/lib/appConfig'; // Assuming appConfig is accessible here
 
 // Define users based on appConfig
@@ -21,6 +21,7 @@ const NicknameContext = createContext<NicknameContextType | undefined>(undefined
 export const NicknameProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { user, isLoaded, isSignedIn } = useUser();
   const isInitialLoad = useRef(true); // Track initial load
 
@@ -78,7 +79,8 @@ export const NicknameProvider = ({ children }: { children: ReactNode }) => {
        }
     }
 
-    if (needsUrlUpdate) {
+    // 只在首页路径时才进行URL同步，避免影响其他页面（如 /legal/privacy 等）
+    if (needsUrlUpdate && pathname === '/') {
        // console.log("Initial load: Syncing URL to:", determinedNickname);
        router.replace(`/?nickname=${encodeURIComponent(determinedNickname)}`, { scroll: false });
     }
@@ -87,7 +89,7 @@ export const NicknameProvider = ({ children }: { children: ReactNode }) => {
     setIsNicknameInitialized(true); // <--- 标记初始化完成
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded, isSignedIn, user, searchParams, router]); // Remove nickname from deps to prevent loops
+  }, [isLoaded, isSignedIn, user, searchParams, router, pathname]); // Remove nickname from deps to prevent loops
 
 
   // Function to update nickname state AND push to URL
