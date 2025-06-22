@@ -77,7 +77,6 @@
   box-shadow: 0 2px 5px rgba(139, 92, 246, 0.3);
   z-index: 10; /* Same z-index */
   white-space: nowrap;
-  font-family: var(--label-font, "Times New Roman", Times, serif) !important;
   border: none;
   opacity: 0.7; /* Base opacity */
   transition: opacity 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
@@ -120,7 +119,6 @@
   line-clamp: unset;
   max-height: none;
   overflow: visible;
-  font-family: var(--label-font, "Times New Roman", Times, serif) !important;
   letter-spacing: 0.03em;
   /* Remove text-specific background/lines */
   background-image: none;
@@ -422,7 +420,6 @@
   box-shadow: 0 2px 5px rgba(139, 92, 246, 0.3);
   z-index: 10;
   white-space: nowrap;
-  font-family: var(--label-font, "Times New Roman", Times, serif) !important;
   border: none;
   opacity: 0.7;
   transition: opacity 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
@@ -468,7 +465,6 @@
   text-overflow: ellipsis;
   position: relative;
   cursor: pointer;
-  font-family: var(--letter-font, "LXGW WenKai Screen R", "华文楷体", serif) !important;
   font-size: 0.75rem !important;
   color: var(--ink-blue, #2c3e50);
   text-align: justify;
@@ -509,7 +505,6 @@
   cursor: auto;
   overflow-y: auto;
   max-height: 400px;
-  font-family: var(--letter-font, "LXGW WenKai Screen R", "华文楷体", serif) !important;
   font-size: 0.8rem !important;
   color: var(--ink-blue, #2c3e50);
   letter-spacing: 0.03em;
@@ -527,7 +522,6 @@
   margin-top: 1rem;
   font-style: italic;
   background: none;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .tlc\:content-fade {
@@ -737,7 +731,6 @@
 .tlc\:modal-content {
   white-space: pre-wrap;
   line-height: 1.6;
-  font-family: var(--letter-font, "LXGW WenKai Screen R", "华文楷体", serif) !important;
   font-size: 1.0rem !important;
   color: var(--ink-blue, #2c3e50);
   letter-spacing: 0.03em;

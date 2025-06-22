@@ -136,7 +136,6 @@ const EntryCard = forwardRef<HTMLDivElement, EntryCardProps>(({ // 添加 ref �
                 boxShadow: '0 3px 8px rgba(139, 92, 246, 0.3)',
                 zIndex: 10,
                 whiteSpace: 'nowrap',
-                fontFamily: 'var(--label-font)',
                 border: 'none', // Remove default button border
                 height: 'auto', // Adjust height
                 opacity: isActive ? 1 : 0.7, // Slightly dim if inactive? Or use CSS
