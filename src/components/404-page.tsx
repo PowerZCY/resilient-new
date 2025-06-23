@@ -27,11 +27,11 @@ export function NotFoundPage() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[75vh] px-4">
+    <div className="flex flex-col items-center justify-center min-h-[75vh] w-full px-4 py-8">
       {/* 主要内容区域 */}
       <div className="text-center space-y-8 max-w-2xl">
         {/* 404数字 - 带故障效果 */}
-        <div className="relative">
+        <div className="relative flex justify-center">
           <h1
             className="text-8xl md:text-9xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-purple-700 bg-clip-text text-transparent select-none"
             style={{
@@ -62,7 +62,7 @@ export function NotFoundPage() {
         <div className="flex justify-center items-center gap-8 pt-8 opacity-60">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <SiteIcon />
-            <span>Re8ger</span>
+            <span>Woops!</span>
           </div>
           <div className="w-1 h-1 bg-purple-500 rounded-full animate-ping" />
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
